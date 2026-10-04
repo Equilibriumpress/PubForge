@@ -1,0 +1,28 @@
+body {
+  font-family: serif;
+  line-height: 1.5;
+}
+.pubforge-component {
+  margin: 1.25em 0;
+}
+.pubforge-columns {
+  column-count: 1 !important;
+}
+.pubforge-hero,
+.pubforge-opener,
+.pubforge-fullpage,
+.pubforge-spread {
+  min-height: auto !important;
+  break-before: auto;
+  break-after: auto;
+}
+.pubforge-gallery {
+  display: block;
+}
+.pubforge-editorial-image {
+  margin: 1.2em 0;
+}
+.pubforge-editorial-image img {
+  max-width: 100%;
+  height: auto;
+}
