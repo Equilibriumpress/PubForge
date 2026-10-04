@@ -1,0 +1,20 @@
+version: 1
+title: Book
+subtitle: PubForge starter project
+author: Your Name
+language: en
+type: book
+
+content:
+  - content/01-start.md
+  - content/02-main.md
+
+theme:
+  preset: book
+  css: theme/publication.css
+
+outputs:
+  - print
+  - epub
+  - webpub
+  - project-zip

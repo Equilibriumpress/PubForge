@@ -1,0 +1,6 @@
+@page { size: A4; margin: 22mm 18mm 24mm; @bottom-center { content: counter(page); font-size: 9pt; } }
+:root { font-family: ui-serif, Georgia, serif; color: #182126; }
+body { font-size: 11pt; line-height: 1.55; }
+h1 { break-before: page; break-after: avoid; font-size: 28pt; }
+h2 { break-after: avoid; }
+p { orphans: 3; widows: 3; }

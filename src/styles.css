@@ -426,3 +426,72 @@ h1 {
     grid-template-columns: 1fr;
   }
 }
+
+
+.templateSection {
+  margin-top: 52px;
+}
+
+.templateSection > header {
+  max-width: 690px;
+}
+
+.templateSection > header h2 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3rem);
+  letter-spacing: -0.04em;
+}
+
+.templateSection > header p:last-child {
+  color: #596269;
+  line-height: 1.6;
+}
+
+.templateGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.templateCard {
+  display: flex;
+  min-height: 245px;
+  flex-direction: column;
+  padding: 20px;
+  border: 1px solid #d9dcda;
+  border-radius: 18px;
+  background: #fff;
+}
+
+.templateCard h3 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.templateCard p {
+  flex: 1;
+  color: #596269;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.templateCard button {
+  align-self: flex-start;
+}
+
+.templateMessage {
+  color: #7f2f2f;
+}
+
+@media (max-width: 980px) {
+  .templateGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .templateGrid {
+    grid-template-columns: 1fr;
+  }
+}

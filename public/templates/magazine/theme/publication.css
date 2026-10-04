@@ -1,0 +1,6 @@
+@page { size: A4; margin: 15mm; }
+:root { font-family: ui-sans-serif, Arial, sans-serif; color: #171717; }
+body { font-size: 10pt; line-height: 1.45; }
+h1 { break-before: page; font-size: 36pt; line-height: 0.95; letter-spacing: -0.04em; }
+h2 { font-size: 18pt; }
+p { orphans: 2; widows: 2; }
