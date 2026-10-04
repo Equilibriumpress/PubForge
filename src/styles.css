@@ -549,3 +549,56 @@ h1 {
   color: #465158;
   font-size: 0.9rem;
 }
+
+
+.historyStatus {
+  margin: 20px 24px;
+  color: #687279;
+}
+
+.historyList {
+  display: grid;
+  gap: 0;
+}
+
+.historyItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px 22px;
+  border-bottom: 1px solid #e2e5e3;
+}
+
+.historyItem:last-child {
+  border-bottom: 0;
+}
+
+.historyCurrent {
+  background: #f8f7f3;
+}
+
+.historyMeta {
+  min-width: 0;
+}
+
+.historyMeta strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.historyMeta span {
+  display: block;
+  margin-top: 6px;
+  color: #687279;
+  font-size: 0.82rem;
+}
+
+@media (max-width: 620px) {
+  .historyItem {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
