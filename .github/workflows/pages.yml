@@ -1,4 +1,4 @@
-name: Deploy PubForge to GitHub Pages
+name: Build PubForge for GitHub Pages
 
 on:
   push:
@@ -6,16 +6,14 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
-  group: pages
+  group: pages-branch
   cancel-in-progress: true
 
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -32,23 +30,22 @@ jobs:
       - name: Build static app
         run: npm run build
 
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-        with:
-          enablement: true
+      - name: Publish prebuilt site to gh-pages
+        shell: bash
+        run: |
+          set -euo pipefail
 
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: dist
+          PAGES_DIR="$(mktemp -d)"
+          cp -R dist/. "$PAGES_DIR/"
+          touch "$PAGES_DIR/.nojekyll"
 
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git checkout --orphan gh-pages
+          git rm -rf . >/dev/null 2>&1 || true
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -R "$PAGES_DIR/." .
+          git add -A
+          git commit -m "Publish PubForge Pages"
+          git push --force origin gh-pages
