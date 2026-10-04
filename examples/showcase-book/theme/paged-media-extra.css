@@ -1,0 +1,8 @@
+.pubforge-role-chapter[data-source$="06-paged-media.md"] {
+  page: chapter-demo;
+}
+
+@page chapter-demo:first {
+  @top-left { content: none; }
+  @top-right { content: none; }
+}
