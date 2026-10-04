@@ -9,7 +9,9 @@ type RendererTab = 'preview' | 'preflight' | 'output';
 
 export function PublicationRenderer({ project }: { project: LoadedProject }) {
   const [tab, setTab] = useState<RendererTab>('preview');
-  const githubUrl = `https://github.com/${project.snapshot.repository}/tree/${project.snapshot.commitSha}`;
+  const githubUrl =
+    `https://github.com/${project.snapshot.repository}/blob/` +
+    `${project.snapshot.commitSha}/${project.manifestPath}`;
 
   return (
     <section className="rendererShell">
@@ -25,7 +27,8 @@ export function PublicationRenderer({ project }: { project: LoadedProject }) {
           <span>{project.manifest.publication.type ?? 'publication'}</span>
           <span>{project.manifest.publication.language}</span>
           <a href={githubUrl} target="_blank" rel="noreferrer">
-            {project.snapshot.repository} · {project.snapshot.commitSha.slice(0, 7)}
+            {project.snapshot.repository} · {project.manifestPath} ·{' '}
+            {project.snapshot.commitSha.slice(0, 7)}
           </a>
         </div>
       </header>
