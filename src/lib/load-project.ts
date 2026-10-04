@@ -2,16 +2,19 @@ import { parsePublicationManifest } from './manifest';
 import { GitHubStorageProvider } from '../storage/github';
 import type { ProjectSnapshot } from '../storage/types';
 import type { PublicationManifest } from '../types/publication';
+import { ProjectWorkspace } from '../workspace/workspace';
 import type { RepositoryTarget } from './github-url';
 
 export interface LoadedProject {
   provider: GitHubStorageProvider;
   snapshot: ProjectSnapshot;
   manifest: PublicationManifest;
+  workspace: ProjectWorkspace;
 }
 
 export async function loadGitHubProject(
   target: RepositoryTarget,
+  onProgress?: (done: number, total: number) => void,
 ): Promise<LoadedProject> {
   const provider = new GitHubStorageProvider(target);
   const snapshot = await provider.open();
@@ -37,5 +40,11 @@ export async function loadGitHubProject(
     );
   }
 
-  return { provider, snapshot, manifest };
+  const workspace = await ProjectWorkspace.hydrate(
+    provider,
+    snapshot,
+    onProgress,
+  );
+
+  return { provider, snapshot, manifest, workspace };
 }
