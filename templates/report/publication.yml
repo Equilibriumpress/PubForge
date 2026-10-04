@@ -1,0 +1,66 @@
+version: 2
+publication:
+  title: Evidence Report Showcase
+  subtitle: KPI pages, charts, tables and recommendations
+  authors:
+    - Equilibrium Press
+  language: en
+  type: report
+  description: Data-led A4 report layout fixture.
+
+contents:
+  toc: true
+  tocTitle: Report contents
+  sectionDepth: 2
+  landmarks: true
+
+readingOrder:
+  - path: content/00-cover.md
+    role: title-page
+    title: Cover
+  - path: content/01-start.md
+    role: chapter
+    title: Executive Summary
+  - path: content/02-main.md
+    role: chapter
+    title: Findings
+    breakBefore: page
+
+theme:
+  preset: report
+  css: theme/publication.css
+
+assets:
+  editorialImages:
+    trend-chart:
+      src: assets/trend-chart.svg
+      alt: Indexed trend line rising steadily across four periods
+      caption: Indexed outcome trend, baseline = 100
+      credit: Illustrative data
+      fit: contain
+      span: page
+      printWidthMm: 160
+
+vfm:
+  math: true
+  mathRenderer: mathml
+  footnote: dpub
+  rewriteRelativeHrefExtensions: true
+
+pdf:
+  enabled: true
+  profile: screen
+  size: A4
+  binding: left
+  bookmarks: true
+
+epub:
+  enabled: true
+  layout: reflowable
+  embeddedFonts: true
+
+webpub:
+  enabled: true
+
+projectZip:
+  enabled: true

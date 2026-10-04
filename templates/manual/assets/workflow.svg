@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" role="img" aria-labelledby="t">
+<title id="t">Four-step operating workflow</title>
+<rect width="1200" height="360" rx="24" fill="#f4f6f6"/>
+<defs><marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#6a7b84"/></marker></defs>
+<g font-family="system-ui" text-anchor="middle">
+<g transform="translate(80 90)"><circle cx="90" cy="90" r="68" fill="#15212a"/><text x="90" y="84" fill="white" font-size="24">1</text><text x="90" y="116" fill="white" font-size="22">Prepare</text></g>
+<g transform="translate(360 90)"><circle cx="90" cy="90" r="68" fill="#376f88"/><text x="90" y="84" fill="white" font-size="24">2</text><text x="90" y="116" fill="white" font-size="22">Run</text></g>
+<g transform="translate(640 90)"><circle cx="90" cy="90" r="68" fill="#d15d30"/><text x="90" y="84" fill="white" font-size="24">3</text><text x="90" y="116" fill="white" font-size="22">Verify</text></g>
+<g transform="translate(920 90)"><circle cx="90" cy="90" r="68" fill="#456b57"/><text x="90" y="84" fill="white" font-size="24">4</text><text x="90" y="116" fill="white" font-size="22">Record</text></g>
+</g>
+<g stroke="#6a7b84" stroke-width="5" fill="none" marker-end="url(#a)"><path d="M245 180H350"/><path d="M525 180H630"/><path d="M805 180H910"/></g>
+</svg>

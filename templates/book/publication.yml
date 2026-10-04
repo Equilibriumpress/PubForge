@@ -1,0 +1,62 @@
+version: 2
+publication:
+  title: Book Typography Showcase
+  subtitle: Classical A5 pages, chapter openers and running heads
+  authors:
+    - Equilibrium Press
+  language: en
+  type: book
+  description: Layout fixture for long-form book typography.
+
+contents:
+  toc: true
+  tocTitle: Contents
+  sectionDepth: 2
+  landmarks: true
+
+readingOrder:
+  - path: content/00-title.md
+    role: title-page
+    title: Title Page
+  - path: content/01-start.md
+    role: chapter
+    title: The Quiet Room
+    breakBefore: recto
+  - path: content/02-main.md
+    role: chapter
+    title: Margins and Memory
+    breakBefore: recto
+  - path: content/03-notes.md
+    role: appendix
+    title: Notes on the Edition
+    breakBefore: recto
+
+theme:
+  preset: book
+  css: theme/publication.css
+
+vfm:
+  math: true
+  mathRenderer: mathml
+  footnote: dpub
+  rewriteRelativeHrefExtensions: true
+
+pdf:
+  enabled: true
+  profile: book
+  size: A5
+  binding: left
+  bleed: 0mm
+  cropMarks: false
+  bookmarks: true
+
+epub:
+  enabled: true
+  layout: reflowable
+  embeddedFonts: true
+
+webpub:
+  enabled: true
+
+projectZip:
+  enabled: true

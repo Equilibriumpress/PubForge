@@ -1,0 +1,109 @@
+@page {
+  size: A4;
+  margin: 19mm 18mm 21mm;
+  @top-left {
+    content: "EVIDENCE REPORT";
+    font: 7pt ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: .12em;
+  }
+  @bottom-right {
+    content: counter(page);
+    font: 8pt ui-sans-serif, system-ui, sans-serif;
+  }
+}
+@page report-cover {
+  margin: 0;
+  @top-left { content: none; }
+  @bottom-right { content: none; }
+}
+:root { font-family: ui-sans-serif, system-ui, sans-serif; color: #13212a; }
+body { font-size: 9.8pt; line-height: 1.5; }
+.pubforge-role-title-page { page: report-cover; }
+.report-cover {
+  min-height: 297mm;
+  margin: -19mm -18mm -21mm;
+  padding: 28mm 24mm;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  align-content: stretch;
+  color: #f7f4ed;
+  background:
+    linear-gradient(135deg, rgb(26 66 82 / .95), rgb(8 28 39 / .98)),
+    radial-gradient(circle at 75% 20%, rgb(255 255 255 / .15), transparent 35%);
+}
+.report-cover h1 {
+  align-self: end;
+  max-width: 150mm;
+  margin: 0;
+  font-size: 42pt;
+  line-height: .95;
+  letter-spacing: -.05em;
+}
+.report-cover h2 { max-width: 110mm; font-size: 17pt; font-weight: 450; }
+.report-series { font-size: 8pt; font-weight: 800; letter-spacing: .17em; }
+.report-cover-stat {
+  position: absolute;
+  right: 24mm;
+  bottom: 42mm;
+  display: grid;
+  width: 38mm;
+  height: 38mm;
+  place-content: center;
+  border: 1px solid rgb(255 255 255 / .5);
+  border-radius: 50%;
+  text-align: center;
+}
+.report-cover-stat strong { font-size: 20pt; }
+.report-cover-stat span { font-size: 6.5pt; text-transform: uppercase; }
+.report-cover-footer { align-self: end; font-size: 8pt; opacity: .8; }
+h1 { margin: 0 0 9mm; font-size: 27pt; letter-spacing: -.035em; }
+h2 { margin-top: 9mm; font-size: 15pt; }
+h3 { font-size: 10.5pt; text-transform: uppercase; letter-spacing: .06em; }
+.report-lead { max-width: 155mm; font-size: 13pt; line-height: 1.42; color: #314b57; }
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 3mm;
+  margin: 0 0 8mm;
+}
+.kpi {
+  padding: 5mm 4mm;
+  border-radius: 2mm;
+  background: #e8eef0;
+}
+.kpi strong { display: block; font-size: 20pt; color: #173f50; }
+.kpi span { display: block; margin-top: 2mm; font-size: 7pt; text-transform: uppercase; letter-spacing: .06em; }
+.recommendation, .report-callout {
+  margin: 7mm 0;
+  padding: 5mm 6mm;
+  border-left: 4px solid #c85a3d;
+  background: #f6eee8;
+  break-inside: avoid;
+}
+.recommendation strong, .callout-label {
+  display: block;
+  margin-bottom: 2mm;
+  font-size: 7pt;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+}
+.finding-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(45mm, .8fr);
+  gap: 8mm;
+  align-items: start;
+}
+.finding-note {
+  padding: 5mm;
+  background: #eef2f1;
+  font-size: 8.5pt;
+}
+table { width: 100%; border-collapse: collapse; margin: 4mm 0 7mm; font-size: 8.5pt; }
+th, td { padding: 2.6mm 2mm; border-bottom: 1px solid #cad3d6; text-align: left; }
+th { color: #38515e; font-size: 7pt; text-transform: uppercase; letter-spacing: .07em; }
+figure { margin: 6mm 0; break-inside: avoid; }
+figure img { width: 100%; max-height: 95mm; }
+figcaption { margin-top: 2mm; color: #60737b; font-size: 7.5pt; }
+blockquote { margin: 7mm 0; padding: 5mm; border-top: 1px solid #173f50; border-bottom: 1px solid #173f50; font-size: 12pt; }
+aside[role="doc-footnote"] { float: footnote; font-size: 7.5pt; }

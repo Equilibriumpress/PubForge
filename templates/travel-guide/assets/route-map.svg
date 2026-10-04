@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 700" role="img" aria-labelledby="t">
+<title id="t">Simplified Lisbon walking route</title>
+<rect width="900" height="700" rx="26" fill="#eef2ee"/>
+<path d="M0 545C210 500 300 640 520 585s250-30 380-10V700H0Z" fill="#a8c8cf"/>
+<g stroke="#c9d2ce" stroke-width="12" fill="none"><path d="M80 90L800 590"/><path d="M150 600L730 80"/><path d="M80 350H820"/><path d="M300 80V610"/><path d="M600 90V590"/></g>
+<path d="M170 510 C210 390 280 320 400 340 S540 255 610 205 S690 150 735 130" fill="none" stroke="#d96e4a" stroke-width="18" stroke-linecap="round"/>
+<g fill="#173743" stroke="white" stroke-width="8"><circle cx="170" cy="510" r="24"/><circle cx="400" cy="340" r="24"/><circle cx="610" cy="205" r="24"/><circle cx="735" cy="130" r="24"/></g>
+<g font-family="system-ui" font-size="26" font-weight="700" fill="#173743"><text x="100" y="565">Baixa</text><text x="330" y="310">Alfama</text><text x="545" y="175">Graça</text><text x="675" y="100">Viewpoint</text></g>
+</svg>

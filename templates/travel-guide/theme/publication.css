@@ -1,0 +1,171 @@
+@page {
+  size: 148mm 210mm;
+  margin: 16mm 14mm 19mm;
+  @top-left {
+    content: string(chapter-title);
+    font: 7pt ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: .08em;
+  }
+  @bottom-center {
+    content: counter(page);
+    font: 8pt ui-sans-serif, system-ui, sans-serif;
+  }
+}
+@page travel-cover {
+  margin: 0;
+  @top-left { content: none; }
+  @bottom-center { content: none; }
+}
+:root {
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  color: #172329;
+  --pubforge-page-bleed-inline: 3mm;
+}
+body { font-size: 9.6pt; line-height: 1.5; }
+.pubforge-role-title-page { page: travel-cover; }
+.travel-cover {
+  position: relative;
+  min-height: 210mm;
+  margin: -16mm -14mm -19mm;
+  overflow: hidden;
+  color: white;
+}
+.travel-cover > .pubforge-editorial-image {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+}
+.travel-cover > .pubforge-editorial-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.travel-cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 35%, rgb(5 25 34 / .82));
+}
+.travel-cover-copy {
+  position: absolute;
+  z-index: 2;
+  left: 14mm;
+  right: 14mm;
+  bottom: 18mm;
+}
+.travel-kicker {
+  margin: 0 0 3mm;
+  font-size: 7pt;
+  font-weight: 800;
+  letter-spacing: .18em;
+}
+.travel-cover h1 {
+  margin: 0;
+  font-size: 48pt;
+  line-height: .85;
+  letter-spacing: -.055em;
+}
+.travel-cover h2 { margin: 4mm 0 7mm; font-size: 15pt; font-weight: 450; }
+.travel-badge {
+  display: inline-block;
+  padding: 2mm 3mm;
+  border: 1px solid rgb(255 255 255 / .7);
+  font-size: 6.5pt;
+  font-weight: 800;
+  letter-spacing: .09em;
+}
+h1 {
+  string-set: chapter-title content();
+  margin: 0 0 7mm;
+  font-size: 27pt;
+  line-height: .98;
+  letter-spacing: -.035em;
+}
+h2 { margin-top: 8mm; font-size: 15pt; }
+.travel-lead { font-size: 12pt; line-height: 1.42; color: #37505b; }
+.fact-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 3mm;
+  margin: 6mm 0 8mm;
+}
+.fact-grid > div {
+  padding: 4mm;
+  border-radius: 2mm;
+  background: #edf3f1;
+}
+.fact-grid span {
+  display: block;
+  margin-bottom: 1mm;
+  color: #6c7e77;
+  font-size: 6pt;
+  font-weight: 800;
+  letter-spacing: .08em;
+}
+.fact-grid strong { font-size: 11pt; }
+.travel-tip, .travel-callout, .practical-box {
+  margin: 6mm 0;
+  padding: 4mm 5mm;
+  border-left: 4px solid #d96e4a;
+  background: #fff1e9;
+  break-inside: avoid;
+}
+.travel-callout { border-color: #3f7c79; background: #eaf3f1; }
+.travel-callout-label {
+  display: block;
+  margin-bottom: 1mm;
+  font-size: 6pt;
+  font-weight: 800;
+  letter-spacing: .09em;
+}
+.place-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 3mm;
+}
+.place-card {
+  min-height: 33mm;
+  padding: 4mm;
+  border: 1px solid #d5ddda;
+  border-radius: 2mm;
+  break-inside: avoid;
+}
+.place-card span {
+  display: block;
+  color: #d96e4a;
+  font-size: 7pt;
+  font-weight: 800;
+}
+.place-card strong { display: block; margin: 1mm 0; font-size: 12pt; }
+.place-card p { margin: 0; color: #62736f; font-size: 8pt; }
+.day-strip {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1.5mm 4mm;
+  margin: 0 0 8mm;
+  padding: 4mm 5mm;
+  background: #172f38;
+  color: white;
+}
+.day-strip span { color: #f0ae83; font: 7pt ui-monospace, monospace; }
+.day-strip strong { font-size: 8pt; }
+.eat-card {
+  margin: 5mm 0;
+  padding: 4mm 5mm;
+  border: 1px solid #d5ddda;
+  border-radius: 2mm;
+}
+.eat-card ul { margin-bottom: 0; }
+blockquote {
+  margin: 7mm 0;
+  padding: 5mm 0;
+  border-top: 1px solid #172f38;
+  border-bottom: 1px solid #172f38;
+  font-size: 12pt;
+  line-height: 1.35;
+}
+.practical-box { border-color: #d3a23d; background: #fff8e6; }
+.practical-box p { margin: 1.5mm 0; }
+figure { margin: 6mm 0; break-inside: avoid; }
+figure img { width: 100%; max-height: 100mm; }
+figcaption { margin-top: 2mm; color: #657772; font-size: 7pt; }

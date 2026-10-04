@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520" role="img" aria-labelledby="t d">
+<title id="t">Indexed outcome trend</title><desc id="d">A line chart rising from 100 to 118 across four periods.</desc>
+<rect width="1200" height="520" fill="#f7f8f7"/>
+<g stroke="#d6dddf" stroke-width="2"><path d="M110 410H1130"/><path d="M110 310H1130"/><path d="M110 210H1130"/><path d="M110 110H1130"/></g>
+<path d="M150 380 L450 305 L750 220 L1050 135" fill="none" stroke="#c85a3d" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+<g fill="#173f50"><circle cx="150" cy="380" r="14"/><circle cx="450" cy="305" r="14"/><circle cx="750" cy="220" r="14"/><circle cx="1050" cy="135" r="14"/></g>
+<g font-family="system-ui" font-size="28" fill="#38515e" text-anchor="middle"><text x="150" y="460">Baseline</text><text x="450" y="460">P1</text><text x="750" y="460">P2</text><text x="1050" y="460">P3</text></g>
+<g font-family="system-ui" font-size="26" fill="#173f50"><text x="170" y="360">100</text><text x="470" y="285">106</text><text x="770" y="200">112</text><text x="1070" y="115">118</text></g>
+</svg>

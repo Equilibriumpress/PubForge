@@ -1,0 +1,165 @@
+@page {
+  size: A4;
+  margin: 17mm 17mm 20mm;
+  @top-left {
+    content: "FIELD OPERATIONS MANUAL";
+    font: 7pt ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: .1em;
+  }
+  @top-right {
+    content: "OPS-104";
+    font: 7pt ui-monospace, monospace;
+  }
+  @bottom-right {
+    content: "PAGE " counter(page);
+    font: 7pt ui-sans-serif, system-ui, sans-serif;
+  }
+}
+@page manual-cover {
+  margin: 0;
+  @top-left { content: none; }
+  @top-right { content: none; }
+  @bottom-right { content: none; }
+}
+:root { font-family: ui-sans-serif, system-ui, sans-serif; color: #15212a; }
+body { font-size: 9.6pt; line-height: 1.48; }
+.pubforge-role-title-page { page: manual-cover; }
+.manual-cover {
+  min-height: 297mm;
+  margin: -17mm -17mm -20mm;
+  padding: 26mm 22mm;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  color: white;
+  background: linear-gradient(160deg, #15212a 0 58%, #e06a3b 58% 100%);
+}
+.manual-cover h1 {
+  align-self: center;
+  max-width: 145mm;
+  margin: 0;
+  font-size: 39pt;
+  line-height: .96;
+  letter-spacing: -.045em;
+}
+.manual-cover h2 { max-width: 105mm; font-size: 16pt; font-weight: 450; }
+.manual-code { font: 8pt ui-monospace, monospace; letter-spacing: .08em; }
+.manual-status {
+  position: absolute;
+  top: 26mm;
+  right: 22mm;
+  display: grid;
+  gap: 1mm;
+  padding: 3mm 4mm;
+  border: 1px solid rgb(255 255 255 / .55);
+}
+.manual-status span { font-size: 6pt; letter-spacing: .1em; }
+.manual-status strong { font-size: 9pt; }
+.manual-meta {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8mm;
+  align-self: end;
+  padding-top: 8mm;
+  border-top: 1px solid rgb(255 255 255 / .45);
+  font-size: 8pt;
+}
+h1 { margin: 0 0 8mm; font-size: 27pt; letter-spacing: -.03em; }
+h2 { margin-top: 9mm; font-size: 15pt; }
+h3 { font-size: 10pt; text-transform: uppercase; letter-spacing: .08em; }
+.manual-lead { max-width: 150mm; font-size: 12pt; color: #40525d; }
+.manual-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4mm;
+  margin: 7mm 0;
+}
+.manual-card {
+  padding: 5mm;
+  border: 1px solid #cad3d6;
+  border-radius: 2mm;
+  background: #f6f8f8;
+}
+.manual-card strong { display: block; margin: 1mm 0 2mm; font-size: 13pt; }
+.manual-card p { margin: 0; color: #52646e; }
+.manual-label {
+  color: #d15d30;
+  font-size: 6.5pt;
+  font-weight: 800;
+  letter-spacing: .09em;
+}
+.manual-warning, .manual-note {
+  margin: 7mm 0;
+  padding: 5mm 6mm;
+  border-left: 5px solid #d15d30;
+  background: #fff0e9;
+  break-inside: avoid;
+}
+.manual-note {
+  border-color: #376f88;
+  background: #eaf2f5;
+}
+.manual-warning strong, .manual-note strong {
+  display: block;
+  margin-bottom: 1mm;
+  font-size: 8pt;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+.procedure {
+  margin: 6mm 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: procedure;
+}
+.procedure > li {
+  counter-increment: procedure;
+  position: relative;
+  margin: 0 0 4mm 13mm;
+  padding: 0 0 4mm 2mm;
+  border-bottom: 1px solid #d8dfe1;
+  break-inside: avoid;
+}
+.procedure > li::before {
+  content: counter(procedure);
+  position: absolute;
+  left: -13mm;
+  top: -1mm;
+  display: grid;
+  width: 9mm;
+  height: 9mm;
+  place-items: center;
+  border-radius: 50%;
+  background: #15212a;
+  color: white;
+  font-weight: 800;
+}
+.procedure strong { font-size: 11pt; }
+.procedure p { margin: 1mm 0 0; }
+pre {
+  margin: 6mm 0;
+  padding: 5mm;
+  border-radius: 2mm;
+  background: #15212a;
+  color: #eef4f5;
+  font: 8.5pt/1.55 ui-monospace, monospace;
+  white-space: pre-wrap;
+}
+.decision-table {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3mm;
+  margin: 6mm 0;
+}
+.decision-table > div {
+  padding: 4mm;
+  border-top: 4px solid #376f88;
+  background: #edf3f5;
+  break-inside: avoid;
+}
+.decision-table span { font-size: 6pt; font-weight: 800; letter-spacing: .08em; }
+.decision-table strong { display: block; margin: 2mm 0; }
+.decision-table p { margin: 0; font-size: 8pt; }
+table { width: 100%; border-collapse: collapse; font-size: 8pt; }
+th, td { padding: 2.5mm; border-bottom: 1px solid #d3dade; text-align: left; vertical-align: top; }
+figure img { max-height: 80mm; width: 100%; }
+figcaption { font-size: 7pt; color: #687982; }

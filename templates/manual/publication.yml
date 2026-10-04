@@ -1,0 +1,66 @@
+version: 2
+publication:
+  title: Operations Manual Showcase
+  subtitle: Procedures, warnings, code and decision paths
+  authors:
+    - Equilibrium Press
+  language: en
+  type: manual
+  description: Structured technical manual layout fixture.
+
+contents:
+  toc: true
+  tocTitle: Manual contents
+  sectionDepth: 3
+  landmarks: true
+
+readingOrder:
+  - path: content/00-cover.md
+    role: title-page
+    title: Cover
+  - path: content/01-start.md
+    role: chapter
+    title: Getting Started
+  - path: content/02-main.md
+    role: chapter
+    title: Operating Procedure
+    breakBefore: page
+
+theme:
+  preset: manual
+  css: theme/publication.css
+
+assets:
+  editorialImages:
+    workflow:
+      src: assets/workflow.svg
+      alt: Four-step workflow from prepare to verify
+      caption: Standard operating flow
+      credit: PubForge
+      fit: contain
+      span: page
+      printWidthMm: 160
+
+vfm:
+  math: true
+  mathRenderer: mathml
+  footnote: dpub
+  rewriteRelativeHrefExtensions: true
+
+pdf:
+  enabled: true
+  profile: screen
+  size: A4
+  binding: left
+  bookmarks: true
+
+epub:
+  enabled: true
+  layout: reflowable
+  embeddedFonts: true
+
+webpub:
+  enabled: true
+
+projectZip:
+  enabled: true
