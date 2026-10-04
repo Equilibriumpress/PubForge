@@ -135,6 +135,11 @@ jobs:
         run: |
           /tmp/pubforge-vivliostyle-cli/node_modules/.bin/vivliostyle build             -c vivliostyle.press.config.mjs
 
+      - name: Stage press-ready PDF artifact
+        run: |
+          cp press-work/webpub/publication-press-ready.pdf \
+            press-work/publication-press-ready.pdf
+
       - name: Validate press-ready PDF
         shell: bash
         run: |
