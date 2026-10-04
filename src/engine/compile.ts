@@ -245,6 +245,9 @@ export function compilePublication(project: LoadedProject): CompiledPublication 
   const themePaths = new Set<string>([
     ...project.resolvedThemes.base,
     project.manifest.theme.css,
+    ...(project.workspace.has('.pubforge/generated/editorial-images.css')
+      ? ['.pubforge/generated/editorial-images.css']
+      : []),
   ]);
 
   const chapters = project.manifest.readingOrder.map((entry, index) => {
@@ -257,6 +260,9 @@ export function compilePublication(project: LoadedProject): CompiledPublication 
     const entryThemes = [
       ...project.resolvedThemes.base,
       project.manifest.theme.css,
+      ...(project.workspace.has('.pubforge/generated/editorial-images.css')
+        ? ['.pubforge/generated/editorial-images.css']
+        : []),
       ...(entry.theme ? [entry.theme] : []),
     ];
     for (const path of entryThemes) themePaths.add(path);
