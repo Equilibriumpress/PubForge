@@ -897,3 +897,72 @@ h1 {
   }
   .reviewAuditButton { margin-left: 0; }
 }
+
+
+.layoutLabPanel {
+  border-bottom: 1px solid #dfe3e1;
+  background: #f8f8f5;
+}
+.layoutLabPanel > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 15px 10px;
+}
+.layoutLabPanel > header .eyebrow { margin-bottom: 3px; }
+.layoutLabPanel > header strong { font-size: .86rem; }
+.labToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: .72rem;
+  font-weight: 800;
+}
+.labToggle input { width: auto; min-width: 0; }
+.labIntro {
+  margin: 0;
+  padding: 0 15px 12px;
+  color: #6e777b;
+  font-size: .75rem;
+  line-height: 1.45;
+}
+.labGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding: 0 12px 12px;
+}
+.labGrid label {
+  display: grid;
+  gap: 5px;
+}
+.labGrid label > span {
+  color: #6f787d;
+  font-size: .62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+}
+.labGrid select {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid #d4d9d7;
+  border-radius: 8px;
+  padding: .55rem .55rem;
+  background: #fff;
+  color: #172026;
+  font: inherit;
+  font-size: .76rem;
+}
+.labGrid select:disabled { opacity: .55; }
+.labPresets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 12px 14px;
+}
+.labPresets button {
+  padding: .45rem .62rem;
+  font-size: .7rem;
+}
