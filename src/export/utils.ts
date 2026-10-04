@@ -71,6 +71,7 @@ export function mediaType(path: string): string {
   const ext = path.split('.').pop()?.toLowerCase() ?? '';
   const types: Record<string, string> = {
     css: 'text/css',
+    csv: 'text/csv',
     gif: 'image/gif',
     html: 'text/html',
     jpeg: 'image/jpeg',
