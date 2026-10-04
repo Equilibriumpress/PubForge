@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { Studio } from './components/Studio';
-import { TemplateGallery } from './components/TemplateGallery';
+import { PublicationRenderer } from './components/PublicationRenderer';
 import { parseRepositoryTarget } from './lib/github-url';
 import { loadGitHubProject, type LoadedProject } from './lib/load-project';
 
@@ -11,30 +10,30 @@ export function App() {
   const params = new URLSearchParams(window.location.search);
   const [repository, setRepository] = useState(params.get('repo') ?? SAMPLE_REPO);
   const [project, setProject] = useState<LoadedProject | null>(null);
-  const [status, setStatus] = useState('Enter a public GitHub publication repository.');
+  const [status, setStatus] = useState('Open a public GitHub publication repository.');
   const [loading, setLoading] = useState(false);
 
   async function openProject(input = repository) {
     setRepository(input);
     setLoading(true);
     setProject(null);
-    setStatus('Reading repository…');
+    setStatus('Reading publication snapshot…');
 
     try {
       const target = parseRepositoryTarget(input);
       const loaded = await loadGitHubProject(target, (done, total) => {
-        setStatus(`Preparing browser workspace… ${done}/${total}`);
+        setStatus(`Preparing publication assets… ${done}/${total}`);
       });
       setProject(loaded);
       setStatus(
-        `Loaded ${loaded.snapshot.repository}@${loaded.snapshot.ref} · ${loaded.snapshot.commitSha.slice(0, 7)}`,
+        `Ready · ${loaded.snapshot.repository}@${loaded.snapshot.ref} · ${loaded.snapshot.commitSha.slice(0, 7)}`,
       );
 
       const next = new URLSearchParams(window.location.search);
       next.set('repo', input.trim());
       window.history.replaceState(null, '', `${window.location.pathname}?${next}`);
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : 'Unable to open repository.');
+      setStatus(error instanceof Error ? error.message : 'Unable to open publication.');
     } finally {
       setLoading(false);
     }
@@ -47,17 +46,17 @@ export function App() {
 
   return (
     <main className="shell">
-      <header className="hero">
-        <p className="eyebrow">Git-native publishing</p>
+      <header className="hero rendererHero">
+        <p className="eyebrow">Git-native publication rendering</p>
         <h1>PubForge</h1>
         <p className="lede">
-          GitHub stores the project. PubForge edits, previews and exports the
-          publication in your browser.
+          ChatGPT edits the publication in GitHub. PubForge turns that committed
+          source into a high-fidelity preview and publication outputs.
         </p>
       </header>
 
       <section className="panel projectOpener">
-        <label htmlFor="repo">GitHub repository</label>
+        <label htmlFor="repo">Publication repository</label>
         <div className="repoRow">
           <input
             id="repo"
@@ -66,44 +65,29 @@ export function App() {
             placeholder="owner/repository or owner/repository@branch"
           />
           <button type="button" onClick={() => void openProject()} disabled={loading}>
-            {loading ? 'Opening…' : 'Open project'}
+            {loading ? 'Opening…' : 'Render publication'}
           </button>
         </div>
         <p className="hint" role="status">{status}</p>
       </section>
 
       {project ? (
-        <Studio
-          key={project.snapshot.commitSha}
-          project={project}
-          onReload={() =>
-            openProject(`${project.snapshot.repository}@${project.snapshot.ref}`)
-          }
-          onOpenCommit={(sha) =>
-            openProject(`${project.snapshot.repository}@${sha}`)
-          }
-        />
+        <PublicationRenderer key={project.snapshot.commitSha} project={project} />
       ) : (
-        <>
-          <section className="grid">
-            <article className="card">
-              <span>01</span>
-              <h2>Repository first</h2>
-              <p>Content, assets, configuration and history remain ordinary Git files.</p>
-            </article>
-            <article className="card">
-              <span>02</span>
-              <h2>Local workspace</h2>
-              <p>Edits and rendering run in the browser before anything is written back.</p>
-            </article>
-            <article className="card">
-              <span>03</span>
-              <h2>Publication output</h2>
-              <p>One project feeds Vivliostyle preview, PDF, EPUB and Web Publication.</p>
-            </article>
-          </section>
-          <TemplateGallery />
-        </>
+        <section className="rendererIntro">
+          <article>
+            <span>Preview</span>
+            <strong>Inspect the actual paginated publication.</strong>
+          </article>
+          <article>
+            <span>Preflight</span>
+            <strong>Catch publication problems before export.</strong>
+          </article>
+          <article>
+            <span>Output</span>
+            <strong>Produce PDF, EPUB and Web Publication formats.</strong>
+          </article>
+        </section>
       )}
     </main>
   );
