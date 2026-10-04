@@ -1,41 +1,122 @@
+import {
+  compilePublication,
+  publicationIdentifier,
+  rewriteHtmlReferences,
+} from '../engine/compile';
 import type { LoadedProject } from '../lib/load-project';
-import { buildPortableHtml } from './portable-html';
 import { downloadBytes, mediaType, slugify, zipFiles } from './utils';
 
-export function exportWebPublication(project: LoadedProject): void {
-  const html = buildPortableHtml(project);
-  const resources = project.workspace
-    .list()
-    .filter((path) => path !== 'publication.yml')
-    .map((path) => ({
-      url: path,
-      encodingFormat: mediaType(path),
-    }));
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
 
+function chapterHtml(
+  project: LoadedProject,
+  chapter: ReturnType<typeof compilePublication>['chapters'][number],
+  chapterMap: Map<string, string>,
+): string {
+  const body = rewriteHtmlReferences(
+    chapter.html,
+    chapter.sourcePath,
+    (resolved) => {
+      const chapterTarget = chapterMap.get(resolved);
+      if (chapterTarget) return chapterTarget.replace(/^text\//, '');
+      if (project.workspace.has(resolved)) return `../${resolved}`;
+      return null;
+    },
+  );
+
+  const styles = chapter.themePaths
+    .map((path) => `<link rel="stylesheet" href="../${escapeHtml(path)}">`)
+    .join('\n');
+
+  return `<!doctype html>
+<html lang="${escapeHtml(project.manifest.publication.language)}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${escapeHtml(chapter.title)}</title>
+${styles}
+</head>
+<body data-role="${chapter.role}">
+<main>
+${body}
+</main>
+</body>
+</html>`;
+}
+
+export function exportWebPublication(project: LoadedProject): void {
+  const compiled = compilePublication(project);
+  const chapterMap = new Map(
+    compiled.chapters.map((chapter) => [chapter.sourcePath, chapter.outputPath]),
+  );
+
+  const extras: Record<string, string | Uint8Array> = {};
+  const readingOrder = compiled.chapters.map((chapter) => {
+    const outputPath = `chapters/${chapter.outputPath.replace(/^text\//, '')}`;
+    extras[outputPath] = chapterHtml(project, chapter, chapterMap);
+    return {
+      url: outputPath,
+      name: chapter.title,
+      encodingFormat: 'text/html',
+      type: chapter.role === 'chapter' ? 'Chapter' : 'CreativeWork',
+    };
+  });
+
+  const sourcePaths = new Set(compiled.chapters.map((chapter) => chapter.sourcePath));
+  const resourceEntries = project.workspace
+    .entries()
+    .filter(([path]) => path !== 'publication.yml' && !sourcePaths.has(path));
+
+  const resources = resourceEntries.map(([path]) => ({
+    url: path,
+    encodingFormat: mediaType(path),
+    ...(project.manifest.cover?.image === path ? { rel: 'cover' } : {}),
+  }));
+
+  const metadata = project.manifest.publication;
   const manifest = {
     '@context': ['https://schema.org', 'https://www.w3.org/ns/pub-context'],
     conformsTo: 'https://www.w3.org/TR/pub-manifest/',
     type: 'CreativeWork',
-    name: project.manifest.title,
-    inLanguage: project.manifest.language,
-    author: project.manifest.author
-      ? (Array.isArray(project.manifest.author)
-          ? project.manifest.author
-          : [project.manifest.author]
-        ).map((name) => ({ type: 'Person', name }))
+    id: publicationIdentifier(project),
+    name: metadata.title,
+    alternateName: metadata.subtitle,
+    inLanguage: metadata.language,
+    author: (metadata.authors ?? []).map((name) => ({ type: 'Person', name })),
+    publisher: metadata.publisher
+      ? { type: 'Organization', name: metadata.publisher }
       : undefined,
-    readingOrder: [{ url: 'index.html', encodingFormat: 'text/html' }],
+    description: metadata.description,
+    keywords: metadata.subjects,
+    copyrightNotice: metadata.rights,
+    datePublished: metadata.date,
+    readingOrder,
     resources,
   };
 
-  const archive = zipFiles(project.workspace.entries(), {
-    'index.html': html,
-    'publication.json': JSON.stringify(manifest, null, 2),
-  });
+  extras['publication.json'] = JSON.stringify(manifest, null, 2);
+  extras['index.html'] = `<!doctype html>
+<html lang="${escapeHtml(metadata.language)}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${escapeHtml(metadata.title)}</title>
+<link rel="publication" href="publication.json">
+<meta http-equiv="refresh" content="0; url=${readingOrder[0]?.url ?? ''}">
+</head>
+<body><p><a href="${readingOrder[0]?.url ?? ''}">Open publication</a></p></body>
+</html>`;
 
+  const archive = zipFiles(resourceEntries, extras);
   downloadBytes(
     archive,
-    `${slugify(project.manifest.title)}.webpub.zip`,
+    `${slugify(metadata.title)}.webpub.zip`,
     'application/zip',
   );
 }
