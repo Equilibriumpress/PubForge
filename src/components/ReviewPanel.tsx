@@ -249,7 +249,7 @@ export function ReviewPanel({ project }: ReviewPanelProps) {
               auditRenderedPages();
             }}
             onNavigation={(state) => {
-              if (state.epage > 0) setPage(Math.max(1, state.epage));
+              if (state.epage >= 0) setPage(state.epage + 1);
             }}
           />
         </div>
