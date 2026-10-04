@@ -1,20 +1,50 @@
-version: 1
-title: Research Report
-subtitle: PubForge starter project
-author: Your Name
-language: en
-type: report
+version: 2
+publication:
+  title: Research Report
+  subtitle: PubForge starter project
+  authors:
+    - Your Name
+  language: en
+  type: report
+  description: Structured report for research, policy or annual reporting.
 
-content:
-  - content/01-start.md
-  - content/02-main.md
+contents:
+  toc: true
+  landmarks: true
+
+readingOrder:
+  - path: content/01-start.md
+    role: chapter
+    title: Executive summary
+  - path: content/02-main.md
+    role: chapter
+    title: Findings
+    breakBefore: page
 
 theme:
   preset: report
   css: theme/publication.css
 
-outputs:
-  - print
-  - epub
-  - webpub
-  - project-zip
+vfm:
+  math: true
+  mathRenderer: mathml
+  footnote: dpub
+  rewriteRelativeHrefExtensions: true
+
+pdf:
+  enabled: true
+  profile: screen
+  size: A4
+  binding: left
+  bookmarks: true
+
+epub:
+  enabled: true
+  reflowable: true
+  embeddedFonts: true
+
+webpub:
+  enabled: true
+
+projectZip:
+  enabled: true
