@@ -40,7 +40,12 @@ function chapterXhtml(
     },
   );
 
-  const styles = chapter.themePaths
+  const themePaths = [
+    ...chapter.themePaths,
+    ...(project.manifest.epub?.theme ? [project.manifest.epub.theme] : []),
+  ].filter((path, index, values) => values.indexOf(path) === index);
+
+  const styles = themePaths
     .map(
       (path) =>
         `<link rel="stylesheet" type="text/css" href="../${xmlEscape(path)}"/>`,
