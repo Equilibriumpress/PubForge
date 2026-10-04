@@ -20,6 +20,12 @@ button {
 
 button:disabled { cursor: progress; opacity: 0.6; }
 
+.secondaryButton {
+  padding: 0.6rem 0.85rem;
+  background: #eef0ef;
+  color: #172026;
+}
+
 input {
   min-width: 0;
   flex: 1;
@@ -112,7 +118,40 @@ h1 {
 .projectSummary dt { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #687279; }
 .projectSummary dd { margin: 7px 0 0; font-weight: 700; overflow-wrap: anywhere; }
 
+.previewPanel {
+  margin-top: 20px;
+  overflow: hidden;
+  border: 1px solid #d9dcda;
+  border-radius: 24px;
+  background: #fff;
+}
+
+.previewToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 22px;
+  border-bottom: 1px solid #e2e5e3;
+}
+
+.previewToolbar .eyebrow { margin-bottom: 4px; }
+.pageControls { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; }
+
+.previewCanvas {
+  min-height: 720px;
+  overflow: auto;
+  padding: 24px;
+  background: #dfe2e0;
+}
+
+.previewCanvas > div {
+  margin: 0 auto;
+}
+
 @media (max-width: 720px) {
   .shell { padding: 40px 0; }
   .repoRow, .grid, .projectSummary { display: grid; grid-template-columns: 1fr; }
+  .previewToolbar { align-items: flex-start; flex-direction: column; }
+  .previewCanvas { min-height: 560px; padding: 10px; }
 }
