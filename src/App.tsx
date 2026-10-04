@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 
+import { PublicationPreview } from './components/PublicationPreview';
 import { parseRepositoryTarget } from './lib/github-url';
 import { loadGitHubProject, type LoadedProject } from './lib/load-project';
 
@@ -74,31 +75,34 @@ export function App() {
       </section>
 
       {project ? (
-        <section className="projectSummary">
-          <div>
-            <p className="eyebrow">Publication</p>
-            <h2>{project.manifest.title}</h2>
-            {project.manifest.subtitle ? <p>{project.manifest.subtitle}</p> : null}
-          </div>
-          <dl>
+        <>
+          <section className="projectSummary">
             <div>
-              <dt>Type</dt>
-              <dd>{project.manifest.type ?? 'custom'}</dd>
+              <p className="eyebrow">Publication</p>
+              <h2>{project.manifest.title}</h2>
+              {project.manifest.subtitle ? <p>{project.manifest.subtitle}</p> : null}
             </div>
-            <div>
-              <dt>Language</dt>
-              <dd>{project.manifest.language}</dd>
-            </div>
-            <div>
-              <dt>Files</dt>
-              <dd>{project.workspace.list().length}</dd>
-            </div>
-            <div>
-              <dt>Commit</dt>
-              <dd>{project.snapshot.commitSha.slice(0, 7)}</dd>
-            </div>
-          </dl>
-        </section>
+            <dl>
+              <div>
+                <dt>Type</dt>
+                <dd>{project.manifest.type ?? 'custom'}</dd>
+              </div>
+              <div>
+                <dt>Language</dt>
+                <dd>{project.manifest.language}</dd>
+              </div>
+              <div>
+                <dt>Files</dt>
+                <dd>{project.workspace.list().length}</dd>
+              </div>
+              <div>
+                <dt>Commit</dt>
+                <dd>{project.snapshot.commitSha.slice(0, 7)}</dd>
+              </div>
+            </dl>
+          </section>
+          <PublicationPreview project={project} />
+        </>
       ) : (
         <section className="grid">
           <article className="card">
