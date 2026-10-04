@@ -26,6 +26,7 @@ export interface ContentEntry {
   role?: ContentRole;
   theme?: string;
   breakBefore?: 'auto' | 'page' | 'left' | 'right' | 'recto' | 'verso';
+  pageCounterReset?: number;
 }
 
 export interface PublicationMetadata {
@@ -40,6 +41,7 @@ export interface PublicationMetadata {
   subjects?: string[];
   rights?: string;
   date?: string;
+  readingProgression?: 'ltr' | 'rtl';
 }
 
 export interface PublicationManifest {
@@ -52,6 +54,8 @@ export interface PublicationManifest {
   };
   contents?: {
     toc?: boolean;
+    tocTitle?: string;
+    sectionDepth?: number;
     landmarks?: boolean;
     pageList?: boolean;
   };
@@ -59,6 +63,11 @@ export interface PublicationManifest {
   theme: {
     preset?: string;
     css: string;
+    packages?: string[];
+  };
+  assets?: {
+    includes?: string[];
+    excludes?: string[];
   };
   vfm?: {
     math?: boolean;
@@ -70,6 +79,7 @@ export interface PublicationManifest {
     captionlessImagePolicy?: 'paragraph' | 'figure';
     parseFigcaptionAsInline?: boolean;
     rewriteRelativeHrefExtensions?: boolean;
+    tableCell?: 'align-attribute' | 'align-class' | 'align-style';
   };
   pdf?: {
     enabled?: boolean;
@@ -80,12 +90,14 @@ export interface PublicationManifest {
     binding?: 'left' | 'right';
     bleed?: string;
     cropMarks?: boolean;
+    cropOffset?: string;
     bookmarks?: boolean;
   };
   epub?: {
     enabled?: boolean;
     reflowable?: boolean;
     theme?: string;
+    themePackages?: string[];
     embeddedFonts?: boolean;
   };
   webpub?: {
@@ -95,7 +107,6 @@ export interface PublicationManifest {
     enabled?: boolean;
   };
 
-  // Compatibility aliases used internally while the renderer migrates to v2.
   title: string;
   subtitle?: string;
   author?: string | string[];
