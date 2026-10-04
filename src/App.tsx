@@ -19,10 +19,12 @@ export function App() {
 
     try {
       const target = parseRepositoryTarget(input);
-      const loaded = await loadGitHubProject(target);
+      const loaded = await loadGitHubProject(target, (done, total) => {
+        setStatus(`Preparing browser workspace… ${done}/${total}`);
+      });
       setProject(loaded);
       setStatus(
-        `Loaded ${loaded.snapshot.repository}@${loaded.snapshot.ref} · ${loaded.snapshot.commitSha.slice(0, 7)}`,
+        `Loaded ${loaded.snapshot.repository}@${loaded.snapshot.ref} · ${loaded.snapshot.commitSha.slice(0, 7)} · browser workspace ready`,
       );
 
       const next = new URLSearchParams(window.location.search);
@@ -89,7 +91,7 @@ export function App() {
             </div>
             <div>
               <dt>Files</dt>
-              <dd>{project.snapshot.files.length}</dd>
+              <dd>{project.workspace.list().length}</dd>
             </div>
             <div>
               <dt>Commit</dt>
