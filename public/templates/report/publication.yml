@@ -1,21 +1,26 @@
 version: 2
 publication:
-  title: Research Report
-  subtitle: PubForge starter project
+  title: Evidence Report Showcase
+  subtitle: KPI pages, charts, tables and recommendations
   authors:
-    - Your Name
+    - Equilibrium Press
   language: en
   type: report
-  description: Structured report for research, policy or annual reporting.
+  description: Data-led A4 report layout fixture.
 
 contents:
   toc: true
+  tocTitle: Report contents
+  sectionDepth: 2
   landmarks: true
 
 readingOrder:
+  - path: content/00-cover.md
+    role: title-page
+    title: Cover
   - path: content/01-start.md
     role: chapter
-    title: Executive summary
+    title: Executive Summary
   - path: content/02-main.md
     role: chapter
     title: Findings
@@ -24,6 +29,17 @@ readingOrder:
 theme:
   preset: report
   css: theme/publication.css
+
+assets:
+  editorialImages:
+    trend-chart:
+      src: assets/trend-chart.svg
+      alt: Indexed trend line rising steadily across four periods
+      caption: Indexed outcome trend, baseline = 100
+      credit: Illustrative data
+      fit: contain
+      span: page
+      printWidthMm: 160
 
 vfm:
   math: true
@@ -40,7 +56,7 @@ pdf:
 
 epub:
   enabled: true
-  reflowable: true
+  layout: reflowable
   embeddedFonts: true
 
 webpub:
