@@ -22,9 +22,13 @@ function escapeHtml(value: string): string {
     .replace(/"/g, '&quot;');
 }
 
-function createObjectUrls(project: LoadedProject): Map<string, string> {
+function createObjectUrls(
+  project: LoadedProject,
+  paths: readonly string[],
+): Map<string, string> {
   const urls = new Map<string, string>();
-  for (const [path, data] of project.workspace.entries()) {
+  for (const path of paths) {
+    const data = project.workspace.read(path);
     urls.set(
       path,
       URL.createObjectURL(
@@ -43,7 +47,7 @@ export interface PublicationDocument {
 
 export function buildPublicationDocument(project: LoadedProject): PublicationDocument {
   const compiled = compilePublication(project);
-  const objectUrls = createObjectUrls(project);
+  const objectUrls = createObjectUrls(project, compiled.assetPaths);
   const profileCss = buildPdfProfileCss(project.manifest);
   const css = compiled.themePaths
     .map((path) =>
