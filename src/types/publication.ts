@@ -100,6 +100,13 @@ export interface PublicationManifest {
     cropOffset?: string;
     bookmarks?: boolean;
     editions?: Array<'normal' | 'print' | 'high-quality'>;
+    production?: {
+      enabled?: boolean;
+      preflight?: 'press-ready' | 'press-ready-local';
+      preflightOptions?: string[];
+      cmyk?: boolean;
+      outputIntent?: string;
+    };
   };
   epub?: {
     enabled?: boolean;
