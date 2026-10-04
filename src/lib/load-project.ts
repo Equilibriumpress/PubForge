@@ -1,4 +1,5 @@
 import { parsePublicationManifest } from './manifest';
+import { normalizeManifestPaths } from './publications';
 import {
   prepareRichAssets,
   type PreparedAssets,
@@ -20,33 +21,37 @@ export interface LoadedProject {
   workspace: ProjectWorkspace;
   resolvedThemes: ResolvedThemePackages;
   preparedAssets: PreparedAssets;
+  manifestPath: string;
 }
 
 export async function loadGitHubProject(
   target: RepositoryTarget,
+  manifestPath = 'publication.yml',
   onProgress?: (done: number, total: number) => void,
 ): Promise<LoadedProject> {
   const provider = new GitHubStorageProvider(target);
   const snapshot = await provider.open();
 
-  if (!provider.stat('publication.yml')) {
-    throw new Error('This repository does not contain publication.yml at its root.');
+  if (!provider.stat(manifestPath)) {
+    throw new Error(`Publication manifest not found: ${manifestPath}`);
   }
 
-  const manifest = parsePublicationManifest(
-    await provider.readText('publication.yml'),
+  const manifest = normalizeManifestPaths(
+    parsePublicationManifest(await provider.readText(manifestPath)),
+    manifestPath,
+    provider,
   );
 
   for (const entry of manifest.content) {
     const path = typeof entry === 'string' ? entry : entry.path;
     if (!provider.stat(path)) {
-      throw new Error(`Content file declared in publication.yml is missing: ${path}`);
+      throw new Error(`Content file declared in ${manifestPath} is missing: ${path}`);
     }
   }
 
   if (!provider.stat(manifest.theme.css)) {
     throw new Error(
-      `Theme file declared in publication.yml is missing: ${manifest.theme.css}`,
+      `Theme file declared in ${manifestPath} is missing: ${manifest.theme.css}`,
     );
   }
 
@@ -66,5 +71,6 @@ export async function loadGitHubProject(
     workspace,
     resolvedThemes,
     preparedAssets,
+    manifestPath,
   };
 }

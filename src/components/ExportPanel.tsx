@@ -30,6 +30,7 @@ export function ExportPanel({ project }: ExportPanelProps) {
       'repo',
       `${project.snapshot.repository}@${project.snapshot.commitSha}`,
     );
+    url.searchParams.set('manifest', project.manifestPath);
     url.searchParams.set('print', '1');
     url.searchParams.set('edition', edition);
     window.open(url, '_blank', 'noopener');
