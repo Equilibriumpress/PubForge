@@ -68,6 +68,13 @@ export interface PublicationManifest {
   assets?: {
     includes?: string[];
     excludes?: string[];
+    mermaid?: boolean;
+    syntaxHighlighting?: boolean;
+    shikiTheme?: string;
+    imageOptimization?: {
+      maxDimension?: number;
+      jpegQuality?: number;
+    };
   };
   vfm?: {
     math?: boolean;
@@ -92,6 +99,7 @@ export interface PublicationManifest {
     cropMarks?: boolean;
     cropOffset?: string;
     bookmarks?: boolean;
+    editions?: Array<'normal' | 'print' | 'high-quality'>;
   };
   epub?: {
     enabled?: boolean;
