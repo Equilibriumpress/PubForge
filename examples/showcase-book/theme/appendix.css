@@ -1,0 +1,11 @@
+@namespace epub "http://www.idpf.org/2007/ops";
+
+.pubforge-role-appendix,
+body[epub|type~="appendix"] {
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+.pubforge-role-appendix table,
+body[epub|type~="appendix"] table {
+  font-size: 8pt;
+}
