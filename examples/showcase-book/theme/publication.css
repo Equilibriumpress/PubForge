@@ -1,0 +1,214 @@
+@page {
+  margin: 17mm 15mm 20mm 18mm;
+  @top-left {
+    content: string(chapter-title);
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 8pt;
+    letter-spacing: .04em;
+  }
+  @bottom-center {
+    content: counter(page);
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 8pt;
+  }
+}
+
+@page :left {
+  margin-left: 15mm;
+  margin-right: 18mm;
+  @top-left { content: string(chapter-title); }
+  @top-right { content: none; }
+}
+
+@page :right {
+  margin-left: 18mm;
+  margin-right: 15mm;
+  @top-left { content: none; }
+  @top-right {
+    content: string(chapter-title);
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 8pt;
+  }
+}
+
+@page title {
+  margin: 24mm 20mm;
+  @top-left { content: none; }
+  @top-right { content: none; }
+  @bottom-center { content: none; }
+}
+
+@page legal {
+  margin: 25mm 20mm;
+  @top-left { content: none; }
+  @top-right { content: none; }
+  @bottom-center { content: none; }
+}
+
+@page colophon {
+  margin: 24mm 20mm;
+  @top-left { content: none; }
+  @top-right { content: none; }
+}
+
+:root {
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
+  color: #1b2328;
+  background: white;
+}
+
+body {
+  font-size: 10.4pt;
+  line-height: 1.56;
+  text-rendering: optimizeLegibility;
+}
+
+.pubforge-role-title-page {
+  page: title;
+  min-height: 150mm;
+  display: grid;
+  align-content: center;
+  background-image: url("../assets/pattern.svg");
+  background-repeat: no-repeat;
+  background-position: right bottom;
+  background-size: 52mm auto;
+}
+
+.pubforge-role-title-page h1 {
+  font-size: 31pt;
+  max-width: 90mm;
+}
+
+.pubforge-role-title-page h2 {
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-weight: 500;
+  color: #526068;
+}
+
+.pubforge-role-copyright {
+  page: legal;
+  font-size: 8.8pt;
+}
+
+.pubforge-role-colophon {
+  page: colophon;
+}
+
+h1 {
+  string-set: chapter-title content();
+  break-after: avoid;
+  font-size: 25pt;
+  line-height: 1.04;
+  letter-spacing: -.025em;
+}
+
+h2 {
+  break-after: avoid;
+  margin-top: 1.65em;
+  font-size: 15pt;
+}
+
+h3 {
+  break-after: avoid;
+  margin-top: 1.4em;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 10.5pt;
+  letter-spacing: .02em;
+}
+
+p {
+  orphans: 3;
+  widows: 3;
+}
+
+a {
+  color: inherit;
+  text-decoration-thickness: .06em;
+  text-underline-offset: .12em;
+}
+
+blockquote {
+  margin: 1.4em 0;
+  padding: .3em 0 .3em 1.1em;
+  border-left: 3px solid #87958e;
+  font-size: 12pt;
+  line-height: 1.45;
+}
+
+figure {
+  margin: 1.5em 0;
+  break-inside: avoid;
+}
+
+figure img {
+  display: block;
+  max-width: 100%;
+  max-height: 150mm;
+  margin: 0 auto;
+}
+
+figcaption {
+  margin-top: .65em;
+  color: #526068;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 8.5pt;
+  line-height: 1.4;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.2em 0 1.5em;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 8.6pt;
+  break-inside: avoid;
+}
+
+th,
+td {
+  padding: .55em .65em;
+  border-bottom: 1px solid #cfd6d2;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  border-top: 2px solid #1b2328;
+  border-bottom: 1px solid #1b2328;
+}
+
+pre {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  padding: 1em;
+  border-radius: 4px;
+  background: #eef1ef;
+  font-size: 8.3pt;
+  line-height: 1.45;
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.callout {
+  margin: 1.4em 0;
+  padding: 1em 1.1em;
+  border: 1px solid #bec8c3;
+  border-radius: 5px;
+  background: #f4f6f5;
+  break-inside: avoid;
+}
+
+ruby rt {
+  font-size: .55em;
+}
+
+aside[role="doc-footnote"] {
+  float: footnote;
+  font-size: 8.5pt;
+}
+
+math {
+  font-size: 1.05em;
+}

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 500" role="img" aria-labelledby="t d">
+  <title id="t">Publication quality scores</title>
+  <desc id="d">Four bars for source, semantics, rendering and preflight.</desc>
+  <rect width="900" height="500" fill="#fff"/>
+  <g stroke="#cfd5d2" stroke-width="2"><path d="M100 400H840"/><path d="M100 300H840"/><path d="M100 200H840"/><path d="M100 100H840"/></g>
+  <g fill="#29363d">
+    <rect x="150" y="160" width="110" height="240"/><rect x="330" y="125" width="110" height="275"/>
+    <rect x="510" y="90" width="110" height="310"/><rect x="690" y="60" width="110" height="340"/>
+  </g>
+  <g font-family="system-ui, sans-serif" font-size="24" text-anchor="middle" fill="#172026">
+    <text x="205" y="445">Source</text><text x="385" y="445">Semantics</text><text x="565" y="445">Render</text><text x="745" y="445">Preflight</text>
+  </g>
+</svg>

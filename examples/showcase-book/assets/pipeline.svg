@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 420" role="img" aria-labelledby="t">
+  <title id="t">Git-native publishing pipeline</title>
+  <defs><marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#172026"/></marker></defs>
+  <rect width="1000" height="420" fill="#f5f2ea"/>
+  <g font-family="system-ui, sans-serif" font-size="28" text-anchor="middle">
+    <rect x="40" y="145" width="180" height="90" rx="18" fill="#fff" stroke="#172026" stroke-width="4"/><text x="130" y="200">ChatGPT</text>
+    <rect x="300" y="145" width="180" height="90" rx="18" fill="#fff" stroke="#172026" stroke-width="4"/><text x="390" y="200">GitHub</text>
+    <rect x="560" y="145" width="180" height="90" rx="18" fill="#fff" stroke="#172026" stroke-width="4"/><text x="650" y="200">PubForge</text>
+    <rect x="820" y="35" width="145" height="70" rx="16" fill="#dfe6e2"/><text x="892" y="80">Preview</text>
+    <rect x="820" y="140" width="145" height="70" rx="16" fill="#dfe6e2"/><text x="892" y="185">EPUB</text>
+    <rect x="820" y="245" width="145" height="70" rx="16" fill="#dfe6e2"/><text x="892" y="290">PDF</text>
+    <rect x="820" y="350" width="145" height="50" rx="16" fill="#dfe6e2"/><text x="892" y="384">WebPub</text>
+  </g>
+  <g stroke="#172026" stroke-width="5" fill="none" marker-end="url(#a)">
+    <path d="M220 190 H295"/><path d="M480 190 H555"/>
+    <path d="M740 175 C780 175 780 70 815 70"/><path d="M740 185 H815"/>
+    <path d="M740 200 C780 200 780 280 815 280"/><path d="M740 210 C780 210 780 375 815 375"/>
+  </g>
+</svg>

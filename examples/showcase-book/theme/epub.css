@@ -1,0 +1,46 @@
+@namespace epub "http://www.idpf.org/2007/ops";
+
+html {
+  color: #1b2328;
+  background: #fff;
+}
+
+body {
+  font-family: serif;
+  line-height: 1.5;
+  margin: 5%;
+}
+
+img,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+figure {
+  margin: 1.25em 0;
+}
+
+figcaption {
+  color: #526068;
+  font-size: .88em;
+}
+
+nav[epub|type~="toc"] ol {
+  padding-left: 1.3em;
+}
+
+aside[role="doc-footnote"] {
+  font-size: .9em;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: .4em;
+  border-bottom: 1px solid #bbb;
+}

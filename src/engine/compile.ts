@@ -39,6 +39,23 @@ export function resolveProjectPath(
   return decodeURIComponent(resolved.pathname.replace(/^\//, ''));
 }
 
+function sourceCandidates(resolvedPath: string): string[] {
+  const candidates = [resolvedPath];
+  if (/\.html?$/i.test(resolvedPath)) {
+    const base = resolvedPath.replace(/\.html?$/i, '');
+    candidates.push(`${base}.md`, `${base}.markdown`);
+  }
+  return candidates;
+}
+
+export function findChapterByResolvedPath(
+  compiled: CompiledPublication,
+  resolvedPath: string,
+): CompiledChapter | undefined {
+  const candidates = new Set(sourceCandidates(resolvedPath));
+  return compiled.chapters.find((chapter) => candidates.has(chapter.sourcePath));
+}
+
 export function rewriteHtmlReferences(
   html: string,
   sourcePath: string,
@@ -116,9 +133,63 @@ function vfmOptions(manifest: PublicationManifest): Parameters<typeof stringify>
   };
 }
 
+function collectReferencedResources(
+  project: LoadedProject,
+  chapters: CompiledChapter[],
+  themePaths: string[],
+): string[] {
+  const resources = new Set<string>();
+  const compiled = {
+    manifest: project.manifest,
+    chapters,
+    themePaths,
+    assetPaths: [],
+  } satisfies CompiledPublication;
+
+  const addIfResource = (resolved: string) => {
+    if (findChapterByResolvedPath(compiled, resolved)) return;
+    if (project.workspace.has(resolved)) resources.add(resolved);
+  };
+
+  if (project.manifest.cover?.image) {
+    addIfResource(project.manifest.cover.image);
+  }
+
+  const allThemes = new Set(themePaths);
+  if (project.manifest.epub?.theme) allThemes.add(project.manifest.epub.theme);
+  for (const themePath of allThemes) {
+    if (!project.workspace.has(themePath)) continue;
+    resources.add(themePath);
+    const css = project.workspace.text(themePath);
+    for (const match of css.matchAll(/url\((['"]?)([^)'"]+)\1\)/g)) {
+      const resolved = resolveProjectPath(themePath, match[2].trim());
+      if (resolved) addIfResource(resolved);
+    }
+  }
+
+  for (const chapter of chapters) {
+    const document = new DOMParser().parseFromString(
+      `<main>${chapter.html}</main>`,
+      'text/html',
+    );
+    for (const element of Array.from(
+      document.querySelectorAll<HTMLElement>('[src], [poster], [href]'),
+    )) {
+      for (const attribute of ['src', 'poster', 'href']) {
+        const value = element.getAttribute(attribute);
+        if (!value || value.startsWith('#')) continue;
+        const reference = value.split('#', 1)[0];
+        const resolved = resolveProjectPath(chapter.sourcePath, reference);
+        if (resolved) addIfResource(resolved);
+      }
+    }
+  }
+
+  return [...resources].sort();
+}
+
 export function compilePublication(project: LoadedProject): CompiledPublication {
   const themePaths = new Set<string>([project.manifest.theme.css]);
-  const sourcePaths = new Set(project.manifest.readingOrder.map((entry) => entry.path));
 
   const chapters = project.manifest.readingOrder.map((entry, index) => {
     const markdown = project.workspace.text(entry.path);
@@ -143,19 +214,17 @@ export function compilePublication(project: LoadedProject): CompiledPublication 
     } satisfies CompiledChapter;
   });
 
-  const assetPaths = project.workspace
-    .list()
-    .filter(
-      (path) =>
-        path !== 'publication.yml' &&
-        !sourcePaths.has(path) &&
-        !themePaths.has(path),
-    );
+  const compiledThemes = [...themePaths];
+  const assetPaths = collectReferencedResources(
+    project,
+    chapters,
+    compiledThemes,
+  );
 
   return {
     manifest: project.manifest,
     chapters,
-    themePaths: [...themePaths],
+    themePaths: compiledThemes,
     assetPaths,
   };
 }

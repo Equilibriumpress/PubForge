@@ -1,6 +1,7 @@
 import type { LoadedProject } from '../lib/load-project';
 import {
   compilePublication,
+  findChapterByResolvedPath,
   rewriteCssReferences,
   rewriteHtmlReferences,
 } from '../engine/compile';
@@ -21,9 +22,13 @@ function escapeHtml(value: string): string {
     .replace(/"/g, '&quot;');
 }
 
-function createObjectUrls(project: LoadedProject): Map<string, string> {
+function createObjectUrls(
+  project: LoadedProject,
+  paths: readonly string[],
+): Map<string, string> {
   const urls = new Map<string, string>();
-  for (const [path, data] of project.workspace.entries()) {
+  for (const path of paths) {
+    const data = project.workspace.read(path);
     urls.set(
       path,
       URL.createObjectURL(
@@ -42,14 +47,7 @@ export interface PublicationDocument {
 
 export function buildPublicationDocument(project: LoadedProject): PublicationDocument {
   const compiled = compilePublication(project);
-  const objectUrls = createObjectUrls(project);
-  const chapterTargets = new Map(
-    compiled.chapters.map((chapter) => [
-      chapter.sourcePath,
-      `#pubforge-chapter-${chapter.index + 1}`,
-    ]),
-  );
-
+  const objectUrls = createObjectUrls(project, compiled.assetPaths);
   const profileCss = buildPdfProfileCss(project.manifest);
   const css = compiled.themePaths
     .map((path) =>
@@ -82,10 +80,12 @@ export function buildPublicationDocument(project: LoadedProject): PublicationDoc
       const body = rewriteHtmlReferences(
         chapter.html,
         chapter.sourcePath,
-        (resolved) =>
-          chapterTargets.get(resolved) ??
-          objectUrls.get(resolved) ??
-          null,
+        (resolved) => {
+          const target = findChapterByResolvedPath(compiled, resolved);
+          return target
+            ? `#pubforge-chapter-${target.index + 1}`
+            : objectUrls.get(resolved) ?? null;
+        },
       );
       const breakBefore = chapter.breakBefore
         ? ` style="break-before:${chapter.breakBefore}"`
