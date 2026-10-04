@@ -50,6 +50,23 @@ interface CreateCommitResponse {
   sha: string;
 }
 
+interface HistoryCommitResponse {
+  sha: string;
+  commit: {
+    message: string;
+    author: { name: string; date: string } | null;
+    committer: { name: string; date: string } | null;
+  };
+  author?: { login: string } | null;
+}
+
+export interface GitHubHistoryEntry {
+  sha: string;
+  message: string;
+  author: string;
+  date: string;
+}
+
 export interface CommitChangesOptions {
   token: string;
   message: string;
@@ -208,6 +225,32 @@ export class GitHubStorageProvider implements StorageProvider {
 
   stat(path: string): FileMeta | null {
     return this.fileIndex.get(path) ?? null;
+  }
+
+  async listHistory(limit = 30): Promise<GitHubHistoryEntry[]> {
+    const snapshot = this.requireSnapshot();
+    const apiRoot = `https://api.github.com/repos/${snapshot.repository}`;
+    const safeLimit = Math.max(1, Math.min(100, Math.floor(limit)));
+    const commits = await githubRequest<HistoryCommitResponse[]>(
+      `${apiRoot}/commits?sha=${encodeURIComponent(snapshot.ref)}&per_page=${safeLimit}`,
+    );
+
+    return commits.map((entry) => {
+      const firstLine = entry.commit.message.split('\n')[0].trim();
+      return {
+        sha: entry.sha,
+        message: firstLine || 'Untitled commit',
+        author:
+          entry.author?.login ??
+          entry.commit.author?.name ??
+          entry.commit.committer?.name ??
+          'Unknown',
+        date:
+          entry.commit.author?.date ??
+          entry.commit.committer?.date ??
+          new Date(0).toISOString(),
+      };
+    });
   }
 
   async commitChanges(options: CommitChangesOptions): Promise<string> {

@@ -6,12 +6,20 @@ import { contentPath } from '../types/publication';
 import { CommitPanel } from './CommitPanel';
 import { ExportPanel } from './ExportPanel';
 import { FileExplorer } from './FileExplorer';
+import { HistoryPanel } from './HistoryPanel';
 import { MetadataPanel } from './MetadataPanel';
 import { PublicationPreview } from './PublicationPreview';
 import { SourceEditor } from './SourceEditor';
 import { ThemePanel } from './ThemePanel';
 
-type StudioTab = 'preview' | 'source' | 'metadata' | 'theme' | 'export' | 'commit';
+type StudioTab =
+  | 'preview'
+  | 'source'
+  | 'metadata'
+  | 'theme'
+  | 'export'
+  | 'history'
+  | 'commit';
 
 const TEXT_EXTENSIONS = new Set([
   'css', 'csv', 'html', 'htm', 'js', 'json', 'md', 'markdown', 'svg',
@@ -26,9 +34,10 @@ function isTextFile(path: string): boolean {
 interface StudioProps {
   project: LoadedProject;
   onReload(): Promise<void> | void;
+  onOpenCommit(sha: string): Promise<void> | void;
 }
 
-export function Studio({ project, onReload }: StudioProps) {
+export function Studio({ project, onReload, onOpenCommit }: StudioProps) {
   const firstContent = contentPath(project.manifest.content[0]);
   const [tab, setTab] = useState<StudioTab>('preview');
   const [selectedFile, setSelectedFile] = useState(firstContent);
@@ -76,6 +85,7 @@ export function Studio({ project, onReload }: StudioProps) {
     'metadata',
     'theme',
     'export',
+    'history',
     'commit',
   ];
 
@@ -146,6 +156,9 @@ export function Studio({ project, onReload }: StudioProps) {
             />
           ) : null}
           {tab === 'export' ? <ExportPanel project={project} /> : null}
+          {tab === 'history' ? (
+            <HistoryPanel project={project} onOpenCommit={onOpenCommit} />
+          ) : null}
           {tab === 'commit' ? (
             <CommitPanel
               key={revision}

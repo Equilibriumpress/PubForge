@@ -79,6 +79,9 @@ export function App() {
           onReload={() =>
             openProject(`${project.snapshot.repository}@${project.snapshot.ref}`)
           }
+          onOpenCommit={(sha) =>
+            openProject(`${project.snapshot.repository}@${sha}`)
+          }
         />
       ) : (
         <>
