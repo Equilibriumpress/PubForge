@@ -80,9 +80,12 @@ export function rewriteHtmlReferences(
 
       const mapped = mapReference(resolved, value);
       if (mapped) {
+        const mappedContainsFragment = mapped.startsWith('#') || mapped.includes('#');
         element.setAttribute(
           attribute,
-          hash && attribute === 'href' ? `${mapped}#${hash}` : mapped,
+          hash && attribute === 'href' && !mappedContainsFragment
+            ? `${mapped}#${hash}`
+            : mapped,
         );
       }
     }
