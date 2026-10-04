@@ -43,6 +43,7 @@ function chapterXhtml(
 
   const themePaths = [
     ...chapter.themePaths,
+    ...project.resolvedThemes.epub,
     ...(project.manifest.epub?.theme ? [project.manifest.epub.theme] : []),
   ].filter((path, index, values) => values.indexOf(path) === index);
 
