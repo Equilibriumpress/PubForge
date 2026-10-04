@@ -4,6 +4,11 @@ import { OpfsProjectCache } from './opfs';
 const MAX_PROJECT_BYTES = 100 * 1024 * 1024;
 const CONCURRENCY = 6;
 
+export interface WorkspaceChangeSet {
+  writes: Array<{ path: string; data: Uint8Array }>;
+  deletes: string[];
+}
+
 async function mapConcurrent<T>(
   items: readonly T[],
   worker: (item: T) => Promise<void>,
@@ -117,6 +122,22 @@ export class ProjectWorkspace {
         return !equalBytes(original, current);
       })
       .sort();
+  }
+
+  changeSet(): WorkspaceChangeSet {
+    const writes: WorkspaceChangeSet['writes'] = [];
+    const deletes: string[] = [];
+
+    for (const path of this.changedPaths()) {
+      const current = this.files.get(path);
+      if (current) {
+        writes.push({ path, data: cloneBytes(current) });
+      } else {
+        deletes.push(path);
+      }
+    }
+
+    return { writes, deletes };
   }
 
   list(prefix = ''): string[] {

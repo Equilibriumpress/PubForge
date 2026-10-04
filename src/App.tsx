@@ -15,6 +15,7 @@ export function App() {
   const [loading, setLoading] = useState(false);
 
   async function openProject(input = repository) {
+    setRepository(input);
     setLoading(true);
     setProject(null);
     setStatus('Reading repository…');
@@ -72,7 +73,13 @@ export function App() {
       </section>
 
       {project ? (
-        <Studio key={project.snapshot.commitSha} project={project} />
+        <Studio
+          key={project.snapshot.commitSha}
+          project={project}
+          onReload={() =>
+            openProject(`${project.snapshot.repository}@${project.snapshot.ref}`)
+          }
+        />
       ) : (
         <>
           <section className="grid">
