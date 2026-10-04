@@ -248,7 +248,9 @@ export function compilePublication(project: LoadedProject): CompiledPublication 
   ]);
 
   const chapters = project.manifest.readingOrder.map((entry, index) => {
-    const markdown = project.workspace.text(entry.path);
+    const markdown =
+      project.preparedAssets.content.get(entry.path) ??
+      project.workspace.text(entry.path);
     const html = ensureHeadingIds(stringify(markdown, vfmOptions(project.manifest)));
     const role = entry.role ?? 'chapter';
     const title = entry.title ?? chapterTitle(html, `Chapter ${index + 1}`);
