@@ -1,29 +1,45 @@
 version: 2
 publication:
-  title: Manual
-  subtitle: PubForge starter project
+  title: Operations Manual Showcase
+  subtitle: Procedures, warnings, code and decision paths
   authors:
-    - Your Name
+    - Equilibrium Press
   language: en
   type: manual
-  description: Structured documentation and procedural manual starter.
+  description: Structured technical manual layout fixture.
 
 contents:
   toc: true
+  tocTitle: Manual contents
+  sectionDepth: 3
   landmarks: true
 
 readingOrder:
+  - path: content/00-cover.md
+    role: title-page
+    title: Cover
   - path: content/01-start.md
     role: chapter
-    title: Getting started
+    title: Getting Started
   - path: content/02-main.md
     role: chapter
-    title: Procedures
+    title: Operating Procedure
     breakBefore: page
 
 theme:
   preset: manual
   css: theme/publication.css
+
+assets:
+  editorialImages:
+    workflow:
+      src: assets/workflow.svg
+      alt: Four-step workflow from prepare to verify
+      caption: Standard operating flow
+      credit: PubForge
+      fit: contain
+      span: page
+      printWidthMm: 160
 
 vfm:
   math: true
@@ -40,7 +56,7 @@ pdf:
 
 epub:
   enabled: true
-  reflowable: true
+  layout: reflowable
   embeddedFonts: true
 
 webpub:
