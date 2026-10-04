@@ -1,6 +1,11 @@
 name: Publication production QA
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/publication-qa.yml
+      - scripts/qa-publication.mjs
   workflow_dispatch:
     inputs:
       repository:
