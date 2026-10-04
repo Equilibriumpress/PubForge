@@ -32,11 +32,16 @@ export function manifestDirectory(manifestPath: string): string {
 }
 
 function normalizePath(path: string): string {
-  const normalized = new URL(
-    path.replace(/^\/+/, ''),
-    'https://pubforge.local/',
-  ).pathname;
-  return decodeURIComponent(normalized.replace(/^\//, ''));
+  const parts: string[] = [];
+  for (const part of path.replace(/^\/+/, '').split('/')) {
+    if (!part || part === '.') continue;
+    if (part === '..') {
+      parts.pop();
+      continue;
+    }
+    parts.push(part);
+  }
+  return parts.join('/');
 }
 
 export function resolveManifestPath(
