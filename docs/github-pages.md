@@ -4,16 +4,26 @@ PubForge supports GitHub Pages and Vercel as static application hosts. Publicati
 
 ## GitHub Pages
 
-The default Pages workflow is `.github/workflows/pages.yml`.
+The default workflow is `.github/workflows/pages.yml`.
 
 It:
 
 1. installs the app dependencies
 2. builds the Vite application
-3. uploads only `dist/`
-4. deploys the static artifact to GitHub Pages
+3. writes only the prebuilt `dist/` output to the `gh-pages` branch
 
-The workflow requests Pages enablement through `actions/configure-pages@v5`. Repository or organization policy may still require a one-time Pages setting change.
+This avoids requiring the workflow token to create or administer the Pages site itself.
+
+For a new repository, select the branch once in GitHub:
+
+```text
+Settings → Pages
+Build and deployment → Deploy from a branch
+Branch → gh-pages
+Folder → /(root)
+```
+
+After that, new commits to `main` refresh the prebuilt `gh-pages` branch automatically.
 
 ## Cross-origin isolation
 
@@ -33,20 +43,12 @@ This keeps the Pages variant ready for browser/WASM workloads while Vercel conti
 
 ## No-Actions publishing
 
-If you prefer branch-based Pages and want no GitHub Actions build, run:
+To publish the same prebuilt branch from your own machine instead of GitHub Actions, run:
 
 ```bash
 bash scripts/publish_prebuilt_pages.sh
 ```
 
-The script builds PubForge locally, writes only `dist/` to the `gh-pages` branch and pushes that branch.
-
-Then configure Pages as:
-
-```text
-Deploy from a branch
-gh-pages
-/(root)
-```
+The script builds PubForge locally, writes only `dist/` to the `gh-pages` branch and pushes it.
 
 This build is independent from publication rendering. Opening and exporting a publication still happens in the user's browser.
