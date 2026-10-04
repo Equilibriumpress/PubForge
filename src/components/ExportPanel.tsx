@@ -1,8 +1,9 @@
-import type { LoadedProject } from '../lib/load-project';
+import type { PdfEdition } from '../engine/output-profile';
+import { resolvePdfProfile } from '../engine/output-profile';
 import { exportEpub } from '../export/epub';
 import { exportProjectZip } from '../export/project-zip';
 import { exportWebPublication } from '../export/webpub';
-import { resolvePdfProfile } from '../engine/output-profile';
+import type { LoadedProject } from '../lib/load-project';
 
 interface ExportPanelProps {
   project: LoadedProject;
@@ -10,25 +11,38 @@ interface ExportPanelProps {
 
 export function ExportPanel({ project }: ExportPanelProps) {
   const pdfProfile = resolvePdfProfile(project.manifest);
-  function printPublication() {
+  const editions: PdfEdition[] =
+    project.manifest.pdf?.editions?.length
+      ? project.manifest.pdf.editions
+      : ['normal'];
+
+  function printPublication(edition: PdfEdition) {
     const url = new URL(window.location.href);
     url.searchParams.set(
       'repo',
       `${project.snapshot.repository}@${project.snapshot.commitSha}`,
     );
     url.searchParams.set('print', '1');
+    url.searchParams.set('edition', edition);
     window.open(url, '_blank', 'noopener');
   }
 
+  const pdfOutputs = editions.map((edition) => ({
+    id: `pdf-${edition}`,
+    enabled: project.manifest.pdf?.enabled !== false,
+    title: `PDF · ${edition}`,
+    detail:
+      edition === 'print'
+        ? 'Print-theme variant using the same Vivliostyle pagination.'
+        : edition === 'high-quality'
+          ? 'High-quality theme variant; final raster/PDF quality still depends on the PDF producer.'
+          : 'Default Vivliostyle paginated browser PDF variant.',
+    action: () => printPublication(edition),
+    label: `Open ${edition} PDF`,
+  }));
+
   const outputs = [
-    {
-      id: 'pdf',
-      enabled: project.manifest.pdf?.enabled !== false,
-      title: 'PDF',
-      detail: 'Vivliostyle paginated print view using the PDF profile.',
-      action: printPublication,
-      label: 'Open PDF print view',
-    },
+    ...pdfOutputs,
     {
       id: 'epub',
       enabled: project.manifest.epub?.enabled !== false,
@@ -49,7 +63,7 @@ export function ExportPanel({ project }: ExportPanelProps) {
       id: 'project',
       enabled: project.manifest.projectZip?.enabled !== false,
       title: 'Source snapshot',
-      detail: 'Exact committed project snapshot for archival and reproduction.',
+      detail: 'Exact committed Git project snapshot; derived browser assets are excluded.',
       action: () => exportProjectZip(project),
       label: 'Project ZIP',
     },
@@ -73,6 +87,9 @@ export function ExportPanel({ project }: ExportPanelProps) {
           <div><dt>Crop marks</dt><dd>{pdfProfile.cropMarks ? 'yes' : 'no'}</dd></div>
           <div><dt>Crop offset</dt><dd>{pdfProfile.cropOffset}</dd></div>
           <div><dt>Bookmarks</dt><dd>{pdfProfile.bookmarks ? 'requested' : 'no'}</dd></div>
+          <div><dt>Mermaid</dt><dd>{project.preparedAssets.mermaidDiagrams}</dd></div>
+          <div><dt>Highlighted code</dt><dd>{project.preparedAssets.highlightedBlocks}</dd></div>
+          <div><dt>Optimized images</dt><dd>{project.preparedAssets.optimizedImages}</dd></div>
         </dl>
         {pdfProfile.profile === 'press' ? (
           <p className="pressNote">
