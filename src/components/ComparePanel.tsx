@@ -377,7 +377,7 @@ export function ComparePanel({ project }: ComparePanelProps) {
                   renderAllPages
                   onLoad={(state) => setCurrentPages(state.epageCount)}
                   onNavigation={(state) => {
-                    if (state.epage > 0) setPage(Math.max(1, state.epage));
+                    if (state.epage >= 0) setPage(state.epage + 1);
                   }}
                 />
               </div>
@@ -401,7 +401,7 @@ export function ComparePanel({ project }: ComparePanelProps) {
                   renderAllPages
                   onLoad={(state) => setPreviousPages(state.epageCount)}
                   onNavigation={(state) => {
-                    if (state.epage > 0) setPage(Math.max(1, state.epage));
+                    if (state.epage >= 0) setPage(state.epage + 1);
                   }}
                 />
               </div>
