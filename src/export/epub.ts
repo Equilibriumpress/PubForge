@@ -1,68 +1,81 @@
 import { strToU8, zipSync, type Zippable } from 'fflate';
-import { stringify } from '@vivliostyle/vfm';
 
+import {
+  compilePublication,
+  publicationIdentifier,
+  rewriteHtmlReferences,
+  roleToEpubType,
+} from '../engine/compile';
 import type { LoadedProject } from '../lib/load-project';
-import { contentPath } from '../types/publication';
 import { downloadBytes, mediaType, slugify, xmlEscape } from './utils';
 
-function resolveProjectPath(fromFile: string, reference: string): string | null {
-  if (
-    !reference ||
-    reference.startsWith('#') ||
-    /^[a-z][a-z0-9+.-]*:/i.test(reference) ||
-    reference.startsWith('//')
-  ) return null;
-
-  const base = new URL(`https://pubforge.local/${fromFile}`);
-  return decodeURIComponent(
-    new URL(reference, base).pathname.replace(/^\//, ''),
-  );
-}
-
-function toXhtml(
-  fragment: string,
-  sourcePath: string,
-  title: string,
-  language: string,
-  cssPath: string,
-): string {
-  const htmlDocument = window.document.implementation.createHTMLDocument('');
-  htmlDocument.body.innerHTML = fragment;
-
-  for (const element of htmlDocument.body.querySelectorAll<HTMLElement>('[src], [poster]')) {
-    for (const attribute of ['src', 'poster']) {
-      const value = element.getAttribute(attribute);
-      if (!value) continue;
-      const resolved = resolveProjectPath(sourcePath, value);
-      if (resolved) element.setAttribute(attribute, `../${resolved}`);
-    }
-  }
-
+function xhtmlBody(fragment: string): string {
+  const document = window.document.implementation.createHTMLDocument('');
+  document.body.innerHTML = fragment;
   const serializer = new XMLSerializer();
-  const body = [...htmlDocument.body.childNodes]
+  return [...document.body.childNodes]
     .map((node) => serializer.serializeToString(node))
     .join('');
-
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="${xmlEscape(language)}" xml:lang="${xmlEscape(language)}">
-<head>
-<title>${xmlEscape(title)}</title>
-<link rel="stylesheet" type="text/css" href="../${xmlEscape(cssPath)}"/>
-</head>
-<body>${body}</body>
-</html>`;
 }
 
 function safeId(path: string, index: number): string {
-  return `res-${index}-${path.replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-|-$/g, '')}`;
+  return `res-${index}-${path
+    .replace(/[^a-zA-Z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')}`;
 }
 
-function chapterTitle(fragment: string, fallback: string): string {
-  const document = new DOMParser().parseFromString(fragment, 'text/html');
-  return document.querySelector('h1, h2')?.textContent?.trim() || fallback;
+function chapterXhtml(
+  project: LoadedProject,
+  chapter: ReturnType<typeof compilePublication>['chapters'][number],
+  chapterMap: Map<string, string>,
+): string {
+  const html = rewriteHtmlReferences(
+    chapter.html,
+    chapter.sourcePath,
+    (resolved) => {
+      const chapterTarget = chapterMap.get(resolved);
+      if (chapterTarget) return chapterTarget.replace(/^text\//, '');
+      if (project.workspace.has(resolved)) return `../${resolved}`;
+      return null;
+    },
+  );
+
+  const styles = chapter.themePaths
+    .map(
+      (path) =>
+        `<link rel="stylesheet" type="text/css" href="../${xmlEscape(path)}"/>`,
+    )
+    .join('\n');
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" lang="${xmlEscape(project.manifest.publication.language)}" xml:lang="${xmlEscape(project.manifest.publication.language)}">
+<head>
+<title>${xmlEscape(chapter.title)}</title>
+${styles}
+</head>
+<body epub:type="${roleToEpubType(chapter.role)}">
+<section epub:type="${roleToEpubType(chapter.role)}">
+${xhtmlBody(html)}
+</section>
+</body>
+</html>`;
+}
+
+function coverXhtml(project: LoadedProject, imagePath: string): string {
+  const alt = project.manifest.cover?.alt ?? project.manifest.publication.title;
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" lang="${xmlEscape(project.manifest.publication.language)}">
+<head><title>Cover</title></head>
+<body epub:type="cover">
+<section epub:type="cover">
+<img src="../${xmlEscape(imagePath)}" alt="${xmlEscape(alt)}"/>
+</section>
+</body>
+</html>`;
 }
 
 export function exportEpub(project: LoadedProject): void {
+  const compiled = compilePublication(project);
   const files: Zippable = {
     mimetype: [strToU8('application/epub+zip'), { level: 0 }],
   };
@@ -74,94 +87,122 @@ export function exportEpub(project: LoadedProject): void {
   </rootfiles>
 </container>`);
 
-  const chapterItems: string[] = [];
+  const chapterMap = new Map(
+    compiled.chapters.map((chapter) => [chapter.sourcePath, chapter.outputPath]),
+  );
+  const manifestItems: string[] = [];
   const spineItems: string[] = [];
-  const navItems: string[] = [];
+  const tocItems: string[] = [];
 
-  project.manifest.content.forEach((entry, index) => {
-    const sourcePath = contentPath(entry);
-    const chapterId = `chapter-${index + 1}`;
-    const chapterPath = `text/${chapterId}.xhtml`;
-    const fragment = stringify(project.workspace.text(sourcePath), {
-      partial: true,
-      math: false,
-      disableFormatHtml: true,
-    });
-    const fallback = `Chapter ${index + 1}`;
-    const displayTitle =
-      typeof entry === 'string'
-        ? chapterTitle(fragment, fallback)
-        : entry.title ?? chapterTitle(fragment, fallback);
+  const coverImage =
+    project.manifest.cover?.image &&
+    project.workspace.has(project.manifest.cover.image)
+      ? project.manifest.cover.image
+      : null;
 
-    files[`EPUB/${chapterPath}`] = strToU8(
-      toXhtml(
-        fragment,
-        sourcePath,
-        displayTitle,
-        project.manifest.language,
-        project.manifest.theme.css,
-      ),
+  if (coverImage) {
+    files['EPUB/text/cover.xhtml'] = strToU8(coverXhtml(project, coverImage));
+    manifestItems.push(
+      '<item id="cover-page" href="text/cover.xhtml" media-type="application/xhtml+xml"/>',
     );
-    chapterItems.push(
-      `<item id="${chapterId}" href="${chapterPath}" media-type="application/xhtml+xml"/>`,
+    spineItems.push('<itemref idref="cover-page" linear="yes"/>');
+  }
+
+  for (const chapter of compiled.chapters) {
+    const id = `chapter-${chapter.index + 1}`;
+    const xhtml = chapterXhtml(project, chapter, chapterMap);
+    files[`EPUB/${chapter.outputPath}`] = strToU8(xhtml);
+
+    const properties = xhtml.includes('<math') ? ' properties="mathml"' : '';
+    manifestItems.push(
+      `<item id="${id}" href="${chapter.outputPath}" media-type="application/xhtml+xml"${properties}/>`,
     );
-    spineItems.push(`<itemref idref="${chapterId}"/>`);
-    navItems.push(
-      `<li><a href="${chapterPath}">${xmlEscape(displayTitle)}</a></li>`,
+    spineItems.push(`<itemref idref="${id}"/>`);
+    tocItems.push(
+      `<li><a href="${chapter.outputPath}">${xmlEscape(chapter.title)}</a></li>`,
     );
-  });
+  }
 
   const excluded = new Set([
     'publication.yml',
-    ...project.manifest.content.map(contentPath),
+    ...compiled.chapters.map((chapter) => chapter.sourcePath),
   ]);
-  const resourceItems: string[] = [];
   let resourceIndex = 0;
 
   for (const [path, bytes] of project.workspace.entries()) {
     if (excluded.has(path)) continue;
     files[`EPUB/${path}`] = bytes;
-    resourceItems.push(
-      `<item id="${safeId(path, resourceIndex++)}" href="${xmlEscape(path)}" media-type="${mediaType(path)}"/>`,
+
+    const properties =
+      coverImage === path
+        ? ' properties="cover-image"'
+        : '';
+    manifestItems.push(
+      `<item id="${safeId(path, resourceIndex++)}" href="${xmlEscape(path)}" media-type="${mediaType(path)}"${properties}/>`,
     );
   }
 
-  const identifier = `urn:pubforge:${project.snapshot.repository}:${project.snapshot.commitSha}`;
-  const authors = project.manifest.author
-    ? (Array.isArray(project.manifest.author)
-        ? project.manifest.author
-        : [project.manifest.author]
-      )
-        .map((author) => `<dc:creator>${xmlEscape(author)}</dc:creator>`)
-        .join('\n')
-    : '';
+  const landmarks: string[] = [];
+  if (coverImage) {
+    landmarks.push(
+      '<li><a epub:type="cover" href="text/cover.xhtml">Cover</a></li>',
+    );
+  }
+  const firstBody = compiled.chapters.find((chapter) => chapter.role === 'chapter');
+  if (firstBody) {
+    landmarks.push(
+      `<li><a epub:type="bodymatter" href="${firstBody.outputPath}">Start of content</a></li>`,
+    );
+  }
+
+  const tocNav =
+    project.manifest.contents?.toc === false
+      ? ''
+      : `<nav epub:type="toc" id="toc"><h1>Contents</h1><ol>${tocItems.join('')}</ol></nav>`;
+  const landmarksNav =
+    project.manifest.contents?.landmarks === false || landmarks.length === 0
+      ? ''
+      : `<nav epub:type="landmarks" hidden="hidden"><h2>Landmarks</h2><ol>${landmarks.join('')}</ol></nav>`;
 
   files['EPUB/nav.xhtml'] = strToU8(`<?xml version="1.0" encoding="UTF-8"?>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" lang="${xmlEscape(project.manifest.language)}">
-<head><title>Contents</title></head>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" lang="${xmlEscape(project.manifest.publication.language)}">
+<head><title>Navigation</title></head>
 <body>
-<nav epub:type="toc" id="toc">
-<h1>Contents</h1>
-<ol>${navItems.join('')}</ol>
-</nav>
+${tocNav}
+${landmarksNav}
 </body>
 </html>`);
+  manifestItems.unshift(
+    '<item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>',
+  );
+
+  const metadata = project.manifest.publication;
+  const creators = (metadata.authors ?? [])
+    .map((author) => `<dc:creator>${xmlEscape(author)}</dc:creator>`)
+    .join('\n');
+  const subjects = (metadata.subjects ?? [])
+    .map((subject) => `<dc:subject>${xmlEscape(subject)}</dc:subject>`)
+    .join('\n');
 
   files['EPUB/package.opf'] = strToU8(`<?xml version="1.0" encoding="UTF-8"?>
-<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="pub-id">
+<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="pub-id" prefix="dcterms: http://purl.org/dc/terms/">
 <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
-<dc:identifier id="pub-id">${xmlEscape(identifier)}</dc:identifier>
-<dc:title>${xmlEscape(project.manifest.title)}</dc:title>
-<dc:language>${xmlEscape(project.manifest.language)}</dc:language>
-${authors}
+<dc:identifier id="pub-id">${xmlEscape(publicationIdentifier(project))}</dc:identifier>
+<dc:title>${xmlEscape(metadata.title)}</dc:title>
+${metadata.subtitle ? `<meta property="title-type" refines="#subtitle">subtitle</meta><dc:title id="subtitle">${xmlEscape(metadata.subtitle)}</dc:title>` : ''}
+<dc:language>${xmlEscape(metadata.language)}</dc:language>
+${creators}
+${metadata.publisher ? `<dc:publisher>${xmlEscape(metadata.publisher)}</dc:publisher>` : ''}
+${metadata.description ? `<dc:description>${xmlEscape(metadata.description)}</dc:description>` : ''}
+${subjects}
+${metadata.rights ? `<dc:rights>${xmlEscape(metadata.rights)}</dc:rights>` : ''}
+${metadata.date ? `<dc:date>${xmlEscape(metadata.date)}</dc:date>` : ''}
 <meta property="dcterms:modified">${new Date().toISOString().replace(/\.\d{3}Z$/, 'Z')}</meta>
 </metadata>
 <manifest>
-<item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>
-${chapterItems.join('\n')}
-${resourceItems.join('\n')}
+${manifestItems.join('\n')}
 </manifest>
-<spine>
+<spine page-progression-direction="${project.manifest.pdf?.binding === 'right' ? 'rtl' : 'ltr'}">
 ${spineItems.join('\n')}
 </spine>
 </package>`);
@@ -169,7 +210,7 @@ ${spineItems.join('\n')}
   const archive = zipSync(files, { level: 6 });
   downloadBytes(
     archive,
-    `${slugify(project.manifest.title)}.epub`,
+    `${slugify(metadata.title)}.epub`,
     'application/epub+zip',
   );
 }
