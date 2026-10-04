@@ -182,8 +182,7 @@ epub:
   orientation: portrait
   spread: auto
   theme: examples/magazine-showcase/theme/epub.css
-  themePackages:
-    - "@vivliostyle/theme-base@3.0.0"
+  fixedTheme: examples/magazine-showcase/theme/fixed-epub.css
   embeddedFonts: true
 
 webpub:
