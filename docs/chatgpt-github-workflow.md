@@ -1,6 +1,6 @@
 # ChatGPT + GitHub workflow
 
-PubForge is designed so an AI agent can manage a publication without a PubForge-specific API.
+PubForge is designed so ChatGPT can manage a publication through ordinary GitHub source files. PubForge itself is deliberately read-only.
 
 ## Control path
 
@@ -9,28 +9,32 @@ User request
   ↓
 ChatGPT
   ↓
-GitHub source files
+GitHub source files + commit
   ↓
-PubForge browser workspace
+PubForge reads pinned commit
   ↓
-Vivliostyle preview and exports
+Preview → Preflight → Output
 ```
 
-The browser application does not need an AI provider. ChatGPT changes the same Git repository that PubForge opens.
+The browser application does not need an AI provider or editorial UI.
 
 ## Common operations
 
 ### Create a publication
 
-Start from one of the starter projects under `public/templates/`, then set metadata and replace the sample content.
+Start from one of the starter projects under `public/templates/`, update manifest v2 metadata and replace the sample reading order/content.
 
 ### Add content
 
-Create the new source file and add its path to the ordered `content` list in `publication.yml`.
+Create the source file and add it to `readingOrder` in `publication.yml`.
 
 ### Change print design
 
-Edit the stylesheet declared by `theme.css`. Page size, margins, running content, breaks and typography should stay in CSS.
+Use the `pdf` block for output profile intent such as size, binding, bleed and crop marks. Use the declared theme CSS for margins, running content, page selectors, typography and complex paged-media rules.
+
+### Configure EPUB
+
+Use the `epub` and `vfm` blocks for reflowable output, EPUB-specific theme, embedded-font intent, MathML and semantic footnotes. Add cover metadata and a cover asset when appropriate.
 
 ### Add data or media
 
@@ -38,12 +42,10 @@ Store reusable source data in `data/`. Store images, diagrams and fonts in `asse
 
 ### Reorganize a publication
 
-Change the order in `publication.yml` instead of renaming every file unless filenames themselves are misleading.
+Change `readingOrder` instead of renaming every file unless filenames themselves are misleading.
 
 ## Commit discipline
 
-A publication change should usually be one coherent commit or pull request. Keep generated output out of source commits unless the output itself is the requested release artifact.
+A publication change should usually be one coherent commit or pull request. PubForge previews and exports exactly that committed snapshot.
 
-## Browser edits
-
-Local Studio edits are drafts until they are written back to GitHub. The commit SHA shown by PubForge identifies the remote source snapshot from which the workspace started.
+Generated output stays outside source commits unless the output itself is the requested release artifact.
