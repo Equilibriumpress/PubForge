@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 2133" role="img" aria-labelledby="t">
+<title id="t">Cliffs in Atlantic weather</title>
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#aec1c0"/><stop offset=".6" stop-color="#667c76"/><stop offset="1" stop-color="#223437"/></linearGradient></defs>
+<rect width="1600" height="2133" fill="url(#g)"/><path d="M0 720L420 510 690 810 950 430 1280 680 1600 520V2133H0Z" fill="#384d47"/>
+<path d="M0 1380C410 1250 630 1480 980 1310s480-120 620-80V2133H0Z" fill="#17303a"/>
+<path d="M260 850L510 760 610 1620 370 1720Z" fill="#a3ae91" opacity=".7"/>
+</svg>
