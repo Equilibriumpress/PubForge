@@ -14,9 +14,6 @@ The active profile uses A5 trim, 3 mm bleed and crop marks. In browser PDF this 
 
 Title, copyright and colophon sections receive named page rules from their semantic roles. The appendix receives an extra scoped theme through its reading-order entry.
 
-<figure>
-  <img src="../assets/page-anatomy.svg" alt="Diagram of an A5 page with trim, bleed, inner and outer margins, running header and folio." />
-  <figcaption>Figure 3. Page anatomy used by the showcase print theme.</figcaption>
-</figure>
+{{image:page-anatomy}}
 
 A renderer that preserves these distinctions can make a book feel intentional rather than merely printed from a web page.

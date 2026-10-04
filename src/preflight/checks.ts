@@ -216,7 +216,13 @@ export function runPreflight(project: LoadedProject): PreflightReport {
     }
 
     for (const image of Array.from(document.querySelectorAll('img'))) {
-      if (!image.hasAttribute('alt') || !image.getAttribute('alt')?.trim()) {
+      const decorative =
+        image.getAttribute('role') === 'presentation' ||
+        image.getAttribute('aria-hidden') === 'true';
+      if (
+        !decorative &&
+        (!image.hasAttribute('alt') || !image.getAttribute('alt')?.trim())
+      ) {
         add(
           issues,
           'warning',
@@ -292,6 +298,44 @@ export function runPreflight(project: LoadedProject): PreflightReport {
           path,
         );
       }
+    }
+  }
+
+  for (const metric of project.preparedAssets.editorialImages) {
+    const spec = project.manifest.assets?.editorialImages?.[metric.key];
+    if (!project.workspace.has(metric.path)) {
+      add(
+        issues,
+        'error',
+        'assets',
+        'editorial-image-missing',
+        `Editorial image "${metric.key}" references a missing source.`,
+        metric.path,
+      );
+      continue;
+    }
+    if (!metric.decorative && !spec?.alt?.trim()) {
+      add(
+        issues,
+        'warning',
+        'assets',
+        'editorial-image-alt',
+        `Editorial image "${metric.key}" has no alt text.`,
+        metric.path,
+      );
+    }
+    if (
+      metric.effectiveDpi !== undefined &&
+      metric.effectiveDpi < metric.targetDpi
+    ) {
+      add(
+        issues,
+        'warning',
+        'assets',
+        'editorial-image-dpi',
+        `Editorial image "${metric.key}" resolves to approximately ${Math.round(metric.effectiveDpi)} dpi at its declared print width; target is ${Math.round(metric.targetDpi)} dpi.`,
+        metric.path,
+      );
     }
   }
 

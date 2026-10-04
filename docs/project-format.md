@@ -152,3 +152,28 @@ Derived files live under `.pubforge/generated/` only in the renderer workspace. 
 - `outputIntent`: project-relative ICC profile path
 
 These settings are intentionally not executed by GitHub Pages. See `docs/press-ready.md`.
+
+
+## Editorial images
+
+For image-led publications, define reusable editorial images under `assets.editorialImages` and reference them in Markdown with `{{image:key}}`.
+
+```yaml
+assets:
+  imagePreflight:
+    targetDpi: 300
+  editorialImages:
+    opening-photo:
+      src: assets/opening.jpg
+      alt: Dawn over the Atlantic coast
+      caption: First light on the western shore
+      credit: Example Photographer
+      fit: cover
+      focalPoint: 62% 40%
+      bleed: full
+      span: spread
+      position: full-page
+      printWidthMm: 296
+```
+
+Supported image intent includes crop mode, focal point, full/page/spread placement, caption, credit, decorative images and explicit print width. Raster images receive an effective-DPI preflight when their pixel dimensions and print width can be resolved. Vector SVG artwork is treated as resolution independent.

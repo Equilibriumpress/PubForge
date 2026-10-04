@@ -92,6 +92,20 @@ assets:
   imageOptimization:
     maxDimension: 1800
     jpegQuality: 0.9
+  imagePreflight:
+    targetDpi: 300
+  editorialImages:
+    page-anatomy:
+      src: examples/showcase-book/assets/page-anatomy.svg
+      alt: Diagram of an A5 page showing bleed, trim, margins, running header and folio
+      caption: Page anatomy used by the print theme
+      credit: PubForge
+      fit: contain
+      focalPoint: 50% 50%
+      bleed: none
+      span: page
+      position: full-page
+      printWidthMm: 120
 
 vfm:
   math: true

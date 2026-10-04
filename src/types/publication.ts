@@ -20,6 +20,21 @@ export type ContentRole =
 
 export type PublicationOutput = 'print' | 'epub' | 'webpub' | 'project-zip';
 
+export interface EditorialImageSpec {
+  src: string;
+  alt?: string;
+  caption?: string;
+  credit?: string;
+  decorative?: boolean;
+  fit?: 'cover' | 'contain';
+  focalPoint?: string;
+  bleed?: 'none' | 'full' | 'left' | 'right';
+  span?: 'column' | 'page' | 'spread';
+  position?: 'inline' | 'float-left' | 'float-right' | 'full-page';
+  printWidthMm?: number;
+  targetDpi?: number;
+}
+
 export interface ContentEntry {
   path: string;
   title?: string;
@@ -74,6 +89,10 @@ export interface PublicationManifest {
     imageOptimization?: {
       maxDimension?: number;
       jpegQuality?: number;
+    };
+    editorialImages?: Record<string, EditorialImageSpec>;
+    imagePreflight?: {
+      targetDpi?: number;
     };
   };
   vfm?: {
