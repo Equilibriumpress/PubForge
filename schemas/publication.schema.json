@@ -364,6 +364,35 @@
             ]
           },
           "uniqueItems": true
+        },
+        "production": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "preflight": {
+              "type": "string",
+              "enum": [
+                "press-ready",
+                "press-ready-local"
+              ]
+            },
+            "preflightOptions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "uniqueItems": true
+            },
+            "cmyk": {
+              "type": "boolean"
+            },
+            "outputIntent": {
+              "type": "string"
+            }
+          }
         }
       }
     },

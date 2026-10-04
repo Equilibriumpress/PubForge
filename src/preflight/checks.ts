@@ -308,13 +308,34 @@ export function runPreflight(project: LoadedProject): PreflightReport {
 
   const pdf = resolvePdfProfile(project.manifest);
   if (pdf.profile === 'press') {
-    add(
-      issues,
-      'warning',
-      'pdf',
-      'press-pdfx',
-      'Press layout is configured, but browser export is not PDF/X and has no ICC output-intent conversion.',
-    );
+    const production = project.manifest.pdf?.production;
+    if (production?.enabled) {
+      add(
+        issues,
+        'info',
+        'pdf',
+        'press-production-enabled',
+        `Press-ready production is enabled via ${production.preflight ?? 'press-ready-local'}; browser PDF remains a preview while the production workflow creates the print artifact.`,
+      );
+      if (production.outputIntent && !project.workspace.has(production.outputIntent)) {
+        add(
+          issues,
+          'error',
+          'pdf',
+          'missing-output-intent',
+          'The configured ICC output-intent profile is missing from the project.',
+          production.outputIntent,
+        );
+      }
+    } else {
+      add(
+        issues,
+        'warning',
+        'pdf',
+        'press-pdfx',
+        'Press layout is configured, but no press-ready production pipeline is enabled.',
+      );
+    }
   }
   if (pdf.cropOffset !== 'auto') {
     add(
