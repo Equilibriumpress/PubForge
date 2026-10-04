@@ -1,20 +1,58 @@
-version: 1
-title: PubForge Example Publication
-subtitle: Git-native publishing in the browser
-author: Equilibrium Press
-language: en
-type: report
+version: 2
+publication:
+  title: PubForge Example Publication
+  subtitle: Git-native publishing in the browser
+  authors:
+    - Equilibrium Press
+  language: en
+  type: report
+  publisher: Equilibrium Press
+  description: Example rich publication rendered by PubForge.
+  subjects:
+    - publishing
+    - Vivliostyle
 
-content:
-  - examples/report/content/01-introduction.md
-  - examples/report/content/02-findings.md
+contents:
+  toc: true
+  landmarks: true
+  pageList: false
+
+readingOrder:
+  - path: examples/report/content/01-introduction.md
+    role: chapter
+    title: Introduction
+  - path: examples/report/content/02-findings.md
+    role: chapter
+    title: Findings
+    breakBefore: page
 
 theme:
   preset: report
   css: examples/report/theme/publication.css
 
-outputs:
-  - print
-  - epub
-  - webpub
-  - project-zip
+vfm:
+  math: true
+  mathRenderer: mathml
+  footnote: dpub
+  rewriteRelativeHrefExtensions: true
+  parseFigcaptionAsInline: true
+
+pdf:
+  enabled: true
+  profile: screen
+  size: A4
+  binding: left
+  bleed: 0mm
+  cropMarks: false
+  bookmarks: true
+
+epub:
+  enabled: true
+  reflowable: true
+  embeddedFonts: true
+
+webpub:
+  enabled: true
+
+projectZip:
+  enabled: true
