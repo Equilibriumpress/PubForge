@@ -280,7 +280,7 @@ export function runPreflight(project: LoadedProject): PreflightReport {
   }
 
   if (fixedRequested) {
-    if (!project.manifest.epub.viewport) {
+    if (!project.manifest.epub?.viewport) {
       add(
         issues,
         'warning',
