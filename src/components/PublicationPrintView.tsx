@@ -1,13 +1,22 @@
 import { useEffect, useMemo } from 'react';
 import { Renderer } from '@vivliostyle/react';
 
+import type { PdfEdition } from '../engine/output-profile';
 import type { LoadedProject } from '../lib/load-project';
 import { buildPublicationDocument } from '../render/build-html';
 
-export function PublicationPrintView({ project }: { project: LoadedProject }) {
+interface PublicationPrintViewProps {
+  project: LoadedProject;
+  edition?: PdfEdition;
+}
+
+export function PublicationPrintView({
+  project,
+  edition = 'normal',
+}: PublicationPrintViewProps) {
   const publication = useMemo(
-    () => buildPublicationDocument(project),
-    [project.snapshot.commitSha],
+    () => buildPublicationDocument(project, { edition }),
+    [project.snapshot.commitSha, edition],
   );
 
   useEffect(() => {
@@ -20,7 +29,7 @@ export function PublicationPrintView({ project }: { project: LoadedProject }) {
   }, [publication]);
 
   return (
-    <main className="printPublicationView">
+    <main className="printPublicationView" data-edition={edition}>
       <Renderer
         source={publication.url}
         renderAllPages
@@ -28,7 +37,7 @@ export function PublicationPrintView({ project }: { project: LoadedProject }) {
         fitToScreen={false}
         background="#ffffff"
         onLoad={() => {
-          document.title = project.manifest.publication.title;
+          document.title = `${project.manifest.publication.title} · ${edition}`;
           window.setTimeout(() => window.print(), 250);
         }}
       />
