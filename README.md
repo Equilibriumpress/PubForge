@@ -77,6 +77,12 @@ Only `publication.yml` is mandatory. See `docs/project-format.md`, `docs/project
 
 For release candidates, the optional `Publication production QA` GitHub workflow generates real browser artifacts and validates them with EPUBCheck, qpdf, Poppler, page-rendering and edition-parity checks. See `docs/production-qa.md`.
 
+## Dual EPUB editions
+
+Magazine and illustrated projects can export both a reflowable reading edition and a fixed-layout EPUB 3 edition from the same source. Optional Apple Books, Kindle and Kobo QA profiles add distribution-specific metadata and checks without forking the manuscript.
+
+See `docs/fixed-layout-epub.md` and `docs/epub-vendor-profiles.md`.
+
 ## Press-ready production
 
 For commercial print jobs, the optional **Press-ready publication** workflow uses the official Vivliostyle CLI to create a heavyweight production PDF with press-ready/PDF-X post-processing, optional font outlining, CMYK handling and an optional ICC output intent. The browser renderer remains the default.

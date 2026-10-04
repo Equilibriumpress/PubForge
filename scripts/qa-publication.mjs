@@ -54,20 +54,38 @@ await page.goto(publicationUrl.href, {
 });
 await waitForRenderer(page);
 await page.getByRole('button', { name: 'Output' }).click();
-await page.getByRole('button', { name: 'Export EPUB' }).waitFor({
-  state: 'visible',
-  timeout: 60_000,
-});
+const epubTargets = [
+  { button: 'Export reflowable EPUB', file: 'publication-reflowable.epub', edition: 'reflowable' },
+  { button: 'Export fixed EPUB', file: 'publication-fixed.epub', edition: 'fixed' },
+];
 
-const downloadPromise = page.waitForEvent('download', { timeout: 120_000 });
-await page.getByRole('button', { name: 'Export EPUB' }).click();
-const epub = await downloadPromise;
-await epub.saveAs(path.join(outputDir, 'publication.epub'));
+const generatedEpubEditions = [];
+for (const targetEpub of epubTargets) {
+  const button = page.getByRole('button', { name: targetEpub.button });
+  if (!(await button.isVisible().catch(() => false))) continue;
+
+  const downloadPromise = page.waitForEvent('download', { timeout: 120_000 });
+  await button.click();
+  const epub = await downloadPromise;
+  await epub.saveAs(path.join(outputDir, targetEpub.file));
+  generatedEpubEditions.push(targetEpub.edition);
+}
+
+if (generatedEpubEditions.length === 0) {
+  const legacyButton = page.getByRole('button', { name: 'Export EPUB' });
+  await legacyButton.waitFor({ state: 'visible', timeout: 60_000 });
+  const downloadPromise = page.waitForEvent('download', { timeout: 120_000 });
+  await legacyButton.click();
+  const epub = await downloadPromise;
+  await epub.saveAs(path.join(outputDir, 'publication.epub'));
+  generatedEpubEditions.push('default');
+}
 
 const summary = {
   target,
   baseUrl,
   editions,
+  epubEditions: generatedEpubEditions,
   generatedAt: new Date().toISOString(),
 };
 

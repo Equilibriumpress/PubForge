@@ -14,6 +14,11 @@ export function ExportPanel({ project }: ExportPanelProps) {
   const epubLayout =
     project.manifest.epub?.layout ??
     (project.manifest.epub?.reflowable === false ? 'fixed' : 'reflowable');
+  const epubEditions =
+    project.manifest.epub?.editions?.length
+      ? project.manifest.epub.editions
+      : [epubLayout];
+  const vendorProfile = project.manifest.epub?.vendorProfile ?? 'generic';
   const editions: PdfEdition[] =
     project.manifest.pdf?.editions?.length
       ? project.manifest.pdf.editions
@@ -46,17 +51,23 @@ export function ExportPanel({ project }: ExportPanelProps) {
 
   const outputs = [
     ...pdfOutputs,
-    {
-      id: 'epub',
+    ...epubEditions.map((edition) => ({
+      id: `epub-${edition}`,
       enabled: project.manifest.epub?.enabled !== false,
-      title: epubLayout === 'fixed' ? 'EPUB 3 · Fixed layout' : 'EPUB 3 · Reflowable',
+      title:
+        edition === 'fixed'
+          ? 'EPUB 3 · Fixed layout'
+          : 'EPUB 3 · Reflowable',
       detail:
-        epubLayout === 'fixed'
-          ? 'Pre-paginated EPUB with one live HTML/CSS page per reading-order entry.'
-          : 'Reflowable EPUB with navigation, metadata and semantic reading order.',
-      action: () => exportEpub(project, epubLayout),
-      label: epubLayout === 'fixed' ? 'Export fixed EPUB' : 'Export EPUB',
-    },
+        edition === 'fixed'
+          ? `Pre-paginated live HTML/CSS pages · ${vendorProfile} QA profile.`
+          : `Linear accessible reading edition · ${vendorProfile} QA profile.`,
+      action: () => exportEpub(project, edition),
+      label:
+        edition === 'fixed'
+          ? 'Export fixed EPUB'
+          : 'Export reflowable EPUB',
+    })),
     {
       id: 'webpub',
       enabled: project.manifest.webpub?.enabled !== false,
@@ -97,7 +108,8 @@ export function ExportPanel({ project }: ExportPanelProps) {
           <div><dt>Highlighted code</dt><dd>{project.preparedAssets.highlightedBlocks}</dd></div>
           <div><dt>Optimized images</dt><dd>{project.preparedAssets.optimizedImages}</dd></div>
           <div><dt>Editorial images</dt><dd>{project.preparedAssets.editorialImages.length}</dd></div>
-          <div><dt>EPUB layout</dt><dd>{epubLayout}</dd></div>
+          <div><dt>EPUB editions</dt><dd>{epubEditions.join(' + ')}</dd></div>
+          <div><dt>EPUB vendor QA</dt><dd>{vendorProfile}</dd></div>
         </dl>
         {pdfProfile.profile === 'press' ? (
           <p className="pressNote">

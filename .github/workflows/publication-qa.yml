@@ -6,6 +6,9 @@ on:
     paths:
       - .github/workflows/publication-qa.yml
       - scripts/qa-publication.mjs
+      - src/export/epub.ts
+      - src/preflight/checks.ts
+      - publication.yml
   workflow_dispatch:
     inputs:
       repository:
@@ -86,11 +89,16 @@ jobs:
           unzip -q /tmp/epubcheck.zip -d /tmp
           echo "EPUBCHECK=/tmp/epubcheck-5.4.0/epubcheck.jar" >> "$GITHUB_ENV"
 
-      - name: Validate EPUB 3
+      - name: Validate every EPUB 3 edition
+        shell: bash
         run: |
-          java -jar "$EPUBCHECK" qa-output/publication.epub \
-            --json qa-output/epubcheck.json \
-            2>&1 | tee qa-output/epubcheck.txt
+          set -euo pipefail
+          for EPUB in qa-output/publication*.epub; do
+            NAME="$(basename "$EPUB" .epub)"
+            java -jar "$EPUBCHECK" "$EPUB" \
+              --json "qa-output/${NAME}.epubcheck.json" \
+              2>&1 | tee "qa-output/${NAME}.epubcheck.txt"
+          done
 
       - name: Validate PDF structure and collect diagnostics
         shell: bash
@@ -125,7 +133,7 @@ jobs:
         run: |
           (
             cd qa-output
-            sha256sum publication.epub publication-*.pdf > SHA256SUMS.txt
+            sha256sum publication*.epub publication-*.pdf > SHA256SUMS.txt
           )
 
       - name: Write QA summary
@@ -142,7 +150,7 @@ jobs:
             echo '```'
             echo
             echo "## Checks"
-            echo "- EPUBCheck 5.4.0: passed"
+            echo "- EPUBCheck 5.4.0: all generated EPUB editions passed"
             echo "- qpdf structural checks: passed"
             echo "- Poppler PDF metadata/font/image reports: captured"
             echo "- All PDF pages rendered to PNG for visual inspection"

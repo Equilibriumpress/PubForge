@@ -172,6 +172,10 @@ epub:
   enabled: true
   reflowable: false
   layout: fixed
+  editions:
+    - reflowable
+    - fixed
+  vendorProfile: apple-books
   viewport:
     width: 794
     height: 1058

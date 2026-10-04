@@ -64,11 +64,16 @@ function fixedViewport(project: LoadedProject): FixedViewport {
 function chapterStyles(
   project: LoadedProject,
   chapter: ReturnType<typeof compilePublication>['chapters'][number],
+  layout: EpubLayoutMode,
 ): string {
+  const layoutTheme =
+    layout === 'fixed'
+      ? project.manifest.epub?.fixedTheme
+      : project.manifest.epub?.theme;
   const themePaths = [
     ...chapter.themePaths,
     ...project.resolvedThemes.epub,
-    ...(project.manifest.epub?.theme ? [project.manifest.epub.theme] : []),
+    ...(layoutTheme ? [layoutTheme] : []),
   ].filter((path, index, values) => values.indexOf(path) === index);
 
   return themePaths
@@ -102,7 +107,7 @@ function reflowableChapterXhtml(
   compiled: ReturnType<typeof compilePublication>,
 ): string {
   const html = chapterHtml(project, chapter, compiled);
-  const styles = chapterStyles(project, chapter);
+  const styles = chapterStyles(project, chapter, 'reflowable');
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" lang="${xmlEscape(project.manifest.publication.language)}" xml:lang="${xmlEscape(project.manifest.publication.language)}" dir="${project.manifest.publication.readingProgression ?? 'ltr'}">
@@ -125,7 +130,7 @@ function fixedChapterXhtml(
   viewport: FixedViewport,
 ): string {
   const html = chapterHtml(project, chapter, compiled);
-  const styles = chapterStyles(project, chapter);
+  const styles = chapterStyles(project, chapter, 'fixed');
   const layoutClass = chapter.layout
     ? ` pubforge-entry-layout-${chapter.layout}`
     : '';
@@ -241,6 +246,7 @@ export function buildEpubArchive(
     (project.manifest.epub?.reflowable === false ? 'fixed' : 'reflowable');
   const fixed = layout === 'fixed';
   const viewport = fixed ? fixedViewport(project) : null;
+  const vendorProfile = project.manifest.epub?.vendorProfile ?? 'generic';
 
   const files: Zippable = {
     mimetype: [strToU8('application/epub+zip'), { level: 0 }],
@@ -359,8 +365,29 @@ ${landmarksNav}
 <meta property="rendition:spread">${project.manifest.epub?.spread ?? 'auto'}</meta>`
     : '<meta property="rendition:layout">reflowable</meta>';
 
+  const appleMetadata =
+    vendorProfile === 'apple-books' && project.manifest.epub?.embeddedFonts
+      ? '<meta property="ibooks:specified-fonts">true</meta>'
+      : '';
+
+  const kindleMetadata =
+    vendorProfile === 'kindle' && fixed && viewport
+      ? `<meta name="fixed-layout" content="true"/>
+<meta name="original-resolution" content="${viewport.width}x${viewport.height}"/>
+<meta name="orientation-lock" content="${project.manifest.epub?.orientation === 'portrait' || project.manifest.epub?.orientation === 'landscape' ? project.manifest.epub.orientation : 'none'}"/>
+<meta name="primary-writing-mode" content="${project.manifest.publication.readingProgression === 'rtl' ? 'horizontal-rl' : 'horizontal-lr'}"/>`
+      : '';
+
+  const packagePrefixes = [
+    'dcterms: http://purl.org/dc/terms/',
+    'rendition: http://www.idpf.org/vocab/rendition/#',
+    ...(vendorProfile === 'apple-books'
+      ? ['ibooks: http://vocabulary.itunes.apple.com/rdf/ibooks/vocabulary-extensions-1.0/']
+      : []),
+  ].join(' ');
+
   files['EPUB/package.opf'] = strToU8(`<?xml version="1.0" encoding="UTF-8"?>
-<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="pub-id" prefix="dcterms: http://purl.org/dc/terms/ rendition: http://www.idpf.org/vocab/rendition/#">
+<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="pub-id" prefix="${packagePrefixes}">
 <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
 <dc:identifier id="pub-id">${xmlEscape(publicationIdentifier(project))}</dc:identifier>
 <dc:title>${xmlEscape(metadata.title)}</dc:title>
@@ -374,6 +401,8 @@ ${metadata.rights ? `<dc:rights>${xmlEscape(metadata.rights)}</dc:rights>` : ''}
 ${metadata.date ? `<dc:date>${xmlEscape(metadata.date)}</dc:date>` : ''}
 <meta property="dcterms:modified">${new Date().toISOString().replace(/\.\d{3}Z$/, 'Z')}</meta>
 ${fixedMetadata}
+${appleMetadata}
+${kindleMetadata}
 </metadata>
 <manifest>
 ${manifestItems.join('\n')}
@@ -395,7 +424,13 @@ export function exportEpub(
     project.manifest.epub?.layout ??
     (project.manifest.epub?.reflowable === false ? 'fixed' : 'reflowable');
   const archive = buildEpubArchive(project, { layout: resolvedLayout });
-  const suffix = resolvedLayout === 'fixed' ? '-fixed' : '';
+  const editions = project.manifest.epub?.editions ?? [resolvedLayout];
+  const suffix =
+    editions.length > 1
+      ? `-${resolvedLayout}`
+      : resolvedLayout === 'fixed'
+        ? '-fixed'
+        : '';
   downloadBytes(
     archive,
     `${slugify(project.manifest.publication.title)}${suffix}.epub`,

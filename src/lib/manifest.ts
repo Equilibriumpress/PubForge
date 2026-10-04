@@ -109,10 +109,18 @@ export function parsePublicationManifest(source: string): PublicationManifest {
         (value.epub?.layout ??
           (value.epub?.reflowable === false ? 'fixed' : 'reflowable')) ===
         'reflowable',
+      editions:
+        value.epub?.editions ??
+        [
+          value.epub?.layout ??
+            (value.epub?.reflowable === false ? 'fixed' : 'reflowable'),
+        ],
+      vendorProfile: value.epub?.vendorProfile ?? 'generic',
       viewport: value.epub?.viewport,
       orientation: value.epub?.orientation ?? 'auto',
       spread: value.epub?.spread ?? 'auto',
       theme: value.epub?.theme,
+      fixedTheme: value.epub?.fixedTheme,
       themePackages: value.epub?.themePackages,
       embeddedFonts: value.epub?.embeddedFonts ?? true,
     },

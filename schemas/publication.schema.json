@@ -554,6 +554,30 @@
             "landscape",
             "both"
           ]
+        },
+        "editions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "reflowable",
+              "fixed"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "vendorProfile": {
+          "type": "string",
+          "enum": [
+            "generic",
+            "apple-books",
+            "kindle",
+            "kobo"
+          ]
+        },
+        "fixedTheme": {
+          "type": "string"
         }
       }
     },

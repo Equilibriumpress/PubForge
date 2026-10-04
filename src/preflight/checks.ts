@@ -5,7 +5,7 @@ import {
   resolveProjectPath,
 } from '../engine/compile';
 import { resolvePdfProfile } from '../engine/output-profile';
-import { buildEpubArchive } from '../export/epub';
+import { buildEpubArchive, type EpubLayoutMode } from '../export/epub';
 import type { LoadedProject } from '../lib/load-project';
 
 export type PreflightSeverity = 'error' | 'warning' | 'info';
@@ -57,11 +57,15 @@ function add(
   issues.push({ severity, category, code, message, path });
 }
 
-function validateEpubPackage(project: LoadedProject, issues: PreflightIssue[]): void {
+function validateEpubPackage(
+  project: LoadedProject,
+  issues: PreflightIssue[],
+  layout: EpubLayoutMode,
+): void {
   if (project.manifest.epub?.enabled === false) return;
 
   try {
-    const archive = buildEpubArchive(project);
+    const archive = buildEpubArchive(project, { layout });
     const files = unzipSync(archive);
     const required = [
       'mimetype',
@@ -91,7 +95,7 @@ function validateEpubPackage(project: LoadedProject, issues: PreflightIssue[]): 
       return;
     }
 
-    const fixed = project.manifest.epub?.layout === 'fixed';
+    const fixed = layout === 'fixed';
     if (
       fixed &&
       !opfSource.includes('<meta property="rendition:layout">pre-paginated</meta>')
@@ -102,6 +106,53 @@ function validateEpubPackage(project: LoadedProject, issues: PreflightIssue[]): 
         'epub',
         'epub-fixed-layout-metadata',
         'Fixed-layout EPUB is missing rendition:layout pre-paginated metadata.',
+        'EPUB/package.opf',
+      );
+    }
+
+    if (fixed) {
+      for (const [path, bytes] of Object.entries(files)) {
+        if (!/^EPUB\/text\/chapter-.*\.xhtml$/.test(path)) continue;
+        const source = strFromU8(bytes);
+        if (!source.includes('<meta name="viewport"')) {
+          add(
+            issues,
+            'error',
+            'epub',
+            'fixed-layout-page-viewport',
+            'Fixed-layout page is missing viewport metadata.',
+            path,
+          );
+        }
+      }
+    }
+
+    const vendorProfile = project.manifest.epub?.vendorProfile ?? 'generic';
+    if (
+      vendorProfile === 'apple-books' &&
+      project.manifest.epub?.embeddedFonts &&
+      !opfSource.includes('<meta property="ibooks:specified-fonts">true</meta>')
+    ) {
+      add(
+        issues,
+        'error',
+        'epub',
+        'apple-specified-fonts',
+        `Apple Books ${layout} edition is missing ibooks:specified-fonts metadata.`,
+        'EPUB/package.opf',
+      );
+    }
+    if (
+      vendorProfile === 'kindle' &&
+      fixed &&
+      !opfSource.includes('name="original-resolution"')
+    ) {
+      add(
+        issues,
+        'error',
+        'epub',
+        'kindle-original-resolution',
+        'Kindle fixed-layout profile requires original-resolution metadata.',
         'EPUB/package.opf',
       );
     }
@@ -163,7 +214,7 @@ function validateEpubPackage(project: LoadedProject, issues: PreflightIssue[]): 
       'info',
       'epub',
       'epub-package-built',
-      `EPUB package built and inspected successfully (${Object.keys(files).length} packaged files).`,
+      `EPUB ${layout} package built and inspected successfully (${Object.keys(files).length} packaged files; ${project.manifest.epub?.vendorProfile ?? 'generic'} QA profile).`,
     );
   } catch (error) {
     add(
@@ -180,6 +231,15 @@ export function runPreflight(project: LoadedProject): PreflightReport {
   const issues: PreflightIssue[] = [];
   const compiled = compilePublication(project);
   const metadata = project.manifest.publication;
+  const epubLayout =
+    project.manifest.epub?.layout ??
+    (project.manifest.epub?.reflowable === false ? 'fixed' : 'reflowable');
+  const epubEditions: EpubLayoutMode[] =
+    project.manifest.epub?.editions?.length
+      ? project.manifest.epub.editions
+      : [epubLayout];
+  const fixedRequested = epubEditions.includes('fixed');
+  const vendorProfile = project.manifest.epub?.vendorProfile ?? 'generic';
 
   if (!metadata.authors?.length) {
     add(issues, 'warning', 'metadata', 'metadata-authors', 'No publication author is defined.');
@@ -219,7 +279,7 @@ export function runPreflight(project: LoadedProject): PreflightReport {
     );
   }
 
-  if (project.manifest.epub?.layout === 'fixed') {
+  if (fixedRequested) {
     if (!project.manifest.epub.viewport) {
       add(
         issues,
@@ -250,6 +310,37 @@ export function runPreflight(project: LoadedProject): PreflightReport {
       'fixed-layout-enabled',
       `Fixed-layout EPUB is enabled with ${project.manifest.readingOrder.length} designed pages.`,
     );
+
+    add(
+      issues,
+      'warning',
+      'epub',
+      'fixed-layout-accessibility',
+      'Fixed-layout EPUB limits reader control over text size and reflow; keep the reflowable edition enabled when the publication can support it.',
+    );
+
+    if (
+      vendorProfile === 'apple-books' &&
+      project.manifest.epub?.spread === 'landscape'
+    ) {
+      add(
+        issues,
+        'warning',
+        'epub',
+        'apple-spread-value',
+        'Apple Books fixed-layout guidance documents auto, both and none for rendition:spread; prefer one of those values for this profile.',
+      );
+    }
+
+    if (vendorProfile === 'kobo') {
+      add(
+        issues,
+        'info',
+        'epub',
+        'kobo-fixed-testing',
+        'Kobo recommends sideloading fixed-layout tests with the .fxl.kepub.epub extension and checking at least two reading platforms.',
+      );
+    }
   }
 
   const seenSources = new Set<string>();
@@ -350,6 +441,9 @@ export function runPreflight(project: LoadedProject): PreflightReport {
   const themePaths = new Set(compiled.themePaths);
   for (const path of project.resolvedThemes.epub) themePaths.add(path);
   if (project.manifest.epub?.theme) themePaths.add(project.manifest.epub.theme);
+  if (project.manifest.epub?.fixedTheme) {
+    themePaths.add(project.manifest.epub.fixedTheme);
+  }
   for (const path of themePaths) {
     if (!project.workspace.has(path)) {
       add(issues, 'error', 'assets', 'missing-theme', 'Theme stylesheet is missing.', path);
@@ -480,7 +574,9 @@ export function runPreflight(project: LoadedProject): PreflightReport {
     );
   }
 
-  validateEpubPackage(project, issues);
+  for (const edition of epubEditions) {
+    validateEpubPackage(project, issues, edition);
+  }
 
   const errors = issues.filter((issue) => issue.severity === 'error').length;
   const warnings = issues.filter((issue) => issue.severity === 'warning').length;
