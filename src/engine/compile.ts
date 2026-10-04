@@ -199,6 +199,7 @@ function collectReferencedResources(
   }
 
   const allThemes = new Set(themePaths);
+  for (const path of project.resolvedThemes.epub) allThemes.add(path);
   if (project.manifest.epub?.theme) allThemes.add(project.manifest.epub.theme);
   for (const themePath of allThemes) {
     if (!project.workspace.has(themePath)) continue;
@@ -241,7 +242,10 @@ function collectReferencedResources(
 }
 
 export function compilePublication(project: LoadedProject): CompiledPublication {
-  const themePaths = new Set<string>([project.manifest.theme.css]);
+  const themePaths = new Set<string>([
+    ...project.resolvedThemes.base,
+    project.manifest.theme.css,
+  ]);
 
   const chapters = project.manifest.readingOrder.map((entry, index) => {
     const markdown = project.workspace.text(entry.path);
@@ -249,6 +253,7 @@ export function compilePublication(project: LoadedProject): CompiledPublication 
     const role = entry.role ?? 'chapter';
     const title = entry.title ?? chapterTitle(html, `Chapter ${index + 1}`);
     const entryThemes = [
+      ...project.resolvedThemes.base,
       project.manifest.theme.css,
       ...(entry.theme ? [entry.theme] : []),
     ];
