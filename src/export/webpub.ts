@@ -36,7 +36,7 @@ function chapterHtml(
     .join('\n');
 
   return `<!doctype html>
-<html lang="${escapeHtml(project.manifest.publication.language)}">
+<html lang="${escapeHtml(project.manifest.publication.language)}" dir="${project.manifest.publication.readingProgression ?? 'ltr'}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -93,13 +93,14 @@ export function exportWebPublication(project: LoadedProject): void {
     keywords: metadata.subjects,
     copyrightNotice: metadata.rights,
     datePublished: metadata.date,
+    readingProgression: metadata.readingProgression ?? 'ltr',
     readingOrder,
     resources,
   };
 
   extras['publication.json'] = JSON.stringify(manifest, null, 2);
   extras['index.html'] = `<!doctype html>
-<html lang="${escapeHtml(metadata.language)}">
+<html lang="${escapeHtml(metadata.language)}" dir="${metadata.readingProgression ?? 'ltr'}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
