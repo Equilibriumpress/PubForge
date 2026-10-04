@@ -19,6 +19,7 @@ publication:
     - Git-native publishing
   rights: © 2026 Equilibrium Press. Demonstration publication.
   date: 2026-10-04
+  readingProgression: ltr
 
 cover:
   image: examples/showcase-book/assets/cover.svg
@@ -26,8 +27,10 @@ cover:
 
 contents:
   toc: true
+  tocTitle: Contents
+  sectionDepth: 3
   landmarks: true
-  pageList: false
+  pageList: true
 
 readingOrder:
   - path: examples/showcase-book/content/00-title-page.md
@@ -44,6 +47,7 @@ readingOrder:
     role: chapter
     title: Typography and Semantics
     breakBefore: recto
+    pageCounterReset: 1
   - path: examples/showcase-book/content/04-figures-data.md
     role: chapter
     title: Figures, Tables and Data
@@ -75,6 +79,12 @@ theme:
   preset: showcase-book
   css: examples/showcase-book/theme/publication.css
 
+assets:
+  includes:
+    - examples/showcase-book/data/*
+  excludes:
+    - examples/showcase-book/**/*.tmp
+
 vfm:
   math: true
   mathRenderer: mathml
@@ -85,6 +95,7 @@ vfm:
   captionlessImagePolicy: figure
   parseFigcaptionAsInline: true
   rewriteRelativeHrefExtensions: true
+  tableCell: align-class
 
 pdf:
   enabled: true
@@ -93,6 +104,7 @@ pdf:
   binding: left
   bleed: 3mm
   cropMarks: true
+  cropOffset: 13mm
   bookmarks: true
 
 epub:
