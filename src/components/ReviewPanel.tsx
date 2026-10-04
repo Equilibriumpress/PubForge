@@ -1,9 +1,19 @@
-import { useEffect, useMemo, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { PageViewMode } from '@vivliostyle/core';
 import { Renderer } from '@vivliostyle/react';
 
 import type { LoadedProject } from '../lib/load-project';
 import { buildPublicationDocument } from '../render/build-html';
+import {
+  runLayoutAudit,
+  type LayoutAuditReport,
+} from '../review/layout-audit';
 
 interface ReviewPanelProps {
   project: LoadedProject;
@@ -18,37 +28,54 @@ export function ReviewPanel({ project }: ReviewPanelProps) {
     () => buildPublicationDocument(project),
     [project.snapshot.commitSha, project.manifestPath],
   );
+  const hostRef = useRef<HTMLDivElement>(null);
   const [page, setPage] = useState(1);
   const [pageCount, setPageCount] = useState<number | null>(null);
   const [zoom, setZoom] = useState(0.8);
   const [viewMode, setViewMode] = useState<ViewMode>('spread');
+  const [audit, setAudit] = useState<LayoutAuditReport | null>(null);
 
   useEffect(() => {
     setPage(1);
     setPageCount(null);
+    setAudit(null);
     return () => publication.dispose();
   }, [publication]);
+
+  const auditRenderedPages = useCallback(() => {
+    window.setTimeout(() => {
+      if (!hostRef.current) return;
+      setAudit(runLayoutAudit(hostRef.current));
+    }, 180);
+  }, []);
 
   const pageNumbers = pageCount
     ? Array.from({ length: pageCount }, (_, index) => index + 1)
     : [];
+
+  const currentMetric = audit?.pages.find((metric) => metric.page === page);
+  const warningCount =
+    audit?.issues.filter((issue) => issue.severity === 'warning').length ?? 0;
+  const infoCount =
+    audit?.issues.filter((issue) => issue.severity === 'info').length ?? 0;
 
   return (
     <section className="reviewSurface">
       <header className="reviewHeader">
         <div>
           <p className="eyebrow">Publication review</p>
-          <h2>Inspect the designed pages</h2>
+          <h2>Inspect and diagnose the designed pages</h2>
           <p>
             Read-only Vivliostyle review of commit{' '}
-            {project.snapshot.commitSha.slice(0, 7)}. Layout controls below are
-            viewing controls only and never change Git source.
+            {project.snapshot.commitSha.slice(0, 7)}. Review state never changes
+            Git source.
           </p>
         </div>
         <div className="reviewState">
           <span>{viewMode === 'spread' ? 'Spread' : 'Single page'}</span>
           <span>{Math.round(zoom * 100) + '%'}</span>
           <span>{pageCount ? pageCount + ' pages' : 'Paginating…'}</span>
+          {audit ? <span>{warningCount + ' layout warnings'}</span> : null}
         </div>
       </header>
 
@@ -110,49 +137,143 @@ export function ReviewPanel({ project }: ReviewPanelProps) {
             Next
           </button>
         </div>
+
+        <button
+          type="button"
+          className="secondaryButton reviewAuditButton"
+          onClick={auditRenderedPages}
+        >
+          Run layout audit
+        </button>
       </div>
 
       {pageNumbers.length ? (
         <nav className="reviewPageRail" aria-label="Page navigator">
-          {pageNumbers.map((pageNumber) => (
-            <button
-              type="button"
-              key={pageNumber}
-              className={
-                pageNumber === page
-                  ? 'reviewPageChip reviewPageChipActive'
-                  : 'reviewPageChip'
-              }
-              aria-label={'Go to page ' + pageNumber}
-              aria-current={pageNumber === page ? 'page' : undefined}
-              onClick={() => setPage(pageNumber)}
-            >
-              <span>{pageNumber}</span>
-            </button>
-          ))}
+          {pageNumbers.map((pageNumber) => {
+            const flagged = audit?.issues.some(
+              (issue) => issue.page === pageNumber,
+            );
+            return (
+              <button
+                type="button"
+                key={pageNumber}
+                className={
+                  pageNumber === page
+                    ? 'reviewPageChip reviewPageChipActive'
+                    : flagged
+                      ? 'reviewPageChip reviewPageChipFlagged'
+                      : 'reviewPageChip'
+                }
+                aria-label={'Go to page ' + pageNumber}
+                aria-current={pageNumber === page ? 'page' : undefined}
+                onClick={() => setPage(pageNumber)}
+              >
+                <span>{pageNumber}</span>
+                {flagged ? <i aria-hidden="true" /> : null}
+              </button>
+            );
+          })}
         </nav>
       ) : null}
 
-      <div className="reviewCanvas">
-        <Renderer
-          source={publication.url}
-          page={page}
-          zoom={zoom}
-          bookMode={false}
-          pageViewMode={
-            viewMode === 'spread'
-              ? PageViewMode.SPREAD
-              : PageViewMode.SINGLE_PAGE
-          }
-          renderAllPages
-          onLoad={(state) => {
-            setPageCount(state.epageCount);
-            setPage(Math.min(page, Math.max(1, state.epageCount)));
-          }}
-          onNavigation={(state) => {
-            if (state.epage > 0) setPage(Math.max(1, state.epage));
-          }}
-        />
+      <div className="reviewWorkspace">
+        <div className="reviewCanvas" ref={hostRef}>
+          <Renderer
+            source={publication.url}
+            page={page}
+            zoom={zoom}
+            bookMode={false}
+            pageViewMode={
+              viewMode === 'spread'
+                ? PageViewMode.SPREAD
+                : PageViewMode.SINGLE_PAGE
+            }
+            renderAllPages
+            onLoad={(state) => {
+              setPageCount(state.epageCount);
+              setPage(Math.min(page, Math.max(1, state.epageCount)));
+              auditRenderedPages();
+            }}
+            onNavigation={(state) => {
+              if (state.epage > 0) setPage(Math.max(1, state.epage));
+            }}
+          />
+        </div>
+
+        <aside className="layoutAuditPanel">
+          <header>
+            <div>
+              <p className="eyebrow">Layout audit</p>
+              <strong>
+                {audit
+                  ? warningCount + ' warnings · ' + infoCount + ' notes'
+                  : 'Waiting for rendered pages'}
+              </strong>
+            </div>
+            <button
+              type="button"
+              className="secondaryButton"
+              onClick={auditRenderedPages}
+            >
+              Refresh
+            </button>
+          </header>
+
+          {currentMetric ? (
+            <div className="pageMetricGrid">
+              <div>
+                <span>Page</span>
+                <strong>{currentMetric.page}</strong>
+              </div>
+              <div>
+                <span>Text</span>
+                <strong>{currentMetric.textCharacters + ' chars'}</strong>
+              </div>
+              <div>
+                <span>Images</span>
+                <strong>{currentMetric.imageCount}</strong>
+              </div>
+              <div>
+                <span>Image area</span>
+                <strong>
+                  {Math.round(currentMetric.imageAreaRatio * 100) + '%'}
+                </strong>
+              </div>
+            </div>
+          ) : null}
+
+          <div className="layoutIssueList">
+            {!audit ? (
+              <p className="layoutAuditEmpty">
+                The audit starts automatically after pagination. It inspects
+                the rendered Vivliostyle page boxes, not only source markup.
+              </p>
+            ) : audit.issues.length === 0 ? (
+              <p className="layoutAuditEmpty">
+                No heuristic layout flags found. Visual review is still
+                required before publication.
+              </p>
+            ) : (
+              audit.issues.map((issue, index) => (
+                <button
+                  type="button"
+                  key={issue.code + '-' + issue.page + '-' + index}
+                  className={'layoutIssue layoutIssue-' + issue.severity}
+                  onClick={() => setPage(issue.page)}
+                >
+                  <span>Page {issue.page}</span>
+                  <strong>{issue.message}</strong>
+                  <small>{issue.code}</small>
+                </button>
+              ))
+            )}
+          </div>
+
+          <p className="layoutAuditDisclaimer">
+            Heuristic review flags are design prompts, not publishing errors.
+            Technical release blockers remain in Preflight.
+          </p>
+        </aside>
       </div>
     </section>
   );
