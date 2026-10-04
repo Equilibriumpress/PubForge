@@ -1,20 +1,53 @@
-version: 1
-title: Book
-subtitle: PubForge starter project
-author: Your Name
-language: en
-type: book
+version: 2
+publication:
+  title: Book
+  subtitle: PubForge starter project
+  authors:
+    - Your Name
+  language: en
+  type: book
+  description: Reflowable EPUB and paginated print book starter.
 
-content:
-  - content/01-start.md
-  - content/02-main.md
+contents:
+  toc: true
+  landmarks: true
+
+readingOrder:
+  - path: content/01-start.md
+    role: chapter
+    title: Chapter One
+    breakBefore: recto
+  - path: content/02-main.md
+    role: chapter
+    title: Chapter Two
+    breakBefore: recto
 
 theme:
   preset: book
   css: theme/publication.css
 
-outputs:
-  - print
-  - epub
-  - webpub
-  - project-zip
+vfm:
+  math: true
+  mathRenderer: mathml
+  footnote: dpub
+  rewriteRelativeHrefExtensions: true
+
+pdf:
+  enabled: true
+  profile: book
+  size: A5
+  binding: left
+  bleed: 0mm
+  cropMarks: false
+  bookmarks: true
+
+epub:
+  enabled: true
+  reflowable: true
+  embeddedFonts: true
+
+webpub:
+  enabled: true
+
+projectZip:
+  enabled: true

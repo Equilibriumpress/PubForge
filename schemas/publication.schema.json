@@ -1,46 +1,79 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://pubforge.dev/schemas/publication.schema.json",
-  "title": "PubForge Publication",
+  "title": "PubForge Publication v2",
   "type": "object",
   "additionalProperties": false,
-  "required": ["version", "title", "language", "content", "theme", "outputs"],
+  "required": ["version", "publication", "readingOrder", "theme"],
   "properties": {
-    "version": { "const": 1 },
-    "title": { "type": "string", "minLength": 1 },
-    "subtitle": { "type": "string" },
-    "author": {
-      "oneOf": [
-        { "type": "string" },
-        { "type": "array", "items": { "type": "string" }, "minItems": 1 }
-      ]
+    "version": { "const": 2 },
+    "publication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "language"],
+      "properties": {
+        "title": { "type": "string", "minLength": 1 },
+        "subtitle": { "type": "string" },
+        "authors": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1
+        },
+        "language": { "type": "string", "minLength": 2 },
+        "type": {
+          "type": "string",
+          "enum": ["report", "book", "magazine", "manual", "travel-guide", "custom"]
+        },
+        "identifier": { "type": "string" },
+        "publisher": { "type": "string" },
+        "description": { "type": "string" },
+        "subjects": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "rights": { "type": "string" },
+        "date": { "type": "string" }
+      }
     },
-    "language": { "type": "string", "minLength": 2 },
-    "type": {
-      "type": "string",
-      "enum": ["report", "book", "magazine", "manual", "travel-guide", "custom"],
-      "default": "custom"
+    "cover": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "image": { "type": "string" },
+        "page": { "type": "string" },
+        "alt": { "type": "string" }
+      }
     },
-    "content": {
+    "contents": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "toc": { "type": "boolean", "default": true },
+        "landmarks": { "type": "boolean", "default": true },
+        "pageList": { "type": "boolean", "default": false }
+      }
+    },
+    "readingOrder": {
       "type": "array",
       "minItems": 1,
       "items": {
-        "oneOf": [
-          { "type": "string", "minLength": 1 },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "required": ["path"],
-            "properties": {
-              "path": { "type": "string", "minLength": 1 },
-              "title": { "type": "string" },
-              "breakBefore": {
-                "type": "string",
-                "enum": ["auto", "page", "left", "right", "recto", "verso"]
-              }
-            }
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path"],
+        "properties": {
+          "path": { "type": "string", "minLength": 1 },
+          "title": { "type": "string" },
+          "role": {
+            "type": "string",
+            "enum": ["cover", "title-page", "copyright", "toc", "preface", "chapter", "appendix", "bibliography", "colophon", "other"]
+          },
+          "theme": { "type": "string" },
+          "breakBefore": {
+            "type": "string",
+            "enum": ["auto", "page", "left", "right", "recto", "verso"]
           }
-        ]
+        }
       }
     },
     "theme": {
@@ -52,13 +85,58 @@
         "css": { "type": "string", "minLength": 1 }
       }
     },
-    "outputs": {
-      "type": "array",
-      "minItems": 1,
-      "uniqueItems": true,
-      "items": {
-        "type": "string",
-        "enum": ["print", "epub", "webpub", "project-zip"]
+    "vfm": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "math": { "type": "boolean" },
+        "mathRenderer": { "type": "string", "enum": ["mathjax", "mathml"] },
+        "footnote": { "type": "string", "enum": ["pandoc", "dpub", "gcpm"] },
+        "hardLineBreaks": { "type": "boolean" },
+        "imgFigcaptionOrder": { "type": "string", "enum": ["img-figcaption", "figcaption-img"] },
+        "assignIdToFigcaption": { "type": "boolean" },
+        "captionlessImagePolicy": { "type": "string", "enum": ["paragraph", "figure"] },
+        "parseFigcaptionAsInline": { "type": "boolean" },
+        "rewriteRelativeHrefExtensions": { "type": "boolean" }
+      }
+    },
+    "pdf": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "profile": { "type": "string", "enum": ["screen", "book", "press"] },
+        "size": { "type": "string" },
+        "width": { "type": "string" },
+        "height": { "type": "string" },
+        "binding": { "type": "string", "enum": ["left", "right"] },
+        "bleed": { "type": "string" },
+        "cropMarks": { "type": "boolean" },
+        "bookmarks": { "type": "boolean" }
+      }
+    },
+    "epub": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "reflowable": { "type": "boolean" },
+        "theme": { "type": "string" },
+        "embeddedFonts": { "type": "boolean" }
+      }
+    },
+    "webpub": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" }
+      }
+    },
+    "projectZip": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" }
       }
     }
   }

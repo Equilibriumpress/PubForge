@@ -1,20 +1,50 @@
-version: 1
-title: Manual
-subtitle: PubForge starter project
-author: Your Name
-language: en
-type: manual
+version: 2
+publication:
+  title: Manual
+  subtitle: PubForge starter project
+  authors:
+    - Your Name
+  language: en
+  type: manual
+  description: Structured documentation and procedural manual starter.
 
-content:
-  - content/01-start.md
-  - content/02-main.md
+contents:
+  toc: true
+  landmarks: true
+
+readingOrder:
+  - path: content/01-start.md
+    role: chapter
+    title: Getting started
+  - path: content/02-main.md
+    role: chapter
+    title: Procedures
+    breakBefore: page
 
 theme:
   preset: manual
   css: theme/publication.css
 
-outputs:
-  - print
-  - epub
-  - webpub
-  - project-zip
+vfm:
+  math: true
+  mathRenderer: mathml
+  footnote: dpub
+  rewriteRelativeHrefExtensions: true
+
+pdf:
+  enabled: true
+  profile: screen
+  size: A4
+  binding: left
+  bookmarks: true
+
+epub:
+  enabled: true
+  reflowable: true
+  embeddedFonts: true
+
+webpub:
+  enabled: true
+
+projectZip:
+  enabled: true
