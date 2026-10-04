@@ -26,10 +26,10 @@ function toXhtml(
   language: string,
   cssPath: string,
 ): string {
-  const document = documentImplementation();
-  document.body.innerHTML = fragment;
+  const htmlDocument = window.document.implementation.createHTMLDocument('');
+  htmlDocument.body.innerHTML = fragment;
 
-  for (const element of document.body.querySelectorAll<HTMLElement>('[src], [poster]')) {
+  for (const element of htmlDocument.body.querySelectorAll<HTMLElement>('[src], [poster]')) {
     for (const attribute of ['src', 'poster']) {
       const value = element.getAttribute(attribute);
       if (!value) continue;
@@ -38,7 +38,11 @@ function toXhtml(
     }
   }
 
-  const body = document.body.innerHTML;
+  const serializer = new XMLSerializer();
+  const body = [...htmlDocument.body.childNodes]
+    .map((node) => serializer.serializeToString(node))
+    .join('');
+
   return `<?xml version="1.0" encoding="UTF-8"?>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="${xmlEscape(language)}" xml:lang="${xmlEscape(language)}">
 <head>
@@ -49,12 +53,13 @@ function toXhtml(
 </html>`;
 }
 
-function documentImplementation(): Document {
-  return window.document.implementation.createHTMLDocument('');
-}
-
 function safeId(path: string, index: number): string {
   return `res-${index}-${path.replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-|-$/g, '')}`;
+}
+
+function chapterTitle(fragment: string, fallback: string): string {
+  const document = new DOMParser().parseFromString(fragment, 'text/html');
+  return document.querySelector('h1, h2')?.textContent?.trim() || fallback;
 }
 
 export function exportEpub(project: LoadedProject): void {
@@ -77,13 +82,16 @@ export function exportEpub(project: LoadedProject): void {
     const sourcePath = contentPath(entry);
     const chapterId = `chapter-${index + 1}`;
     const chapterPath = `text/${chapterId}.xhtml`;
-    const displayTitle =
-      typeof entry === 'string' ? `Chapter ${index + 1}` : entry.title ?? `Chapter ${index + 1}`;
     const fragment = stringify(project.workspace.text(sourcePath), {
       partial: true,
       math: false,
       disableFormatHtml: true,
     });
+    const fallback = `Chapter ${index + 1}`;
+    const displayTitle =
+      typeof entry === 'string'
+        ? chapterTitle(fragment, fallback)
+        : entry.title ?? chapterTitle(fragment, fallback);
 
     files[`EPUB/${chapterPath}`] = strToU8(
       toXhtml(
