@@ -1,0 +1,182 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  color: #152126;
+  background: #ffffff;
+  font-family: Georgia, serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.pubforge-fixed-page {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  padding: 52px 56px;
+}
+
+.pubforge-component {
+  position: relative;
+  margin: 24px 0;
+}
+
+.pubforge-columns {
+  column-count: 3;
+  column-gap: 20px;
+}
+
+.pubforge-pullquote {
+  margin: 28px 0;
+  padding: 12px 0;
+  border-top: 1px solid #a14e3d;
+  border-bottom: 1px solid #a14e3d;
+  color: #a14e3d;
+  font-family: Arial, sans-serif;
+  font-size: 32px;
+  line-height: 1.12;
+  font-weight: 700;
+}
+
+.pubforge-sidebar {
+  margin: 18px 0;
+  padding: 18px;
+  background: #e8ede8;
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+}
+
+.pubforge-gallery {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.pubforge-gallery .pubforge-editorial-image {
+  margin: 0;
+}
+
+.pubforge-layout-mosaic .pubforge-editorial-image:first-child {
+  grid-column: 1 / 3;
+}
+
+.pubforge-editorial-image {
+  position: relative;
+  margin: 24px 0;
+}
+
+.pubforge-editorial-image img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.pubforge-image-fit-cover img {
+  object-fit: cover;
+  object-position: var(--pubforge-focal-point, 50% 50%);
+}
+
+.pubforge-image-fit-contain img {
+  object-fit: contain;
+}
+
+.pubforge-image-position-full-page {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+.pubforge-image-position-full-page img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pubforge-image-caption,
+.pubforge-image-credit {
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+}
+
+.pubforge-hero,
+.pubforge-opener,
+.pubforge-fullpage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  color: #ffffff;
+}
+
+.pubforge-hero > .pubforge-editorial-image,
+.pubforge-opener > .pubforge-editorial-image,
+.pubforge-fullpage > .pubforge-editorial-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  z-index: 0;
+}
+
+.pubforge-hero > .pubforge-editorial-image img,
+.pubforge-opener > .pubforge-editorial-image img,
+.pubforge-fullpage > .pubforge-editorial-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pubforge-hero > :not(.pubforge-editorial-image),
+.pubforge-opener > :not(.pubforge-editorial-image),
+.pubforge-fullpage > :not(.pubforge-editorial-image) {
+  position: relative;
+  z-index: 1;
+}
+
+.mag-kicker {
+  margin: 0 0 12px;
+  font-family: Arial, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0 0 22px;
+  font-family: Arial, sans-serif;
+  font-size: 64px;
+  line-height: .96;
+}
+
+h2 {
+  margin: 0 0 14px;
+  font-family: Arial, sans-serif;
+  font-size: 30px;
+  line-height: 1.05;
+}
+
+p {
+  font-size: 19px;
+  line-height: 1.45;
+}
+
+.mag-page-overlay {
+  position: relative;
+  z-index: 2;
+  margin-top: auto;
+  padding: 48px;
+  color: #ffffff;
+}
