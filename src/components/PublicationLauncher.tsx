@@ -10,7 +10,7 @@ interface PublicationLauncherProps {
 const kindLabels: Record<PublicationDescriptor['kind'], string> = {
   primary: 'Primary',
   example: 'Example',
-  starter: 'Starter',
+  starter: 'Layout demo',
 };
 
 const outputLabels: Record<string, string> = {
@@ -33,7 +33,7 @@ export function PublicationLauncher({
       <header className="launcherHeader">
         <div>
           <p className="eyebrow">Publications</p>
-          <h2 id="publication-launcher-title">Choose what to render</h2>
+          <h2 id="publication-launcher-title">Compare publication layouts</h2>
         </div>
         <span>{publications.length} manifests found</span>
       </header>

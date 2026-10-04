@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 700" role="img" aria-labelledby="t">
+<title id="t">Geometric editorial detail</title>
+<rect width="900" height="700" fill="#efe9dd"/>
+<circle cx="250" cy="360" r="170" fill="#d35c47"/>
+<rect x="430" y="120" width="300" height="430" fill="#1a1b20"/>
+<path d="M80 580H820" stroke="#608b88" stroke-width="42"/>
+<path d="M500 180L690 480" stroke="#efe9dd" stroke-width="18"/>
+</svg>

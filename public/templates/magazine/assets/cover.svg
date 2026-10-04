@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1700" role="img" aria-labelledby="t">
+<title id="t">Abstract editorial cover composition</title>
+<rect width="1200" height="1700" fill="#1a1b20"/>
+<rect x="110" y="160" width="670" height="960" transform="rotate(-8 445 640)" fill="#f0e8d8"/>
+<rect x="470" y="300" width="610" height="930" transform="rotate(7 775 765)" fill="#d35c47"/>
+<circle cx="365" cy="1180" r="230" fill="#608b88"/>
+<path d="M160 380H880M160 480H720M160 580H930" stroke="#1a1b20" stroke-width="26" opacity=".9"/>
+<path d="M710 240V1330" stroke="#f5eede" stroke-width="18" opacity=".7"/>
+</svg>

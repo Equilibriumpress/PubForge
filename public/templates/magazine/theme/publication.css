@@ -1,6 +1,76 @@
-@page { size: A4; margin: 15mm; }
-:root { font-family: ui-sans-serif, Arial, sans-serif; color: #171717; }
-body { font-size: 10pt; line-height: 1.45; }
-h1 { break-before: page; font-size: 36pt; line-height: 0.95; letter-spacing: -0.04em; }
-h2 { font-size: 18pt; }
-p { orphans: 2; widows: 2; }
+@page magazine-cover {
+  size: A4;
+  margin: 0;
+}
+@page magazine-feature {
+  size: A4;
+  margin: 15mm 16mm 18mm;
+  @top-left {
+    content: "THE EDITED PAGE";
+    font: 7pt ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: .12em;
+  }
+  @bottom-right {
+    content: counter(page);
+    font: 8pt ui-sans-serif, system-ui, sans-serif;
+  }
+}
+:root {
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  color: #171717;
+  --pubforge-page-bleed-inline: 3mm;
+}
+body { font-size: 9.8pt; line-height: 1.45; }
+h1 {
+  margin: 0 0 7mm;
+  font-size: 36pt;
+  line-height: .93;
+  letter-spacing: -.045em;
+}
+h2 { font-size: 17pt; }
+.pubforge-hero {
+  min-height: 297mm;
+  margin: -15mm -16mm -18mm;
+  padding: 20mm;
+  color: white;
+}
+.pubforge-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 25%, rgb(10 12 16 / .8));
+  z-index: 0;
+}
+.pubforge-hero h1 {
+  max-width: 160mm;
+  font-size: 54pt;
+}
+.pubforge-hero h2 {
+  max-width: 110mm;
+  font-size: 18pt;
+  font-weight: 450;
+}
+.mag-kicker {
+  margin: 0 0 4mm;
+  font-size: 7pt;
+  font-weight: 800;
+  letter-spacing: .18em;
+}
+.mag-deck {
+  max-width: 110mm;
+  font-size: 11pt;
+}
+.pubforge-pullquote {
+  margin: 8mm 0;
+  color: #c84f3d;
+  font-size: 19pt;
+  line-height: 1.08;
+}
+.pubforge-sidebar {
+  padding: 4mm;
+  background: #f1ece6;
+  font-size: 8.5pt;
+}
+.pubforge-gallery { margin-top: 8mm; }
+.pubforge-gallery .pubforge-editorial-image { min-height: 45mm; }
+.pubforge-gallery img { height: 100%; object-fit: cover; }

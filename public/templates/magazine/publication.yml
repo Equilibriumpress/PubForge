@@ -1,29 +1,56 @@
 version: 2
 publication:
-  title: Magazine
-  subtitle: PubForge starter project
+  title: Magazine Layout Showcase
+  subtitle: Hero pages, columns, pull quotes and mosaic galleries
   authors:
-    - Your Name
+    - Equilibrium Press
   language: en
   type: magazine
-  description: Editorial publication for image-led features and departments.
+  description: Compact art-directed magazine starter.
 
 contents:
   toc: true
+  tocTitle: In this issue
   landmarks: true
+
+layout:
+  mode: magazine
+  columns: 3
+  gutter: 5mm
 
 readingOrder:
   - path: content/01-start.md
     role: chapter
-    title: Opening feature
+    title: Opening Feature
+    layout: page
+    pageName: magazine-cover
   - path: content/02-main.md
     role: chapter
-    title: Second feature
-    breakBefore: page
+    title: Studio Notes
+    layout: page
+    pageName: magazine-feature
 
 theme:
   preset: magazine
   css: theme/publication.css
+
+assets:
+  editorialImages:
+    cover:
+      src: assets/cover.svg
+      alt: Abstract editorial composition of layered paper, type and geometric forms
+      fit: cover
+      focalPoint: 50% 45%
+      bleed: full
+      span: page
+      position: full-page
+    detail:
+      src: assets/detail.svg
+      alt: Editorial detail study of geometric forms
+      caption: A detail image creates visual rhythm between text blocks
+      credit: PubForge
+      fit: cover
+      span: column
 
 vfm:
   math: true
@@ -40,7 +67,7 @@ pdf:
 
 epub:
   enabled: true
-  reflowable: true
+  layout: reflowable
   embeddedFonts: true
 
 webpub:
