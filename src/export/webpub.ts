@@ -1,5 +1,6 @@
 import {
   compilePublication,
+  findChapterByResolvedPath,
   publicationIdentifier,
   rewriteHtmlReferences,
 } from '../engine/compile';
@@ -17,14 +18,14 @@ function escapeHtml(value: string): string {
 function chapterHtml(
   project: LoadedProject,
   chapter: ReturnType<typeof compilePublication>['chapters'][number],
-  chapterMap: Map<string, string>,
+  compiled: ReturnType<typeof compilePublication>,
 ): string {
   const body = rewriteHtmlReferences(
     chapter.html,
     chapter.sourcePath,
     (resolved) => {
-      const chapterTarget = chapterMap.get(resolved);
-      if (chapterTarget) return chapterTarget.replace(/^text\//, '');
+      const target = findChapterByResolvedPath(compiled, resolved);
+      if (target) return target.outputPath.replace(/^text\//, '');
       if (project.workspace.has(resolved)) return `../${resolved}`;
       return null;
     },
@@ -52,14 +53,11 @@ ${body}
 
 export function exportWebPublication(project: LoadedProject): void {
   const compiled = compilePublication(project);
-  const chapterMap = new Map(
-    compiled.chapters.map((chapter) => [chapter.sourcePath, chapter.outputPath]),
-  );
 
   const extras: Record<string, string | Uint8Array> = {};
   const readingOrder = compiled.chapters.map((chapter) => {
     const outputPath = `chapters/${chapter.outputPath.replace(/^text\//, '')}`;
-    extras[outputPath] = chapterHtml(project, chapter, chapterMap);
+    extras[outputPath] = chapterHtml(project, chapter, compiled);
     return {
       url: outputPath,
       name: chapter.title,
@@ -68,10 +66,9 @@ export function exportWebPublication(project: LoadedProject): void {
     };
   });
 
-  const sourcePaths = new Set(compiled.chapters.map((chapter) => chapter.sourcePath));
-  const resourceEntries = project.workspace
-    .entries()
-    .filter(([path]) => path !== 'publication.yml' && !sourcePaths.has(path));
+  const resourceEntries = compiled.assetPaths.map(
+    (path) => [path, project.workspace.read(path)] as [string, Uint8Array],
+  );
 
   const resources = resourceEntries.map(([path]) => ({
     url: path,
