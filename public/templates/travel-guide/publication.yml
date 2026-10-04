@@ -1,29 +1,55 @@
 version: 2
 publication:
-  title: Travel Guide
-  subtitle: PubForge starter project
+  title: Lisbon Weekend Guide
+  subtitle: Image-led city pages, route cards and practical planning
   authors:
-    - Your Name
+    - Equilibrium Press
   language: en
   type: travel-guide
-  description: Destination guide with places, routes, maps and practical content.
+  description: Travel-guide layout fixture with maps, place cards and editorial imagery.
 
 contents:
   toc: true
+  tocTitle: Explore Lisbon
+  sectionDepth: 2
   landmarks: true
 
 readingOrder:
+  - path: content/00-cover.md
+    role: title-page
+    title: Cover
   - path: content/01-start.md
     role: chapter
-    title: Destination overview
+    title: Lisbon at a glance
   - path: content/02-main.md
     role: chapter
-    title: Places and routes
-    breakBefore: page
+    title: A perfect first day
+    breakBefore: recto
 
 theme:
   preset: travel-guide
   css: theme/publication.css
+
+assets:
+  imagePreflight:
+    targetDpi: 300
+  editorialImages:
+    lisbon-hero:
+      src: assets/lisbon-hero.svg
+      alt: Stylized Lisbon hillside with tiled facades, tram lines and the Tagus
+      fit: cover
+      focalPoint: 55% 42%
+      bleed: full
+      span: page
+      position: full-page
+    route-map:
+      src: assets/route-map.svg
+      alt: Simplified walking route linking Baixa, Alfama, Graça and the riverfront
+      caption: First-day walking route
+      credit: Schematic map
+      fit: contain
+      span: page
+      printWidthMm: 118
 
 vfm:
   math: true
@@ -41,7 +67,7 @@ pdf:
 
 epub:
   enabled: true
-  reflowable: true
+  layout: reflowable
   embeddedFonts: true
 
 webpub:
