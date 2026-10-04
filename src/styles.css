@@ -351,3 +351,64 @@ h1 {
     padding: 10px;
   }
 }
+
+
+.outputCards {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.outputCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 16px;
+  border-radius: 14px;
+  background: #263137;
+}
+
+.outputCard strong {
+  font-size: 1rem;
+}
+
+.outputCard p {
+  margin: 5px 0 0;
+  color: #bfc7ca;
+  font-size: 0.86rem;
+  line-height: 1.4;
+}
+
+.outputCard button {
+  flex: 0 0 auto;
+  background: #fff;
+  color: #172026;
+}
+
+.printPublicationView {
+  margin: 0;
+  background: #fff;
+}
+
+@media print {
+  html,
+  body,
+  #root,
+  .printPublicationView {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+
+  .printPublicationView {
+    width: 100%;
+  }
+}
+
+@media (max-width: 700px) {
+  .outputCard {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

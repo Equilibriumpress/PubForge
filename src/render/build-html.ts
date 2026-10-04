@@ -1,28 +1,10 @@
-import { stringify } from '@vivliostyle/vfm';
-
 import type { LoadedProject } from '../lib/load-project';
-import { contentPath } from '../types/publication';
-
-const MIME_TYPES: Record<string, string> = {
-  css: 'text/css',
-  gif: 'image/gif',
-  html: 'text/html',
-  jpeg: 'image/jpeg',
-  jpg: 'image/jpeg',
-  json: 'application/json',
-  mp3: 'audio/mpeg',
-  mp4: 'video/mp4',
-  png: 'image/png',
-  svg: 'image/svg+xml',
-  webp: 'image/webp',
-  woff: 'font/woff',
-  woff2: 'font/woff2',
-};
-
-function mimeType(path: string): string {
-  const ext = path.split('.').pop()?.toLowerCase() ?? '';
-  return MIME_TYPES[ext] ?? 'application/octet-stream';
-}
+import {
+  compilePublication,
+  rewriteCssReferences,
+  rewriteHtmlReferences,
+} from '../engine/compile';
+import { mediaType } from '../export/utils';
 
 function asArrayBuffer(data: Uint8Array): ArrayBuffer {
   const copy = new Uint8Array(data.byteLength);
@@ -30,68 +12,25 @@ function asArrayBuffer(data: Uint8Array): ArrayBuffer {
   return copy.buffer;
 }
 
-function resolveProjectPath(fromFile: string, reference: string): string | null {
-  if (
-    !reference ||
-    reference.startsWith('#') ||
-    /^[a-z][a-z0-9+.-]*:/i.test(reference) ||
-    reference.startsWith('//')
-  ) {
-    return null;
-  }
-
-  const base = new URL(`https://pubforge.local/${fromFile}`);
-  const resolved = new URL(reference, base);
-  return decodeURIComponent(resolved.pathname.replace(/^\//, ''));
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
-function createAssetUrls(project: LoadedProject): Map<string, string> {
+function createObjectUrls(project: LoadedProject): Map<string, string> {
   const urls = new Map<string, string>();
   for (const [path, data] of project.workspace.entries()) {
     urls.set(
       path,
-      URL.createObjectURL(new Blob([asArrayBuffer(data)], { type: mimeType(path) })),
+      URL.createObjectURL(
+        new Blob([asArrayBuffer(data)], { type: mediaType(path) }),
+      ),
     );
   }
   return urls;
-}
-
-function rewriteHtmlAssets(
-  html: string,
-  sourcePath: string,
-  assetUrls: Map<string, string>,
-): string {
-  const document = new DOMParser().parseFromString(
-    `<main id="pubforge-fragment">${html}</main>`,
-    'text/html',
-  );
-  const root = document.getElementById('pubforge-fragment');
-  if (!root) return html;
-
-  for (const element of root.querySelectorAll<HTMLElement>('[src], [poster]')) {
-    for (const attribute of ['src', 'poster']) {
-      const value = element.getAttribute(attribute);
-      if (!value) continue;
-      const resolved = resolveProjectPath(sourcePath, value);
-      if (resolved && assetUrls.has(resolved)) {
-        element.setAttribute(attribute, assetUrls.get(resolved)!);
-      }
-    }
-  }
-
-  return root.innerHTML;
-}
-
-function rewriteCssUrls(
-  css: string,
-  sourcePath: string,
-  assetUrls: Map<string, string>,
-): string {
-  return css.replace(/url\((['"]?)([^)'"]+)\1\)/g, (full, _quote: string, value: string) => {
-    const resolved = resolveProjectPath(sourcePath, value.trim());
-    if (!resolved || !assetUrls.has(resolved)) return full;
-    return `url("${assetUrls.get(resolved)}")`;
-  });
 }
 
 export interface PublicationDocument {
@@ -101,49 +40,85 @@ export interface PublicationDocument {
 }
 
 export function buildPublicationDocument(project: LoadedProject): PublicationDocument {
-  const assetUrls = createAssetUrls(project);
-  const themeCss = rewriteCssUrls(
-    project.workspace.text(project.manifest.theme.css),
-    project.manifest.theme.css,
-    assetUrls,
+  const compiled = compilePublication(project);
+  const objectUrls = createObjectUrls(project);
+  const chapterTargets = new Map(
+    compiled.chapters.map((chapter) => [
+      chapter.sourcePath,
+      `#pubforge-chapter-${chapter.index + 1}`,
+    ]),
   );
 
-  const chapters = project.manifest.content.map((entry) => {
-    const path = contentPath(entry);
-    const markdown = project.workspace.text(path);
-    const partial = stringify(markdown, {
-      partial: true,
-      math: false,
-      disableFormatHtml: true,
-    });
-    const body = rewriteHtmlAssets(partial, path, assetUrls);
-    const breakBefore =
-      typeof entry === 'string' ? undefined : entry.breakBefore;
+  const css = compiled.themePaths
+    .map((path) =>
+      rewriteCssReferences(
+        project.workspace.text(path),
+        path,
+        (resolved) => objectUrls.get(resolved) ?? null,
+      ),
+    )
+    .join('\n');
 
-    return `<section class="pubforge-chapter" data-source="${path}"${breakBefore ? ` style="break-before:${breakBefore}"` : ''}>${body}</section>`;
-  });
+  const cover = project.manifest.cover?.image;
+  const coverHtml =
+    cover && project.workspace.has(cover)
+      ? `<section class="pubforge-cover" epub:type="cover"><img src="${objectUrls.get(cover)}" alt="${escapeHtml(project.manifest.cover?.alt ?? project.manifest.title)}"></section>`
+      : '';
 
-  const author = Array.isArray(project.manifest.author)
-    ? project.manifest.author.join(', ')
-    : project.manifest.author ?? '';
+  const tocHtml =
+    project.manifest.contents?.toc === false
+      ? ''
+      : `<nav class="pubforge-toc" role="doc-toc"><h1>Contents</h1><ol>${compiled.chapters
+          .map(
+            (chapter) =>
+              `<li><a href="#pubforge-chapter-${chapter.index + 1}">${escapeHtml(chapter.title)}</a></li>`,
+          )
+          .join('')}</ol></nav>`;
+
+  const chapters = compiled.chapters
+    .map((chapter) => {
+      const body = rewriteHtmlReferences(
+        chapter.html,
+        chapter.sourcePath,
+        (resolved) =>
+          chapterTargets.get(resolved) ??
+          objectUrls.get(resolved) ??
+          null,
+      );
+      const breakBefore = chapter.breakBefore
+        ? ` style="break-before:${chapter.breakBefore}"`
+        : '';
+      return `<section id="pubforge-chapter-${chapter.index + 1}" class="pubforge-chapter pubforge-role-${chapter.role}" data-source="${escapeHtml(chapter.sourcePath)}" data-role="${chapter.role}"${breakBefore}>${body}</section>`;
+    })
+    .join('\n');
+
+  const authors = project.manifest.publication.authors ?? [];
+  const meta = project.manifest.publication;
 
   const html = `<!doctype html>
-<html lang="${project.manifest.language}">
+<html lang="${escapeHtml(meta.language)}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${project.manifest.title}</title>
-<meta name="author" content="${author}">
+<title>${escapeHtml(meta.title)}</title>
+<meta name="author" content="${escapeHtml(authors.join(', '))}">
+${meta.identifier ? `<meta name="identifier" content="${escapeHtml(meta.identifier)}">` : ''}
+${meta.publisher ? `<meta name="publisher" content="${escapeHtml(meta.publisher)}">` : ''}
+${meta.description ? `<meta name="description" content="${escapeHtml(meta.description)}">` : ''}
 <style>
 html { background: white; }
 body { margin: 0; }
-.pubforge-chapter:first-child > section:first-child,
-.pubforge-chapter:first-child > h1:first-child { break-before: auto; }
-${themeCss}
+.pubforge-cover { break-after: page; display: grid; place-items: center; min-height: 90vh; }
+.pubforge-cover img { max-width: 100%; max-height: 90vh; object-fit: contain; }
+.pubforge-toc { break-before: page; break-after: page; }
+.pubforge-chapter:first-of-type { break-before: auto; }
+${css}
 </style>
 </head>
 <body>
-${chapters.join('\n')}
+${coverHtml}
+${tocHtml}
+${chapters}
 </body>
 </html>`;
 
@@ -154,9 +129,7 @@ ${chapters.join('\n')}
     url,
     dispose() {
       URL.revokeObjectURL(url);
-      for (const assetUrl of assetUrls.values()) {
-        URL.revokeObjectURL(assetUrl);
-      }
+      for (const objectUrl of objectUrls.values()) URL.revokeObjectURL(objectUrl);
     },
   };
 }

@@ -1,0 +1,193 @@
+import { stringify } from '@vivliostyle/vfm';
+
+import type { LoadedProject } from '../lib/load-project';
+import type { ContentEntry, ContentRole, PublicationManifest } from '../types/publication';
+
+export interface CompiledChapter {
+  index: number;
+  sourcePath: string;
+  outputPath: string;
+  title: string;
+  role: ContentRole;
+  breakBefore?: ContentEntry['breakBefore'];
+  themePaths: string[];
+  html: string;
+}
+
+export interface CompiledPublication {
+  manifest: PublicationManifest;
+  chapters: CompiledChapter[];
+  themePaths: string[];
+  assetPaths: string[];
+}
+
+export function resolveProjectPath(
+  fromFile: string,
+  reference: string,
+): string | null {
+  if (
+    !reference ||
+    reference.startsWith('#') ||
+    /^[a-z][a-z0-9+.-]*:/i.test(reference) ||
+    reference.startsWith('//')
+  ) {
+    return null;
+  }
+
+  const base = new URL(`https://pubforge.local/${fromFile}`);
+  const resolved = new URL(reference, base);
+  return decodeURIComponent(resolved.pathname.replace(/^\//, ''));
+}
+
+export function rewriteHtmlReferences(
+  html: string,
+  sourcePath: string,
+  mapReference: (resolvedPath: string, original: string) => string | null,
+): string {
+  const document = new DOMParser().parseFromString(
+    `<main id="pubforge-fragment">${html}</main>`,
+    'text/html',
+  );
+  const root = document.getElementById('pubforge-fragment');
+  if (!root) return html;
+
+  for (const element of root.querySelectorAll<HTMLElement>('[src], [poster], [href]')) {
+    for (const attribute of ['src', 'poster', 'href']) {
+      const value = element.getAttribute(attribute);
+      if (!value) continue;
+
+      const [reference, hash = ''] = value.split('#', 2);
+      const resolved = resolveProjectPath(sourcePath, reference);
+      if (!resolved) continue;
+
+      const mapped = mapReference(resolved, value);
+      if (mapped) {
+        element.setAttribute(
+          attribute,
+          hash && attribute === 'href' ? `${mapped}#${hash}` : mapped,
+        );
+      }
+    }
+  }
+
+  return root.innerHTML;
+}
+
+export function rewriteCssReferences(
+  css: string,
+  sourcePath: string,
+  mapReference: (resolvedPath: string, original: string) => string | null,
+): string {
+  return css.replace(
+    /url\((['"]?)([^)'"]+)\1\)/g,
+    (full, _quote: string, value: string) => {
+      const resolved = resolveProjectPath(sourcePath, value.trim());
+      if (!resolved) return full;
+      const mapped = mapReference(resolved, value.trim());
+      return mapped ? `url("${mapped}")` : full;
+    },
+  );
+}
+
+function chapterTitle(html: string, fallback: string): string {
+  const document = new DOMParser().parseFromString(html, 'text/html');
+  return document.querySelector('h1, h2, h3')?.textContent?.trim() || fallback;
+}
+
+function outputName(index: number): string {
+  return `text/chapter-${String(index + 1).padStart(3, '0')}.xhtml`;
+}
+
+function vfmOptions(manifest: PublicationManifest): Parameters<typeof stringify>[1] {
+  const config = manifest.vfm ?? {};
+  return {
+    partial: true,
+    math: config.math ?? true,
+    mathRenderer: config.mathRenderer ?? 'mathml',
+    footnote: config.footnote ?? 'dpub',
+    hardLineBreaks: config.hardLineBreaks ?? false,
+    imgFigcaptionOrder: config.imgFigcaptionOrder ?? 'img-figcaption',
+    assignIdToFigcaption: config.assignIdToFigcaption ?? false,
+    captionlessImagePolicy: config.captionlessImagePolicy ?? 'paragraph',
+    parseFigcaptionAsInline: config.parseFigcaptionAsInline ?? false,
+    rewriteRelativeHrefExtensions:
+      config.rewriteRelativeHrefExtensions ?? true,
+    disableFormatHtml: true,
+  };
+}
+
+export function compilePublication(project: LoadedProject): CompiledPublication {
+  const themePaths = new Set<string>([project.manifest.theme.css]);
+  const sourcePaths = new Set(project.manifest.readingOrder.map((entry) => entry.path));
+
+  const chapters = project.manifest.readingOrder.map((entry, index) => {
+    const markdown = project.workspace.text(entry.path);
+    const html = stringify(markdown, vfmOptions(project.manifest));
+    const role = entry.role ?? 'chapter';
+    const title = entry.title ?? chapterTitle(html, `Chapter ${index + 1}`);
+    const entryThemes = [
+      project.manifest.theme.css,
+      ...(entry.theme ? [entry.theme] : []),
+    ];
+    for (const path of entryThemes) themePaths.add(path);
+
+    return {
+      index,
+      sourcePath: entry.path,
+      outputPath: outputName(index),
+      title,
+      role,
+      breakBefore: entry.breakBefore,
+      themePaths: entryThemes,
+      html,
+    } satisfies CompiledChapter;
+  });
+
+  const assetPaths = project.workspace
+    .list()
+    .filter(
+      (path) =>
+        path !== 'publication.yml' &&
+        !sourcePaths.has(path) &&
+        !themePaths.has(path),
+    );
+
+  return {
+    manifest: project.manifest,
+    chapters,
+    themePaths: [...themePaths],
+    assetPaths,
+  };
+}
+
+export function roleToEpubType(role: ContentRole): string {
+  switch (role) {
+    case 'cover':
+      return 'cover';
+    case 'title-page':
+      return 'titlepage';
+    case 'copyright':
+      return 'copyright-page';
+    case 'toc':
+      return 'toc';
+    case 'preface':
+      return 'preface';
+    case 'appendix':
+      return 'appendix';
+    case 'bibliography':
+      return 'bibliography';
+    case 'colophon':
+      return 'colophon';
+    case 'chapter':
+      return 'chapter';
+    default:
+      return 'bodymatter';
+  }
+}
+
+export function publicationIdentifier(project: LoadedProject): string {
+  return (
+    project.manifest.publication.identifier ??
+    `urn:pubforge:${project.snapshot.repository}:${project.snapshot.commitSha}`
+  );
+}

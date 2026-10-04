@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { PublicationRenderer } from './components/PublicationRenderer';
+import { PublicationPrintView } from './components/PublicationPrintView';
 import { parseRepositoryTarget } from './lib/github-url';
 import { loadGitHubProject, type LoadedProject } from './lib/load-project';
 
@@ -8,6 +9,7 @@ const SAMPLE_REPO = 'Equilibriumpress/PubForge';
 
 export function App() {
   const params = new URLSearchParams(window.location.search);
+  const printMode = params.get('print') === '1';
   const [repository, setRepository] = useState(params.get('repo') ?? SAMPLE_REPO);
   const [project, setProject] = useState<LoadedProject | null>(null);
   const [status, setStatus] = useState('Open a public GitHub publication repository.');
@@ -43,6 +45,10 @@ export function App() {
     const initial = new URLSearchParams(window.location.search).get('repo');
     if (initial) void openProject(initial);
   }, []);
+
+  if (printMode && project) {
+    return <PublicationPrintView project={project} />;
+  }
 
   return (
     <main className="shell">
