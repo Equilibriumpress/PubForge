@@ -95,13 +95,24 @@ async function packageCssUrl(refText: string): Promise<string> {
 }
 
 function isPackageImport(value: string): boolean {
-  return (
-    !value.startsWith('.') &&
-    !value.startsWith('/') &&
-    !value.startsWith('http:') &&
-    !value.startsWith('https:') &&
-    !value.startsWith('data:')
-  );
+  if (
+    value.startsWith('.') ||
+    value.startsWith('/') ||
+    value.startsWith('http:') ||
+    value.startsWith('https:') ||
+    value.startsWith('data:')
+  ) {
+    return false;
+  }
+
+  // CSS commonly uses URL-relative imports without a "./" prefix
+  // (for example "css/reset.css"). Treat explicit stylesheet paths as
+  // relative URLs, while npm package specifiers remain package imports.
+  if (/\.(?:css|pcss)(?:$|[?#])/i.test(value)) {
+    return false;
+  }
+
+  return true;
 }
 
 function safeKey(value: string): string {
