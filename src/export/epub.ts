@@ -71,8 +71,6 @@ function chapterStyles(
       ? project.manifest.epub?.fixedTheme
       : project.manifest.epub?.theme;
   const themePaths = [
-    ...chapter.themePaths,
-    ...project.resolvedThemes.epub,
     ...(layoutTheme ? [layoutTheme] : []),
   ].filter((path, index, values) => values.indexOf(path) === index);
 
@@ -295,8 +293,18 @@ export function buildEpubArchive(
     );
   }
 
+  const epubCssPaths = new Set(
+    [
+      fixed ? project.manifest.epub?.fixedTheme : project.manifest.epub?.theme,
+    ].filter((path): path is string => Boolean(path)),
+  );
+
   let resourceIndex = 0;
   for (const path of compiled.assetPaths) {
+    if (/\.css$/i.test(path) && !epubCssPaths.has(path)) {
+      continue;
+    }
+
     const bytes = project.workspace.read(path);
     files[`EPUB/${path}`] = bytes;
     const properties = coverImage === path ? ' properties="cover-image"' : '';
