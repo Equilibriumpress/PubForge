@@ -451,3 +451,108 @@ h1 {
     grid-template-columns: 1fr;
   }
 }
+
+
+.preflightState {
+  border-radius: 999px;
+  padding: 0.55rem 0.8rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.preflightReady {
+  background: #e5f5e9;
+  color: #176a33;
+}
+
+.preflightBlocked {
+  background: #fee8e5;
+  color: #9f2d21;
+}
+
+.preflightTotals {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  padding: 20px 22px;
+  border-bottom: 1px solid #e2e5e3;
+}
+
+.preflightTotals div {
+  display: grid;
+  gap: 3px;
+  padding: 14px;
+  border: 1px solid #dfe3e1;
+  border-radius: 12px;
+}
+
+.preflightTotals strong {
+  font-size: 1.45rem;
+}
+
+.preflightTotals span {
+  color: #687279;
+  font-size: 0.78rem;
+}
+
+.issueList {
+  display: grid;
+}
+
+.issueItem {
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr);
+  gap: 16px;
+  padding: 16px 22px;
+  border-bottom: 1px solid #e2e5e3;
+}
+
+.issueItem:last-child {
+  border-bottom: 0;
+}
+
+.issueSeverity {
+  align-self: start;
+  justify-self: start;
+  border-radius: 999px;
+  padding: 0.35rem 0.55rem;
+  font-size: 0.68rem;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.issue-error .issueSeverity {
+  background: #fee8e5;
+  color: #9f2d21;
+}
+
+.issue-warning .issueSeverity {
+  background: #fff1c7;
+  color: #805e00;
+}
+
+.issue-info .issueSeverity {
+  background: #e9eff7;
+  color: #355b86;
+}
+
+.issueItem p {
+  margin: 5px 0 0;
+  color: #687279;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 560px) {
+  .preflightTotals {
+    grid-template-columns: 1fr;
+  }
+
+  .issueItem {
+    grid-template-columns: 1fr;
+  }
+}

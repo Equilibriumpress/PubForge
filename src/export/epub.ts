@@ -79,7 +79,7 @@ function coverXhtml(project: LoadedProject, imagePath: string): string {
 </html>`;
 }
 
-export function exportEpub(project: LoadedProject): void {
+export function buildEpubArchive(project: LoadedProject): Uint8Array {
   const compiled = compilePublication(project);
   const files: Zippable = {
     mimetype: [strToU8('application/epub+zip'), { level: 0 }],
@@ -212,10 +212,14 @@ ${spineItems.join('\n')}
 </spine>
 </package>`);
 
-  const archive = zipSync(files, { level: 6 });
+  return zipSync(files, { level: 6 });
+}
+
+export function exportEpub(project: LoadedProject): void {
+  const archive = buildEpubArchive(project);
   downloadBytes(
     archive,
-    `${slugify(metadata.title)}.epub`,
+    `${slugify(project.manifest.publication.title)}.epub`,
     'application/epub+zip',
   );
 }
