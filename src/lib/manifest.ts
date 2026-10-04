@@ -100,10 +100,21 @@ export function parsePublicationManifest(source: string): PublicationManifest {
       profile: 'screen',
       bookmarks: true,
     },
-    epub: value.epub ?? {
-      enabled: true,
-      reflowable: true,
-      embeddedFonts: true,
+    epub: {
+      enabled: value.epub?.enabled ?? true,
+      layout:
+        value.epub?.layout ??
+        (value.epub?.reflowable === false ? 'fixed' : 'reflowable'),
+      reflowable:
+        (value.epub?.layout ??
+          (value.epub?.reflowable === false ? 'fixed' : 'reflowable')) ===
+        'reflowable',
+      viewport: value.epub?.viewport,
+      orientation: value.epub?.orientation ?? 'auto',
+      spread: value.epub?.spread ?? 'auto',
+      theme: value.epub?.theme,
+      themePackages: value.epub?.themePackages,
+      embeddedFonts: value.epub?.embeddedFonts ?? true,
     },
     webpub: value.webpub ?? { enabled: true },
     projectZip: value.projectZip ?? { enabled: true },
