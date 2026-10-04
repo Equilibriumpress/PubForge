@@ -52,11 +52,16 @@ readingOrder:
     title: The long way west
     layout: page
     pageName: magazine
-  - path: examples/magazine-showcase/content/04-people.md
+  - path: examples/magazine-showcase/content/04-people-left.md
     role: chapter
     title: Lives facing the sea
-    layout: spread
-    pageName: spread
+    layout: page
+    pageName: spread-left
+  - path: examples/magazine-showcase/content/04-people-right.md
+    role: chapter
+    title: Marta, harbour master
+    layout: page
+    pageName: spread-right
   - path: examples/magazine-showcase/content/05-gallery.md
     role: chapter
     title: Three ways to read a coast
@@ -165,7 +170,13 @@ pdf:
 
 epub:
   enabled: true
-  reflowable: true
+  reflowable: false
+  layout: fixed
+  viewport:
+    width: 794
+    height: 1058
+  orientation: portrait
+  spread: auto
   theme: examples/magazine-showcase/theme/epub.css
   themePackages:
     - "@vivliostyle/theme-base@3.0.0"

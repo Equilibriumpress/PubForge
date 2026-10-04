@@ -10,6 +10,13 @@ import {
 import type { LoadedProject } from '../lib/load-project';
 import { downloadBytes, mediaType, slugify, xmlEscape } from './utils';
 
+export type EpubLayoutMode = 'reflowable' | 'fixed';
+
+interface FixedViewport {
+  width: number;
+  height: number;
+}
+
 function xhtmlBody(fragment: string): string {
   const document = window.document.implementation.createHTMLDocument('');
   document.body.innerHTML = fragment;
@@ -25,12 +32,59 @@ function safeId(path: string, index: number): string {
     .replace(/^-|-$/g, '')}`;
 }
 
-function chapterXhtml(
+function lengthToCssPx(value: string | undefined): number | undefined {
+  if (!value) return undefined;
+  const numeric = Number.parseFloat(value);
+  if (!Number.isFinite(numeric)) return undefined;
+  if (value.endsWith('mm')) return Math.round((numeric / 25.4) * 96);
+  if (value.endsWith('cm')) return Math.round((numeric / 2.54) * 96);
+  if (value.endsWith('in')) return Math.round(numeric * 96);
+  if (value.endsWith('px')) return Math.round(numeric);
+  return undefined;
+}
+
+function fixedViewport(project: LoadedProject): FixedViewport {
+  if (project.manifest.epub?.viewport) return project.manifest.epub.viewport;
+
+  const standards: Record<string, FixedViewport> = {
+    A4: { width: 794, height: 1123 },
+    A5: { width: 559, height: 794 },
+    A6: { width: 397, height: 559 },
+    Letter: { width: 816, height: 1056 },
+    Legal: { width: 816, height: 1344 },
+  };
+
+  const width = lengthToCssPx(project.manifest.pdf?.width);
+  const height = lengthToCssPx(project.manifest.pdf?.height);
+  if (width && height) return { width, height };
+
+  return standards[project.manifest.pdf?.size ?? 'A4'] ?? standards.A4;
+}
+
+function chapterStyles(
+  project: LoadedProject,
+  chapter: ReturnType<typeof compilePublication>['chapters'][number],
+): string {
+  const themePaths = [
+    ...chapter.themePaths,
+    ...project.resolvedThemes.epub,
+    ...(project.manifest.epub?.theme ? [project.manifest.epub.theme] : []),
+  ].filter((path, index, values) => values.indexOf(path) === index);
+
+  return themePaths
+    .map(
+      (path) =>
+        `<link rel="stylesheet" type="text/css" href="../${xmlEscape(path)}"/>`,
+    )
+    .join('\n');
+}
+
+function chapterHtml(
   project: LoadedProject,
   chapter: ReturnType<typeof compilePublication>['chapters'][number],
   compiled: ReturnType<typeof compilePublication>,
 ): string {
-  const html = rewriteHtmlReferences(
+  return rewriteHtmlReferences(
     chapter.html,
     chapter.sourcePath,
     (resolved) => {
@@ -40,19 +94,15 @@ function chapterXhtml(
       return null;
     },
   );
+}
 
-  const themePaths = [
-    ...chapter.themePaths,
-    ...project.resolvedThemes.epub,
-    ...(project.manifest.epub?.theme ? [project.manifest.epub.theme] : []),
-  ].filter((path, index, values) => values.indexOf(path) === index);
-
-  const styles = themePaths
-    .map(
-      (path) =>
-        `<link rel="stylesheet" type="text/css" href="../${xmlEscape(path)}"/>`,
-    )
-    .join('\n');
+function reflowableChapterXhtml(
+  project: LoadedProject,
+  chapter: ReturnType<typeof compilePublication>['chapters'][number],
+  compiled: ReturnType<typeof compilePublication>,
+): string {
+  const html = chapterHtml(project, chapter, compiled);
+  const styles = chapterStyles(project, chapter);
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" lang="${xmlEscape(project.manifest.publication.language)}" xml:lang="${xmlEscape(project.manifest.publication.language)}" dir="${project.manifest.publication.readingProgression ?? 'ltr'}">
@@ -62,6 +112,50 @@ ${styles}
 </head>
 <body epub:type="${roleToEpubType(chapter.role)}">
 <section epub:type="${roleToEpubType(chapter.role)}">
+${xhtmlBody(html)}
+</section>
+</body>
+</html>`;
+}
+
+function fixedChapterXhtml(
+  project: LoadedProject,
+  chapter: ReturnType<typeof compilePublication>['chapters'][number],
+  compiled: ReturnType<typeof compilePublication>,
+  viewport: FixedViewport,
+): string {
+  const html = chapterHtml(project, chapter, compiled);
+  const styles = chapterStyles(project, chapter);
+  const layoutClass = chapter.layout
+    ? ` pubforge-entry-layout-${chapter.layout}`
+    : '';
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" lang="${xmlEscape(project.manifest.publication.language)}" xml:lang="${xmlEscape(project.manifest.publication.language)}" dir="${project.manifest.publication.readingProgression ?? 'ltr'}">
+<head>
+<title>${xmlEscape(chapter.title)}</title>
+<meta name="viewport" content="width=${viewport.width}, height=${viewport.height}"/>
+${styles}
+<style>
+html, body {
+  width: ${viewport.width}px;
+  height: ${viewport.height}px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+body { position: relative; }
+.pubforge-fixed-page {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  margin: 0;
+}
+</style>
+</head>
+<body epub:type="${roleToEpubType(chapter.role)}">
+<section class="pubforge-chapter pubforge-fixed-page${layoutClass}" data-entry-layout="${chapter.layout ?? 'page'}" epub:type="${roleToEpubType(chapter.role)}">
 ${xhtmlBody(html)}
 </section>
 </body>
@@ -136,8 +230,18 @@ function collectPageList(
   return items;
 }
 
-export function buildEpubArchive(project: LoadedProject): Uint8Array {
+export function buildEpubArchive(
+  project: LoadedProject,
+  options: { layout?: EpubLayoutMode } = {},
+): Uint8Array {
   const compiled = compilePublication(project);
+  const layout =
+    options.layout ??
+    project.manifest.epub?.layout ??
+    (project.manifest.epub?.reflowable === false ? 'fixed' : 'reflowable');
+  const fixed = layout === 'fixed';
+  const viewport = fixed ? fixedViewport(project) : null;
+
   const files: Zippable = {
     mimetype: [strToU8('application/epub+zip'), { level: 0 }],
   };
@@ -159,7 +263,7 @@ export function buildEpubArchive(project: LoadedProject): Uint8Array {
       ? project.manifest.cover.image
       : null;
 
-  if (coverImage) {
+  if (coverImage && !fixed) {
     files['EPUB/text/cover.xhtml'] = strToU8(coverXhtml(project, coverImage));
     manifestItems.push(
       '<item id="cover-page" href="text/cover.xhtml" media-type="application/xhtml+xml"/>',
@@ -169,7 +273,10 @@ export function buildEpubArchive(project: LoadedProject): Uint8Array {
 
   for (const chapter of compiled.chapters) {
     const id = `chapter-${chapter.index + 1}`;
-    const xhtml = chapterXhtml(project, chapter, compiled);
+    const xhtml =
+      fixed && viewport
+        ? fixedChapterXhtml(project, chapter, compiled, viewport)
+        : reflowableChapterXhtml(project, chapter, compiled);
     files[`EPUB/${chapter.outputPath}`] = strToU8(xhtml);
 
     const properties = xhtml.includes('<math') ? ' properties="mathml"' : '';
@@ -183,15 +290,10 @@ export function buildEpubArchive(project: LoadedProject): Uint8Array {
   }
 
   let resourceIndex = 0;
-
   for (const path of compiled.assetPaths) {
     const bytes = project.workspace.read(path);
     files[`EPUB/${path}`] = bytes;
-
-    const properties =
-      coverImage === path
-        ? ' properties="cover-image"'
-        : '';
+    const properties = coverImage === path ? ' properties="cover-image"' : '';
     manifestItems.push(
       `<item id="${safeId(path, resourceIndex++)}" href="${xmlEscape(path)}" media-type="${mediaType(path)}"${properties}/>`,
     );
@@ -199,9 +301,14 @@ export function buildEpubArchive(project: LoadedProject): Uint8Array {
 
   const landmarks: string[] = [];
   if (coverImage) {
-    landmarks.push(
-      '<li><a epub:type="cover" href="text/cover.xhtml">Cover</a></li>',
-    );
+    const coverHref = fixed
+      ? compiled.chapters[0]?.outputPath
+      : 'text/cover.xhtml';
+    if (coverHref) {
+      landmarks.push(
+        `<li><a epub:type="cover" href="${coverHref}">Cover</a></li>`,
+      );
+    }
   }
   const firstBody = compiled.chapters.find((chapter) => chapter.role === 'chapter');
   if (firstBody) {
@@ -226,7 +333,7 @@ export function buildEpubArchive(project: LoadedProject): Uint8Array {
       : `<nav epub:type="landmarks" hidden="hidden"><h2>Landmarks</h2><ol>${landmarks.join('')}</ol></nav>`;
 
   files['EPUB/nav.xhtml'] = strToU8(`<?xml version="1.0" encoding="UTF-8"?>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" lang="${xmlEscape(project.manifest.publication.language)}">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" lang="${xmlEscape(project.manifest.publication.language)}" dir="${project.manifest.publication.readingProgression ?? 'ltr'}">
 <head><title>Navigation</title></head>
 <body>
 ${tocNav}
@@ -246,8 +353,14 @@ ${landmarksNav}
     .map((subject) => `<dc:subject>${xmlEscape(subject)}</dc:subject>`)
     .join('\n');
 
+  const fixedMetadata = fixed
+    ? `<meta property="rendition:layout">pre-paginated</meta>
+<meta property="rendition:orientation">${project.manifest.epub?.orientation ?? 'auto'}</meta>
+<meta property="rendition:spread">${project.manifest.epub?.spread ?? 'auto'}</meta>`
+    : '<meta property="rendition:layout">reflowable</meta>';
+
   files['EPUB/package.opf'] = strToU8(`<?xml version="1.0" encoding="UTF-8"?>
-<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="pub-id" prefix="dcterms: http://purl.org/dc/terms/">
+<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="pub-id" prefix="dcterms: http://purl.org/dc/terms/ rendition: http://www.idpf.org/vocab/rendition/#">
 <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
 <dc:identifier id="pub-id">${xmlEscape(publicationIdentifier(project))}</dc:identifier>
 <dc:title>${xmlEscape(metadata.title)}</dc:title>
@@ -260,6 +373,7 @@ ${subjects}
 ${metadata.rights ? `<dc:rights>${xmlEscape(metadata.rights)}</dc:rights>` : ''}
 ${metadata.date ? `<dc:date>${xmlEscape(metadata.date)}</dc:date>` : ''}
 <meta property="dcterms:modified">${new Date().toISOString().replace(/\.\d{3}Z$/, 'Z')}</meta>
+${fixedMetadata}
 </metadata>
 <manifest>
 ${manifestItems.join('\n')}
@@ -272,11 +386,19 @@ ${spineItems.join('\n')}
   return zipSync(files, { level: 6 });
 }
 
-export function exportEpub(project: LoadedProject): void {
-  const archive = buildEpubArchive(project);
+export function exportEpub(
+  project: LoadedProject,
+  layout?: EpubLayoutMode,
+): void {
+  const resolvedLayout =
+    layout ??
+    project.manifest.epub?.layout ??
+    (project.manifest.epub?.reflowable === false ? 'fixed' : 'reflowable');
+  const archive = buildEpubArchive(project, { layout: resolvedLayout });
+  const suffix = resolvedLayout === 'fixed' ? '-fixed' : '';
   downloadBytes(
     archive,
-    `${slugify(project.manifest.publication.title)}.epub`,
+    `${slugify(project.manifest.publication.title)}${suffix}.epub`,
     'application/epub+zip',
   );
 }

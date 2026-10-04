@@ -84,10 +84,26 @@ function validateEpubPackage(project: LoadedProject, issues: PreflightIssue[]): 
     }
 
     if (!files['EPUB/package.opf']) return;
-    const opf = xmlDocument(strFromU8(files['EPUB/package.opf']));
+    const opfSource = strFromU8(files['EPUB/package.opf']);
+    const opf = xmlDocument(opfSource);
     if (hasXmlError(opf)) {
       add(issues, 'error', 'epub', 'epub-opf-xml', 'EPUB package.opf is not well-formed XML.', 'EPUB/package.opf');
       return;
+    }
+
+    const fixed = project.manifest.epub?.layout === 'fixed';
+    if (
+      fixed &&
+      !opfSource.includes('<meta property="rendition:layout">pre-paginated</meta>')
+    ) {
+      add(
+        issues,
+        'error',
+        'epub',
+        'epub-fixed-layout-metadata',
+        'Fixed-layout EPUB is missing rendition:layout pre-paginated metadata.',
+        'EPUB/package.opf',
+      );
     }
 
     const manifestIds = new Set<string>();
@@ -200,6 +216,39 @@ export function runPreflight(project: LoadedProject): PreflightReport {
       'content',
       'magazine-layout',
       `Magazine component layout is active with ${project.manifest.layout.columns ?? 2} default columns.`,
+    );
+  }
+
+  if (project.manifest.epub?.layout === 'fixed') {
+    if (!project.manifest.epub.viewport) {
+      add(
+        issues,
+        'warning',
+        'epub',
+        'fixed-layout-viewport-derived',
+        'Fixed-layout EPUB has no explicit viewport; PubForge will derive one from the PDF page size.',
+      );
+    }
+
+    for (const entry of project.manifest.readingOrder) {
+      if (entry.layout === 'spread') {
+        add(
+          issues,
+          'error',
+          'epub',
+          'fixed-layout-wide-spread',
+          'Fixed-layout EPUB requires one designed page per reading-order entry. Split wide spreads into left and right page entries.',
+          entry.path,
+        );
+      }
+    }
+
+    add(
+      issues,
+      'info',
+      'epub',
+      'fixed-layout-enabled',
+      `Fixed-layout EPUB is enabled with ${project.manifest.readingOrder.length} designed pages.`,
     );
   }
 

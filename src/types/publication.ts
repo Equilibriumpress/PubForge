@@ -137,6 +137,13 @@ export interface PublicationManifest {
   epub?: {
     enabled?: boolean;
     reflowable?: boolean;
+    layout?: 'reflowable' | 'fixed';
+    viewport?: {
+      width: number;
+      height: number;
+    };
+    orientation?: 'auto' | 'portrait' | 'landscape';
+    spread?: 'auto' | 'none' | 'landscape' | 'both';
     theme?: string;
     themePackages?: string[];
     embeddedFonts?: boolean;
