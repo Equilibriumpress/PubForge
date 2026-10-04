@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1800" role="img" aria-labelledby="t">
+<title id="t">Stylized Lisbon hillside and river</title>
+<defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#80b4c3"/><stop offset=".65" stop-color="#f0c093"/></linearGradient></defs>
+<rect width="1200" height="1800" fill="url(#sky)"/>
+<rect y="1380" width="1200" height="420" fill="#356d79"/>
+<path d="M0 1280L180 1080 310 1180 470 910 620 1100 790 760 960 1000 1200 860V1450H0Z" fill="#d8c49f"/>
+<g fill="#f0e7d6" stroke="#8e725f" stroke-width="6"><rect x="100" y="1040" width="180" height="250"/><rect x="330" y="990" width="210" height="300"/><rect x="610" y="900" width="190" height="390"/><rect x="860" y="960" width="220" height="330"/></g>
+<g fill="#d66e4d"><path d="M90 1040l100-70 100 70z"/><path d="M315 990l120-80 120 80z"/><path d="M595 900l110-80 110 80z"/><path d="M845 960l125-85 125 85z"/></g>
+<path d="M0 1510C250 1450 480 1560 720 1490s330-30 480 10" fill="none" stroke="#e6f0eb" stroke-width="10" opacity=".45"/>
+<path d="M110 1320C350 1240 620 1300 1020 1160" fill="none" stroke="#c99b43" stroke-width="10"/>
+</svg>
