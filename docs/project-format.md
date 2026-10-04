@@ -126,3 +126,16 @@ PDF bookmark requests are retained as production intent because browser Save as 
 `theme.packages` and `epub.themePackages` may contain npm package references such as `@vivliostyle/theme-base@3.0.0`.
 
 PubForge resolves these packages directly in the browser through jsDelivr, reads the package's Vivliostyle/style/main entry, recursively inlines CSS imports, downloads relative theme assets into a read-only virtual workspace and then bundles those resources into EPUB/WebPub output. Local project CSS is layered after base package themes so a publication can override package defaults.
+
+
+## Rich browser assets
+
+The optional `assets` controls can prepare derived resources without changing Git source:
+
+- `mermaid: true`: fenced Mermaid blocks are rendered to virtual SVG files in the browser.
+- `syntaxHighlighting: true`: fenced code blocks are highlighted with Shiki; `shikiTheme` selects the theme.
+- `imageOptimization.maxDimension`: raster Markdown images larger than this are downsampled in-browser; JPEG quality is controlled with `jpegQuality`.
+
+Derived files live under `.pubforge/generated/` only in the renderer workspace. The Project ZIP continues to contain the exact committed Git source.
+
+`pdf.editions` may request `normal`, `print` and/or `high-quality` theme variants. These are CSS/rendering edition hooks; the browser does not claim vendor-specific image recompression or PDF/X behavior.
