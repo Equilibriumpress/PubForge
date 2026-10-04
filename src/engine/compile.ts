@@ -137,7 +137,15 @@ function vfmOptions(manifest: PublicationManifest): Parameters<typeof stringify>
 
 function globMatch(path: string, pattern: string): boolean {
   const escaped = pattern
-    .replace(/[.+^$(){}|[\]\\]/g, '\\function collectReferencedResources(
+    .replace(/[.+^$(){}|[\]\\]/g, '\\$&')
+    .replace(/\*\*/g, '§§DOUBLESTAR§§')
+    .replace(/\*/g, '[^/]*')
+    .replace(/§§DOUBLESTAR§§/g, '.*')
+    .replace(/\?/g, '.');
+  return new RegExp(`^${escaped}$`).test(path);
+}
+
+function collectReferencedResources(
   project: LoadedProject,')
     .replace(/\*\*/g, '§§DOUBLESTAR§§')
     .replace(/\*/g, '[^/]*')
