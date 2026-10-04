@@ -495,3 +495,57 @@ h1 {
     grid-template-columns: 1fr;
   }
 }
+
+
+.commitContent {
+  display: grid;
+  gap: 18px;
+  max-width: 720px;
+  padding: 24px;
+}
+
+.commitContent label {
+  display: grid;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.commitContent input {
+  width: 100%;
+}
+
+.commitChanges {
+  padding: 18px;
+  border: 1px solid #e2e5e3;
+  border-radius: 14px;
+  background: #f8f7f3;
+}
+
+.commitChanges h3 {
+  margin: 0 0 10px;
+}
+
+.commitChanges ul {
+  max-height: 220px;
+  overflow: auto;
+  margin: 0;
+  padding-left: 20px;
+  color: #465158;
+  font: 0.85rem/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.commitChanges p {
+  margin: 0;
+  color: #687279;
+}
+
+.commitNote {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.commitStatus {
+  margin: 0;
+  color: #465158;
+  font-size: 0.9rem;
+}
