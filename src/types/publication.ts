@@ -147,6 +147,7 @@ export interface PublicationManifest {
     orientation?: 'auto' | 'portrait' | 'landscape';
     spread?: 'auto' | 'none' | 'landscape' | 'both';
     theme?: string;
+    fixedTheme?: string;
     themePackages?: string[];
     embeddedFonts?: boolean;
   };
