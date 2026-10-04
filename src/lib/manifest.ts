@@ -120,6 +120,7 @@ export function parsePublicationManifest(source: string): PublicationManifest {
       orientation: value.epub?.orientation ?? 'auto',
       spread: value.epub?.spread ?? 'auto',
       theme: value.epub?.theme,
+      fixedTheme: value.epub?.fixedTheme,
       themePackages: value.epub?.themePackages,
       embeddedFonts: value.epub?.embeddedFonts ?? true,
     },
