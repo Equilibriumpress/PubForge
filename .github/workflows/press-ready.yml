@@ -1,0 +1,188 @@
+name: Press-ready publication
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/press-ready.yml
+      - scripts/generate-press-config.mjs
+      - scripts/export-webpub.mjs
+      - publication.yml
+  workflow_dispatch:
+    inputs:
+      repository:
+        description: Public publication repository (owner/name)
+        required: false
+        default: Equilibriumpress/PubForge
+      ref:
+        description: Git ref or commit; blank uses this workflow commit
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  press-ready:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout PubForge
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install validation tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qpdf poppler-utils unzip curl
+
+      - name: Install PubForge dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Install Vivliostyle CLI
+        run: npm install --no-save @vivliostyle/cli@11.3.3
+
+      - name: Resolve publication target
+        id: target
+        shell: bash
+        run: |
+          REPOSITORY="${{ inputs.repository }}"
+          if [ -z "$REPOSITORY" ]; then REPOSITORY="$GITHUB_REPOSITORY"; fi
+
+          REF="${{ inputs.ref }}"
+          if [ -z "$REF" ]; then REF="$GITHUB_SHA"; fi
+
+          echo "repository=$REPOSITORY" >> "$GITHUB_OUTPUT"
+          echo "ref=$REF" >> "$GITHUB_OUTPUT"
+          echo "repo_ref=$REPOSITORY@$REF" >> "$GITHUB_OUTPUT"
+
+      - name: Fetch publication source
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir publication-source
+          git -C publication-source init
+          git -C publication-source remote add origin "https://github.com/${{ steps.target.outputs.repository }}.git"
+          git -C publication-source fetch --depth 1 origin "${{ steps.target.outputs.ref }}"
+          git -C publication-source checkout --detach FETCH_HEAD
+          test -f publication-source/publication.yml
+
+      - name: Check press-ready intent
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFile } from 'node:fs/promises';
+          import { parse } from 'yaml';
+
+          const manifest = parse(await readFile('publication-source/publication.yml', 'utf8'));
+          const production = manifest.pdf?.production ?? {};
+
+          if (production.enabled === false) {
+            throw new Error('pdf.production.enabled is false for this publication.');
+          }
+
+          console.log(JSON.stringify({
+            profile: manifest.pdf?.profile ?? 'screen',
+            production,
+          }, null, 2));
+          NODE
+
+      - name: Build PubForge
+        run: npm run build
+
+      - name: Start PubForge preview server
+        run: |
+          npm run preview -- --host 127.0.0.1 --port 4173 >/tmp/pubforge-preview.log 2>&1 &
+          echo $! >/tmp/pubforge-preview.pid
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:4173/ >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/pubforge-preview.log
+          exit 1
+
+      - name: Export prepared Web Publication
+        env:
+          PUBFORGE_REPO: ${{ steps.target.outputs.repo_ref }}
+          PUBFORGE_URL: http://127.0.0.1:4173/
+          PUBFORGE_WEBPUB: press-work/publication.webpub.zip
+        run: node scripts/export-webpub.mjs
+
+      - name: Prepare Web Publication workspace
+        run: |
+          mkdir -p press-work/webpub
+          unzip -q press-work/publication.webpub.zip -d press-work/webpub
+          test -f press-work/webpub/publication.json
+
+      - name: Generate Vivliostyle press config
+        run: |
+          node scripts/generate-press-config.mjs             publication-source             press-work/webpub             press-work/publication-press-ready.pdf
+
+      - name: Build press-ready PDF/X with official Vivliostyle CLI
+        working-directory: press-work/webpub
+        run: |
+          ../../../node_modules/.bin/vivliostyle build             -c vivliostyle.press.config.mjs
+
+      - name: Validate press-ready PDF
+        shell: bash
+        run: |
+          set -euo pipefail
+          PDF="press-work/publication-press-ready.pdf"
+          test -s "$PDF"
+
+          qpdf --check "$PDF" 2>&1 | tee press-work/qpdf-check.txt
+          pdfinfo -box "$PDF" | tee press-work/pdfinfo.txt
+          pdffonts "$PDF" | tee press-work/fonts.txt
+          pdfimages -list "$PDF" | tee press-work/images.txt
+
+          # Record PDF/X/output-intent evidence when present. These checks
+          # remain diagnostic because the exact metadata representation can
+          # differ between compliant producers.
+          strings "$PDF" | grep -E 'GTS_PDFX|PDF/X|OutputIntent'             > press-work/pdfx-evidence.txt || true
+
+          sha256sum "$PDF" > press-work/SHA256SUMS.txt
+
+      - name: Write press-ready report
+        shell: bash
+        run: |
+          {
+            echo "# PubForge press-ready build"
+            echo
+            echo "Target: `${{ steps.target.outputs.repo_ref }}`"
+            echo
+            echo "- Vivliostyle CLI: 11.3.3"
+            echo "- PDF structural check: qpdf passed"
+            echo "- Page boxes/fonts/images: captured with Poppler"
+            echo "- PDF/X/output-intent evidence: captured when present"
+            echo "- SHA-256 checksum: generated"
+            echo
+            echo "The exact press-ready transformation is controlled by"
+            echo "`pdf.production` in the publication manifest."
+          } > press-work/PRESS-READY-REPORT.md
+
+      - name: Upload press-ready artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pubforge-press-ready
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            press-work/publication-press-ready.pdf
+            press-work/pubforge-press-config.json
+            press-work/qpdf-check.txt
+            press-work/pdfinfo.txt
+            press-work/fonts.txt
+            press-work/images.txt
+            press-work/pdfx-evidence.txt
+            press-work/SHA256SUMS.txt
+            press-work/PRESS-READY-REPORT.md
