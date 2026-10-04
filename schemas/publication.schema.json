@@ -512,6 +512,48 @@
         },
         "embeddedFonts": {
           "type": "boolean"
+        },
+        "layout": {
+          "type": "string",
+          "enum": [
+            "reflowable",
+            "fixed"
+          ]
+        },
+        "viewport": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "width",
+            "height"
+          ],
+          "properties": {
+            "width": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "height": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "orientation": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "portrait",
+            "landscape"
+          ]
+        },
+        "spread": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "none",
+            "landscape",
+            "both"
+          ]
         }
       }
     },
