@@ -1,5 +1,7 @@
 # Figures, Tables and Data
 
+<span role="doc-pagebreak" id="page-2" aria-label="2"></span>
+
 A rich publication should keep explanatory visuals close to the argument.
 
 <figure id="pipeline-figure">
