@@ -18,6 +18,7 @@ export interface LayoutPageMetric {
   textCharacters: number;
   imageCount: number;
   imageAreaRatio: number;
+  sourcePaths: string[];
 }
 
 export interface LayoutAuditReport {
@@ -68,11 +69,22 @@ export function runLayoutAudit(root: HTMLElement): LayoutAuditReport {
     );
     const imageAreaRatio = Math.min(1, ratio(imageArea, pageArea));
 
+    const sourcePaths = Array.from(
+      new Set(
+        Array.from(
+          pageElement.querySelectorAll<HTMLElement>('[data-source]'),
+        )
+          .map((element) => element.dataset.source)
+          .filter((value): value is string => Boolean(value)),
+      ),
+    );
+
     pages.push({
       page,
       textCharacters,
       imageCount: images.length,
       imageAreaRatio,
+      sourcePaths,
     });
 
     if (textCharacters < 70 && imageAreaRatio < 0.18) {
