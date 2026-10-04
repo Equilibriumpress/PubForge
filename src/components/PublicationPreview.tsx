@@ -6,18 +6,23 @@ import { buildPublicationDocument } from '../render/build-html';
 
 interface PublicationPreviewProps {
   project: LoadedProject;
+  revision?: number;
 }
 
-export function PublicationPreview({ project }: PublicationPreviewProps) {
+export function PublicationPreview({
+  project,
+  revision = 0,
+}: PublicationPreviewProps) {
   const publication = useMemo(
     () => buildPublicationDocument(project),
-    [project.snapshot.commitSha],
+    [project.snapshot.commitSha, revision],
   );
   const [page, setPage] = useState(1);
   const [pageCount, setPageCount] = useState<number | null>(null);
 
   useEffect(() => {
     setPage(1);
+    setPageCount(null);
     return () => publication.dispose();
   }, [publication]);
 
