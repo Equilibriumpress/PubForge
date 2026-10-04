@@ -14,6 +14,19 @@ interface CommitResponse {
   };
 }
 
+interface GitCommitResponse {
+  sha: string;
+  tree: {
+    sha: string;
+  };
+}
+
+interface GitRefResponse {
+  object: {
+    sha: string;
+  };
+}
+
 interface TreeResponse {
   truncated: boolean;
   tree: Array<{
@@ -25,6 +38,25 @@ interface TreeResponse {
   }>;
 }
 
+interface BlobResponse {
+  sha: string;
+}
+
+interface CreateTreeResponse {
+  sha: string;
+}
+
+interface CreateCommitResponse {
+  sha: string;
+}
+
+export interface CommitChangesOptions {
+  token: string;
+  message: string;
+  writes: Array<{ path: string; data: Uint8Array }>;
+  deletes: string[];
+}
+
 const decoder = new TextDecoder();
 
 function encodedPath(path: string): string {
@@ -34,25 +66,55 @@ function encodedPath(path: string): string {
     .join('/');
 }
 
-async function githubJson<T>(url: string): Promise<T> {
-  const response = await fetch(url, {
-    headers: {
-      Accept: 'application/vnd.github+json',
-      'X-GitHub-Api-Version': '2022-11-28',
-    },
-  });
+function encodedRefPath(ref: string): string {
+  return ref.split('/').map((part) => encodeURIComponent(part)).join('/');
+}
+
+function bytesToBase64(data: Uint8Array): string {
+  let binary = '';
+  const chunkSize = 0x8000;
+  for (let index = 0; index < data.length; index += chunkSize) {
+    binary += String.fromCharCode(...data.subarray(index, index + chunkSize));
+  }
+  return btoa(binary);
+}
+
+async function githubRequest<T>(
+  url: string,
+  init: RequestInit = {},
+  token?: string,
+): Promise<T> {
+  const headers = new Headers(init.headers);
+  headers.set('Accept', 'application/vnd.github+json');
+  headers.set('X-GitHub-Api-Version', '2022-11-28');
+  if (token) headers.set('Authorization', `Bearer ${token}`);
+  if (init.body && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
+
+  const response = await fetch(url, { ...init, headers });
 
   if (!response.ok) {
     const rateRemaining = response.headers.get('x-ratelimit-remaining');
     if (response.status === 403 && rateRemaining === '0') {
-      throw new Error('GitHub API rate limit reached. Try again later or use a cached project.');
+      throw new Error('GitHub API rate limit reached.');
+    }
+    if (response.status === 401) {
+      throw new Error('GitHub rejected the token.');
+    }
+    if (response.status === 403) {
+      throw new Error('GitHub token does not have permission to write this repository.');
     }
     if (response.status === 404) {
-      throw new Error('Repository or ref not found, or the repository is private.');
+      throw new Error('Repository, branch or file was not found.');
+    }
+    if (response.status === 422) {
+      throw new Error('GitHub rejected the write because the branch changed or the request is invalid.');
     }
     throw new Error(`GitHub request failed with status ${response.status}.`);
   }
 
+  if (response.status === 204) return undefined as T;
   return response.json() as Promise<T>;
 }
 
@@ -66,12 +128,12 @@ export class GitHubStorageProvider implements StorageProvider {
     const repository = `${this.target.owner}/${this.target.repo}`;
     const apiRoot = `https://api.github.com/repos/${repository}`;
 
-    const repositoryInfo = await githubJson<RepositoryResponse>(apiRoot);
+    const repositoryInfo = await githubRequest<RepositoryResponse>(apiRoot);
     const ref = this.target.ref ?? repositoryInfo.default_branch;
-    const commit = await githubJson<CommitResponse>(
+    const commit = await githubRequest<CommitResponse>(
       `${apiRoot}/commits/${encodeURIComponent(ref)}`,
     );
-    const tree = await githubJson<TreeResponse>(
+    const tree = await githubRequest<TreeResponse>(
       `${apiRoot}/git/trees/${commit.commit.tree.sha}?recursive=1`,
     );
 
@@ -137,9 +199,7 @@ export class GitHubStorageProvider implements StorageProvider {
 
   list(prefix = ''): FileMeta[] {
     const normalized = prefix.replace(/^\/+|\/+$/g, '');
-    if (!normalized) {
-      return [...this.fileIndex.values()];
-    }
+    if (!normalized) return [...this.fileIndex.values()];
     const withSlash = `${normalized}/`;
     return [...this.fileIndex.values()].filter(
       (file) => file.path === normalized || file.path.startsWith(withSlash),
@@ -148,5 +208,109 @@ export class GitHubStorageProvider implements StorageProvider {
 
   stat(path: string): FileMeta | null {
     return this.fileIndex.get(path) ?? null;
+  }
+
+  async commitChanges(options: CommitChangesOptions): Promise<string> {
+    const snapshot = this.requireSnapshot();
+    if (!options.token) throw new Error('A GitHub token is required.');
+    if (!options.writes.length && !options.deletes.length) {
+      throw new Error('There are no local changes to commit.');
+    }
+
+    const apiRoot = `https://api.github.com/repos/${snapshot.repository}`;
+    const refPath = encodedRefPath(snapshot.ref);
+
+    let ref: GitRefResponse;
+    try {
+      ref = await githubRequest<GitRefResponse>(
+        `${apiRoot}/git/ref/heads/${refPath}`,
+        {},
+        options.token,
+      );
+    } catch {
+      throw new Error('Write-back requires a branch ref. Open a branch instead of a tag or commit SHA.');
+    }
+
+    if (ref.object.sha !== snapshot.commitSha) {
+      throw new Error(
+        'The remote branch changed after this workspace was opened. Reload before committing.',
+      );
+    }
+
+    const currentCommit = await githubRequest<GitCommitResponse>(
+      `${apiRoot}/git/commits/${snapshot.commitSha}`,
+      {},
+      options.token,
+    );
+
+    const tree: Array<Record<string, unknown>> = [];
+
+    for (const write of options.writes) {
+      const blob = await githubRequest<BlobResponse>(
+        `${apiRoot}/git/blobs`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            content: bytesToBase64(write.data),
+            encoding: 'base64',
+          }),
+        },
+        options.token,
+      );
+      tree.push({
+        path: write.path,
+        mode: '100644',
+        type: 'blob',
+        sha: blob.sha,
+      });
+    }
+
+    for (const path of options.deletes) {
+      tree.push({
+        path,
+        mode: '100644',
+        type: 'blob',
+        sha: null,
+      });
+    }
+
+    const newTree = await githubRequest<CreateTreeResponse>(
+      `${apiRoot}/git/trees`,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          base_tree: currentCommit.tree.sha,
+          tree,
+        }),
+      },
+      options.token,
+    );
+
+    const newCommit = await githubRequest<CreateCommitResponse>(
+      `${apiRoot}/git/commits`,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          message: options.message,
+          tree: newTree.sha,
+          parents: [snapshot.commitSha],
+        }),
+      },
+      options.token,
+    );
+
+    await githubRequest(
+      `${apiRoot}/git/refs/heads/${refPath}`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify({
+          sha: newCommit.sha,
+          force: false,
+        }),
+      },
+      options.token,
+    );
+
+    return newCommit.sha;
   }
 }
