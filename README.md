@@ -67,6 +67,10 @@ AGENTS.md
 
 Only `publication.yml` is mandatory. See `docs/project-format.md`, `docs/project-protocol.md` and `schemas/publication.schema.json`.
 
+## Production QA
+
+For release candidates, the optional `Publication production QA` GitHub workflow generates real browser artifacts and validates them with EPUBCheck, qpdf, Poppler, page-rendering and edition-parity checks. See `docs/production-qa.md`.
+
 ## Important PDF boundary
 
 The browser PDF path uses Vivliostyle pagination and can render trim size, bleed and crop-mark layouts. A **press** profile does not by itself create PDF/X or an ICC/output-intent conversion. Those remain an optional external press-ready step.
