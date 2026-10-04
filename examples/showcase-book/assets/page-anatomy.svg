@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 620" role="img" aria-labelledby="t">
+  <title id="t">A5 page anatomy</title>
+  <rect width="800" height="620" fill="#f5f2ea"/>
+  <rect x="210" y="50" width="380" height="520" fill="#fff" stroke="#a6b0ab" stroke-width="12"/>
+  <rect x="228" y="68" width="344" height="484" fill="none" stroke="#172026" stroke-width="3"/>
+  <rect x="275" y="120" width="250" height="360" fill="#eef1ef" stroke="#8d9993" stroke-dasharray="8 8"/>
+  <text x="400" y="105" text-anchor="middle" font-family="system-ui" font-size="22">running header</text>
+  <text x="400" y="520" text-anchor="middle" font-family="system-ui" font-size="22">folio 24</text>
+  <g font-family="system-ui" font-size="20" fill="#172026">
+    <text x="40" y="90">bleed</text><path d="M95 85H200" stroke="#172026"/>
+    <text x="610" y="90">trim</text><path d="M600 85H575" stroke="#172026"/>
+    <text x="40" y="300">inner margin</text><path d="M150 295H270" stroke="#172026"/>
+    <text x="610" y="300">outer margin</text><path d="M600 295H525" stroke="#172026"/>
+  </g>
+</svg>
