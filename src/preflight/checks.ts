@@ -110,6 +110,23 @@ function validateEpubPackage(
       );
     }
 
+    if (fixed) {
+      for (const [path, bytes] of Object.entries(files)) {
+        if (!/^EPUB\/text\/chapter-.*\.xhtml$/.test(path)) continue;
+        const source = strFromU8(bytes);
+        if (!source.includes('<meta name="viewport"')) {
+          add(
+            issues,
+            'error',
+            'epub',
+            'fixed-layout-page-viewport',
+            'Fixed-layout page is missing viewport metadata.',
+            path,
+          );
+        }
+      }
+    }
+
     const vendorProfile = project.manifest.epub?.vendorProfile ?? 'generic';
     if (
       vendorProfile === 'apple-books' &&
