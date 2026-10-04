@@ -8,12 +8,18 @@ import {
 import { PageViewMode } from '@vivliostyle/core';
 import { Renderer } from '@vivliostyle/react';
 
+import { LayoutLabPanel } from './LayoutLabPanel';
 import type { LoadedProject } from '../lib/load-project';
 import { buildPublicationDocument } from '../render/build-html';
 import {
   runLayoutAudit,
   type LayoutAuditReport,
 } from '../review/layout-audit';
+import {
+  buildLayoutLabCss,
+  DEFAULT_LAYOUT_LAB,
+  type LayoutLabSettings,
+} from '../review/layout-lab';
 
 interface ReviewPanelProps {
   project: LoadedProject;
@@ -34,11 +40,21 @@ export function ReviewPanel({ project }: ReviewPanelProps) {
   const [zoom, setZoom] = useState(0.8);
   const [viewMode, setViewMode] = useState<ViewMode>('spread');
   const [audit, setAudit] = useState<LayoutAuditReport | null>(null);
+  const [labEnabled, setLabEnabled] = useState(false);
+  const [labSettings, setLabSettings] =
+    useState<LayoutLabSettings>(DEFAULT_LAYOUT_LAB);
+
+  const labCss = useMemo(
+    () => buildLayoutLabCss(project.manifest, labSettings),
+    [project.manifest, labSettings],
+  );
 
   useEffect(() => {
     setPage(1);
     setPageCount(null);
     setAudit(null);
+    setLabEnabled(false);
+    setLabSettings(DEFAULT_LAYOUT_LAB);
     return () => publication.dispose();
   }, [publication]);
 
@@ -76,6 +92,7 @@ export function ReviewPanel({ project }: ReviewPanelProps) {
           <span>{Math.round(zoom * 100) + '%'}</span>
           <span>{pageCount ? pageCount + ' pages' : 'Paginating…'}</span>
           {audit ? <span>{warningCount + ' layout warnings'}</span> : null}
+          {labEnabled ? <span>Layout Lab active</span> : null}
         </div>
       </header>
 
@@ -189,6 +206,7 @@ export function ReviewPanel({ project }: ReviewPanelProps) {
                 : PageViewMode.SINGLE_PAGE
             }
             renderAllPages
+            authorStyleSheet={labEnabled ? labCss : undefined}
             onLoad={(state) => {
               setPageCount(state.epageCount);
               setPage(Math.min(page, Math.max(1, state.epageCount)));
@@ -201,6 +219,17 @@ export function ReviewPanel({ project }: ReviewPanelProps) {
         </div>
 
         <aside className="layoutAuditPanel">
+          <LayoutLabPanel
+            enabled={labEnabled}
+            settings={labSettings}
+            onEnabledChange={setLabEnabled}
+            onChange={setLabSettings}
+            onReset={() => {
+              setLabSettings(DEFAULT_LAYOUT_LAB);
+              setLabEnabled(false);
+            }}
+          />
+
           <header>
             <div>
               <p className="eyebrow">Layout audit</p>
