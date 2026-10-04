@@ -50,6 +50,18 @@ GitHub is the source of truth. The PubForge browser app is read-only.
 - `AGENTS.md` protocol for ChatGPT and other Git-aware agents
 - GitHub Pages and Vercel static hosting
 
+## Layout showcase library
+
+The bundled launcher is also a visual regression library. The five nested template publications intentionally exercise different composition systems:
+
+- **Book Typography Showcase** — A5 literary typography, recto chapter starts, running heads, drop caps, footnotes and appendix styling.
+- **Evidence Report Showcase** — A4 cover, KPI grid, data chart, evidence tables, recommendation blocks and interpretation rail.
+- **Operations Manual Showcase** — technical cover, numbered procedures, warnings, decision cards, code blocks and troubleshooting matrix.
+- **Lisbon Weekend Guide** — full-bleed cover, editorial image metadata, route map, fact grid, place cards and itinerary strip.
+- **Magazine Layout Showcase** — hero page, multi-column text, pull quote, sidebar and mosaic gallery.
+
+Together with **North Atlantic** and **The Browser Book**, the repository tests both publication formats and visibly different layout systems.
+
 ## Publication launcher
 
 A repository may contain more than one PubForge publication. PubForge discovers valid root and nested `publication.yml` manifests and shows them as **Primary**, **Example** or **Starter** cards.
