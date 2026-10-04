@@ -7,6 +7,7 @@ export interface PublicationTemplate {
 
 const FILES = [
   'publication.yml',
+  'AGENTS.md',
   'content/01-start.md',
   'content/02-main.md',
   'theme/publication.css',
