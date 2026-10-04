@@ -10,6 +10,7 @@ export interface CompiledChapter {
   title: string;
   role: ContentRole;
   breakBefore?: ContentEntry['breakBefore'];
+  pageCounterReset?: number;
   themePaths: string[];
   html: string;
 }
@@ -79,9 +80,12 @@ export function rewriteHtmlReferences(
 
       const mapped = mapReference(resolved, value);
       if (mapped) {
+        const mappedContainsFragment = mapped.startsWith('#') || mapped.includes('#');
         element.setAttribute(
           attribute,
-          hash && attribute === 'href' ? `${mapped}#${hash}` : mapped,
+          hash && attribute === 'href' && !mappedContainsFragment
+            ? `${mapped}#${hash}`
+            : mapped,
         );
       }
     }
@@ -111,6 +115,35 @@ function chapterTitle(html: string, fallback: string): string {
   return document.querySelector('h1, h2, h3')?.textContent?.trim() || fallback;
 }
 
+function slug(value: string): string {
+  return value
+    .normalize('NFKD')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/[\s-]+/g, '-')
+    .replace(/^-|-$/g, '') || 'section';
+}
+
+function ensureHeadingIds(html: string): string {
+  const document = new DOMParser().parseFromString(
+    `<main id="pubforge-fragment">${html}</main>`,
+    'text/html',
+  );
+  const root = document.getElementById('pubforge-fragment');
+  if (!root) return html;
+  const seen = new Set<string>();
+  for (const heading of Array.from(root.querySelectorAll<HTMLElement>('h1, h2, h3, h4, h5, h6'))) {
+    const base = heading.id || slug(heading.textContent ?? 'section');
+    let id = base;
+    let suffix = 2;
+    while (seen.has(id)) id = `${base}-${suffix++}`;
+    heading.id = id;
+    seen.add(id);
+  }
+  return root.innerHTML;
+}
+
 function outputName(index: number): string {
   return `text/chapter-${String(index + 1).padStart(3, '0')}.xhtml`;
 }
@@ -129,10 +162,20 @@ function vfmOptions(manifest: PublicationManifest): Parameters<typeof stringify>
     parseFigcaptionAsInline: config.parseFigcaptionAsInline ?? false,
     rewriteRelativeHrefExtensions:
       config.rewriteRelativeHrefExtensions ?? true,
+    table: { cell: config.tableCell ?? 'align-class' },
     disableFormatHtml: true,
   };
 }
 
+function globMatch(path: string, pattern: string): boolean {
+  const escaped = pattern
+    .replace(/[.+^$(){}|[\]\\]/g, '\\$&')
+    .replace(/\*\*/g, '§§DOUBLESTAR§§')
+    .replace(/\*/g, '[^/]*')
+    .replace(/§§DOUBLESTAR§§/g, '.*')
+    .replace(/\?/g, '.');
+  return new RegExp(`^${escaped}$`).test(path);
+}
 function collectReferencedResources(
   project: LoadedProject,
   chapters: CompiledChapter[],
@@ -185,7 +228,16 @@ function collectReferencedResources(
     }
   }
 
-  return [...resources].sort();
+  for (const pattern of project.manifest.assets?.includes ?? []) {
+    for (const path of project.workspace.list()) {
+      if (globMatch(path, pattern)) addIfResource(path);
+    }
+  }
+
+  const excludes = project.manifest.assets?.excludes ?? [];
+  return [...resources]
+    .filter((path) => !excludes.some((pattern) => globMatch(path, pattern)))
+    .sort();
 }
 
 export function compilePublication(project: LoadedProject): CompiledPublication {
@@ -193,7 +245,7 @@ export function compilePublication(project: LoadedProject): CompiledPublication 
 
   const chapters = project.manifest.readingOrder.map((entry, index) => {
     const markdown = project.workspace.text(entry.path);
-    const html = stringify(markdown, vfmOptions(project.manifest));
+    const html = ensureHeadingIds(stringify(markdown, vfmOptions(project.manifest)));
     const role = entry.role ?? 'chapter';
     const title = entry.title ?? chapterTitle(html, `Chapter ${index + 1}`);
     const entryThemes = [
@@ -209,6 +261,7 @@ export function compilePublication(project: LoadedProject): CompiledPublication 
       title,
       role,
       breakBefore: entry.breakBefore,
+      pageCounterReset: entry.pageCounterReset,
       themePaths: entryThemes,
       html,
     } satisfies CompiledChapter;

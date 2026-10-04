@@ -14,6 +14,7 @@ export interface PdfProfileSummary {
   binding: 'left' | 'right';
   bleed: string;
   cropMarks: boolean;
+  cropOffset: string;
   bookmarks: boolean;
   browserPdf: boolean;
   pdfX: boolean;
@@ -28,9 +29,7 @@ export function resolvePdfProfile(
     pdf.width && pdf.height
       ? `${pdf.width} ${pdf.height}`
       : PAGE_SIZES[pdf.size ?? 'A4'] ?? pdf.size ?? PAGE_SIZES.A4;
-  const bleed =
-    pdf.bleed ??
-    (profile === 'press' ? '3mm' : '0mm');
+  const bleed = pdf.bleed ?? (profile === 'press' ? '3mm' : '0mm');
 
   return {
     profile,
@@ -38,6 +37,7 @@ export function resolvePdfProfile(
     binding: pdf.binding ?? 'left',
     bleed,
     cropMarks: pdf.cropMarks ?? profile === 'press',
+    cropOffset: pdf.cropOffset ?? 'auto',
     bookmarks: pdf.bookmarks ?? true,
     browserPdf: true,
     pdfX: false,
@@ -47,6 +47,7 @@ export function resolvePdfProfile(
 export function buildPdfProfileCss(manifest: PublicationManifest): string {
   const profile = resolvePdfProfile(manifest);
   const marks = profile.cropMarks ? 'crop' : 'none';
+  const progression = manifest.publication.readingProgression ?? 'ltr';
 
   return `
 @page {
@@ -58,6 +59,8 @@ export function buildPdfProfileCss(manifest: PublicationManifest): string {
 :root {
   --pubforge-pdf-profile: "${profile.profile}";
   --pubforge-binding: "${profile.binding}";
+  --pubforge-crop-offset: "${profile.cropOffset}";
+  direction: ${progression};
 }
 
 .pubforge-cover {

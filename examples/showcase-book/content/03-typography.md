@@ -1,5 +1,7 @@
 # Typography and Semantics
 
+<span role="doc-pagebreak" id="page-1" aria-label="1"></span>
+
 This chapter combines ordinary prose with semantic structures that should remain useful in both paged and reflowable output.
 
 ## Hierarchy

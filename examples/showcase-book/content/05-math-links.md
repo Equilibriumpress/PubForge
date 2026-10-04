@@ -1,5 +1,7 @@
 # Math, Notes and Cross-References
 
+<span role="doc-pagebreak" id="page-3" aria-label="3"></span>
+
 This chapter tests formulas, semantic footnotes and links between source documents.
 
 ## The model

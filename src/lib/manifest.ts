@@ -14,6 +14,7 @@ interface RawManifest {
   contents?: PublicationManifest['contents'];
   readingOrder?: ContentEntry[];
   theme?: PublicationManifest['theme'];
+  assets?: PublicationManifest['assets'];
   vfm?: PublicationManifest['vfm'];
   pdf?: PublicationManifest['pdf'];
   epub?: PublicationManifest['epub'];
@@ -45,6 +46,7 @@ export function parsePublicationManifest(source: string): PublicationManifest {
     ...value.publication,
     title: requiredString(value.publication.title, 'publication.title'),
     language: requiredString(value.publication.language, 'publication.language'),
+    readingProgression: value.publication.readingProgression ?? 'ltr',
   };
 
   if (!Array.isArray(value.readingOrder) || value.readingOrder.length === 0) {
@@ -65,18 +67,31 @@ export function parsePublicationManifest(source: string): PublicationManifest {
     throw new Error('publication.yml requires theme.css.');
   }
 
+  const sectionDepth = value.contents?.sectionDepth ?? 1;
+  if (!Number.isInteger(sectionDepth) || sectionDepth < 1 || sectionDepth > 6) {
+    throw new Error('contents.sectionDepth must be an integer from 1 through 6.');
+  }
+
   const manifest = {
     version: 2,
     publication,
     cover: value.cover,
-    contents: value.contents ?? { toc: true, landmarks: true, pageList: false },
+    contents: {
+      toc: value.contents?.toc ?? true,
+      tocTitle: value.contents?.tocTitle ?? 'Contents',
+      sectionDepth,
+      landmarks: value.contents?.landmarks ?? true,
+      pageList: value.contents?.pageList ?? false,
+    },
     readingOrder,
     theme: value.theme,
+    assets: value.assets ?? {},
     vfm: value.vfm ?? {
       math: true,
       mathRenderer: 'mathml',
       footnote: 'dpub',
       rewriteRelativeHrefExtensions: true,
+      tableCell: 'align-class',
     },
     pdf: value.pdf ?? {
       enabled: true,

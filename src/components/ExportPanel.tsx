@@ -71,13 +71,15 @@ export function ExportPanel({ project }: ExportPanelProps) {
           <div><dt>Binding</dt><dd>{pdfProfile.binding}</dd></div>
           <div><dt>Bleed</dt><dd>{pdfProfile.bleed}</dd></div>
           <div><dt>Crop marks</dt><dd>{pdfProfile.cropMarks ? 'yes' : 'no'}</dd></div>
-          <div><dt>Bookmarks</dt><dd>{pdfProfile.bookmarks ? 'yes' : 'no'}</dd></div>
+          <div><dt>Crop offset</dt><dd>{pdfProfile.cropOffset}</dd></div>
+          <div><dt>Bookmarks</dt><dd>{pdfProfile.bookmarks ? 'requested' : 'no'}</dd></div>
         </dl>
         {pdfProfile.profile === 'press' ? (
           <p className="pressNote">
-            Press profile includes trim/bleed/crop layout. PDF/X conversion and
-            output-intent color preflight still require the optional external
-            press-ready pipeline.
+            Press profile includes trim/bleed/crop layout. Crop offset, PDF
+            outlines/bookmarks, PDF/X conversion and output-intent color work
+            are finalized by the optional production pipeline rather than the
+            browser print dialog.
           </p>
         ) : null}
       </div>

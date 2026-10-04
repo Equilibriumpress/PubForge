@@ -22,6 +22,65 @@ function escapeHtml(value: string): string {
     .replace(/"/g, '&quot;');
 }
 
+function namespaceCombinedChapter(html: string, prefix: string): string {
+  const document = new DOMParser().parseFromString(
+    `<main id="pubforge-fragment">${html}</main>`,
+    'text/html',
+  );
+  const root = document.getElementById('pubforge-fragment');
+  if (!root) return html;
+
+  for (const element of Array.from(root.querySelectorAll<HTMLElement>('[id]'))) {
+    element.id = `${prefix}-${element.id}`;
+  }
+  for (const link of Array.from(root.querySelectorAll<HTMLAnchorElement>('a[href^="#"]'))) {
+    const href = link.getAttribute('href');
+    if (href && href.length > 1) {
+      link.setAttribute('href', `#${prefix}-${href.slice(1)}`);
+    }
+  }
+  return root.innerHTML;
+}
+
+function tocChildren(
+  chapter: ReturnType<typeof compilePublication>['chapters'][number],
+  prefix: string,
+  depth: number,
+): string {
+  if (depth <= 1) return '';
+  const document = new DOMParser().parseFromString(chapter.html, 'text/html');
+  const selectors = Array.from(
+    { length: Math.max(0, depth - 1) },
+    (_, index) => `h${index + 2}[id]`,
+  ).join(', ');
+  if (!selectors) return '';
+
+  const items = Array.from(document.querySelectorAll<HTMLElement>(selectors))
+    .map((heading) => {
+      const label = heading.textContent?.trim();
+      if (!label) return '';
+      return `<li class="toc-level-${heading.tagName.slice(1)}"><a href="#${prefix}-${escapeHtml(heading.id)}">${escapeHtml(label)}</a></li>`;
+    })
+    .filter(Boolean)
+    .join('');
+
+  return items ? `<ol class="pubforge-toc-sections">${items}</ol>` : '';
+}
+
+function buildToc(
+  compiled: ReturnType<typeof compilePublication>,
+  title: string,
+  depth: number,
+): string {
+  const items = compiled.chapters
+    .map((chapter) => {
+      const prefix = `pubforge-chapter-${chapter.index + 1}`;
+      return `<li><a href="#${prefix}">${escapeHtml(chapter.title)}</a>${tocChildren(chapter, prefix, depth)}</li>`;
+    })
+    .join('');
+  return `<nav class="pubforge-toc" role="doc-toc"><h1>${escapeHtml(title)}</h1><ol>${items}</ol></nav>`;
+}
+
 function createObjectUrls(
   project: LoadedProject,
   paths: readonly string[],
@@ -68,29 +127,40 @@ export function buildPublicationDocument(project: LoadedProject): PublicationDoc
   const tocHtml =
     project.manifest.contents?.toc === false
       ? ''
-      : `<nav class="pubforge-toc" role="doc-toc"><h1>Contents</h1><ol>${compiled.chapters
-          .map(
-            (chapter) =>
-              `<li><a href="#pubforge-chapter-${chapter.index + 1}">${escapeHtml(chapter.title)}</a></li>`,
-          )
-          .join('')}</ol></nav>`;
+      : buildToc(
+          compiled,
+          project.manifest.contents?.tocTitle ?? 'Contents',
+          project.manifest.contents?.sectionDepth ?? 1,
+        );
 
   const chapters = compiled.chapters
     .map((chapter) => {
+      const prefix = `pubforge-chapter-${chapter.index + 1}`;
+      const namespaced = namespaceCombinedChapter(chapter.html, prefix);
       const body = rewriteHtmlReferences(
-        chapter.html,
+        namespaced,
         chapter.sourcePath,
-        (resolved) => {
+        (resolved, original) => {
           const target = findChapterByResolvedPath(compiled, resolved);
-          return target
-            ? `#pubforge-chapter-${target.index + 1}`
-            : objectUrls.get(resolved) ?? null;
+          if (target) {
+            const hash = original.includes('#') ? original.split('#', 2)[1] : '';
+            return hash
+              ? `#pubforge-chapter-${target.index + 1}-${hash}`
+              : `#pubforge-chapter-${target.index + 1}`;
+          }
+          return objectUrls.get(resolved) ?? null;
         },
       );
-      const breakBefore = chapter.breakBefore
-        ? ` style="break-before:${chapter.breakBefore}"`
-        : '';
-      return `<section id="pubforge-chapter-${chapter.index + 1}" class="pubforge-chapter pubforge-role-${chapter.role}" data-source="${escapeHtml(chapter.sourcePath)}" data-role="${chapter.role}"${breakBefore}>${body}</section>`;
+      const style = [
+        chapter.breakBefore ? `break-before:${chapter.breakBefore}` : '',
+        chapter.pageCounterReset !== undefined
+          ? `counter-reset:page ${chapter.pageCounterReset - 1}`
+          : '',
+      ]
+        .filter(Boolean)
+        .join(';');
+      const styleAttribute = style ? ` style="${style}"` : '';
+      return `<section id="${prefix}" class="pubforge-chapter pubforge-role-${chapter.role}" data-source="${escapeHtml(chapter.sourcePath)}" data-role="${chapter.role}"${styleAttribute}>${body}</section>`;
     })
     .join('\n');
 
@@ -98,7 +168,7 @@ export function buildPublicationDocument(project: LoadedProject): PublicationDoc
   const meta = project.manifest.publication;
 
   const html = `<!doctype html>
-<html lang="${escapeHtml(meta.language)}">
+<html lang="${escapeHtml(meta.language)}" dir="${meta.readingProgression ?? 'ltr'}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
