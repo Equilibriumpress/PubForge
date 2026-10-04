@@ -28,6 +28,8 @@ GitHub is the source of truth. The PubForge browser app is read-only.
 ## Current feature set
 
 - public GitHub repository loading by `owner/repo`, GitHub URL or `owner/repo@ref`
+- automatic discovery of multiple `publication.yml` manifests in one repository
+- read-only publication launcher with direct `?manifest=...` deep links
 - immutable commit snapshots and OPFS-backed browser cache
 - rich `publication.yml` v2 + JSON Schema
 - semantic reading order and publication roles
@@ -48,6 +50,20 @@ GitHub is the source of truth. The PubForge browser app is read-only.
 - `AGENTS.md` protocol for ChatGPT and other Git-aware agents
 - GitHub Pages and Vercel static hosting
 
+## Publication launcher
+
+A repository may contain more than one PubForge publication. PubForge discovers valid root and nested `publication.yml` manifests and shows them as **Primary**, **Example** or **Starter** cards.
+
+The root manifest remains the default. Any publication can be deep-linked:
+
+```text
+?repo=Equilibriumpress/PubForge&manifest=examples/showcase-book/publication.yml
+```
+
+Nested projects may use paths relative to their own manifest directory, such as `content/chapter-01.md` and `theme/publication.css`. Existing manifests that already use repository-root paths continue to work.
+
+The launcher is read-only: selecting a publication only changes what PubForge previews, validates and exports.
+
 ## Magazine publishing
 
 PubForge supports art-directed magazine projects with page/spread entries, reusable editorial images and lightweight Markdown components for heroes, columns, pull quotes, sidebars and galleries. The active repository showcase is **North Atlantic · Issue 01**.
@@ -56,7 +72,7 @@ See `docs/magazine-layout.md`.
 
 ## Built-in showcase book
 
-Opening `Equilibriumpress/PubForge` in PubForge now renders **The Browser Book**, a feature-rich regression publication under `examples/showcase-book/`. It exercises semantic front/back matter, VFM math and footnotes, cross-document links, SVG figures, data resources, rich EPUB metadata, paged-media CSS and press-layout settings.
+The publication launcher exposes **The Browser Book**, a feature-rich regression publication under `examples/showcase-book/`, alongside the active North Atlantic magazine and starter publications. It exercises semantic front/back matter, VFM math and footnotes, cross-document links, SVG figures, data resources, rich EPUB metadata, paged-media CSS and press-layout settings.
 
 See `examples/showcase-book/README.md` for the coverage matrix and deliberate boundaries.
 
