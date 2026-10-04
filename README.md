@@ -48,6 +48,12 @@ GitHub is the source of truth. The PubForge browser app is read-only.
 - `AGENTS.md` protocol for ChatGPT and other Git-aware agents
 - GitHub Pages and Vercel static hosting
 
+## Magazine publishing
+
+PubForge supports art-directed magazine projects with page/spread entries, reusable editorial images and lightweight Markdown components for heroes, columns, pull quotes, sidebars and galleries. The active repository showcase is **North Atlantic · Issue 01**.
+
+See `docs/magazine-layout.md`.
+
 ## Built-in showcase book
 
 Opening `Equilibriumpress/PubForge` in PubForge now renders **The Browser Book**, a feature-rich regression publication under `examples/showcase-book/`. It exercises semantic front/back matter, VFM math and footnotes, cross-document links, SVG figures, data resources, rich EPUB metadata, paged-media CSS and press-layout settings.
