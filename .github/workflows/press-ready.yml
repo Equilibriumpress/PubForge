@@ -128,7 +128,7 @@ jobs:
 
       - name: Generate Vivliostyle press config
         run: |
-          node scripts/generate-press-config.mjs             publication-source             press-work/webpub             press-work/publication-press-ready.pdf
+          node scripts/generate-press-config.mjs             publication-source             press-work/webpub             press-work/webpub/publication-press-ready.pdf
 
       - name: Build press-ready PDF/X with official Vivliostyle CLI
         working-directory: press-work/webpub
