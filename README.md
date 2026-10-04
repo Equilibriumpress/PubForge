@@ -2,26 +2,30 @@
 
 Git-native publication studio for browser-based web and print publishing.
 
-PubForge treats a GitHub repository as the publication project. Content, assets, data, themes and publication configuration live together in Git. The browser reads a pinned commit, mirrors the project into a local workspace and renders it without a publication backend.
+PubForge treats a GitHub repository as the publication project. Content, assets, data, themes, history and publication configuration live together in Git. The browser reads a pinned commit, mirrors the project into a local workspace and renders it without a publication backend.
 
-## Current milestone
-
-Version 0.1 includes:
+## Current feature set
 
 - public GitHub repository loading by `owner/repo`, GitHub URL or `owner/repo@ref`
 - `publication.yml` project format with JSON Schema
 - immutable commit snapshots
-- OPFS-backed browser cache with an in-memory workspace
+- OPFS-backed browser cache with an in-memory editable workspace
+- Publication Studio with Files, Source, Metadata, Theme, Preview, Export, History and Commit views
 - Vivliostyle paginated preview through `@vivliostyle/react`
 - VFM Markdown conversion
-- project-relative images and CSS assets
+- project-relative images, fonts and CSS assets
 - Print / Save PDF browser flow
 - EPUB 3 export
 - Web Publication ZIP export
 - exact project ZIP export with source commit metadata
-- Vercel headers for cross-origin isolated browser workloads
+- five file-based starter projects: report, book, magazine, manual and travel guide
+- `AGENTS.md` protocol for ChatGPT and other Git-aware agents
+- direct GitHub write-back as one atomic commit with remote-SHA conflict protection
+- Git commit history with earlier snapshots opened directly in PubForge
+- Vercel hosting with native COOP/COEP headers
+- GitHub Pages hosting with a static cross-origin-isolation service worker
 
-No database is required. GitHub is the source of truth.
+No publication database is required. GitHub is the source of truth.
 
 ## Project structure
 
@@ -31,11 +35,12 @@ content/
 assets/
 data/
 theme/
+AGENTS.md
 ```
 
-A project may use different directory names. `publication.yml` declares the ordered content and theme paths.
+Only `publication.yml` is mandatory. A project may use different directory names because the manifest declares the ordered content and theme paths.
 
-See `docs/project-format.md` and `schemas/publication.schema.json`.
+See `docs/project-format.md`, `docs/project-protocol.md` and `schemas/publication.schema.json`.
 
 ## Example manifest
 
@@ -76,9 +81,49 @@ npm run build
 
 ## Hosting
 
-The application is static after the Vite build. Vercel is the preferred first deployment target because `vercel.json` sets the response headers required by heavier browser/WASM features planned for later milestones.
+PubForge is static after the Vite build.
 
-The publication itself is still rendered locally in the browser. Vercel is not a publication database or render server.
+### GitHub Pages
+
+`.github/workflows/pages.yml` builds and deploys `dist/`. GitHub Pages lacks custom response-header configuration, so PubForge ships a same-origin service worker that supplies the COOP/COEP headers required by browser workloads after the first controlled reload.
+
+A no-Actions branch publishing route is also available:
+
+```bash
+bash scripts/publish_prebuilt_pages.sh
+```
+
+See `docs/github-pages.md`.
+
+### Vercel
+
+`vercel.json` supplies native COOP/COEP response headers. Vercel remains a static app host. It is not a publication database or render server.
+
+## GitHub write-back
+
+Studio edits remain local until the user explicitly commits them. The Commit view accepts a fine-grained GitHub token with repository Contents read/write permission.
+
+The token stays in React memory only and is cleared after a successful commit. It is never written to Git, OPFS or browser storage.
+
+Before writing, PubForge checks that the remote branch still points to the commit from which the workspace was opened.
+
+## ChatGPT workflow
+
+ChatGPT does not need an AI endpoint inside PubForge.
+
+```text
+User request
+      ↓
+ChatGPT
+      ↓
+GitHub project files
+      ↓
+PubForge
+      ↓
+Preview / PDF / EPUB / WebPub
+```
+
+See `docs/chatgpt-github-workflow.md` and `AGENTS.md`.
 
 ## Architecture
 
@@ -89,15 +134,13 @@ GitHubStorageProvider
       ↓
 Pinned commit snapshot
       ↓
-OPFS + browser workspace
+OPFS + editable browser workspace
       ↓
 VFM + Vivliostyle
       ↓
 Preview / Print / EPUB / WebPub / Project ZIP
+      ↓
+optional atomic GitHub commit
 ```
 
-The repository contains a root `publication.yml` so PubForge itself also works as a small test publication.
-
-## Next milestone
-
-Planned next steps are a Studio interface with Files, Source, Metadata and Theme views, reusable templates, GitHub write-back, commit history and a GitHub Pages deployment experiment.
+The PubForge repository itself contains a root `publication.yml`, so it also acts as a small test publication.
