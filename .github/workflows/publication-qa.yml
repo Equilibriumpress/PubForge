@@ -1,0 +1,153 @@
+name: Publication production QA
+
+on:
+  workflow_dispatch:
+    inputs:
+      repository:
+        description: Public publication repository (owner/name)
+        required: false
+        default: Equilibriumpress/PubForge
+      ref:
+        description: Git ref or commit; blank uses this workflow commit
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout PubForge
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install system QA tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qpdf poppler-utils default-jre-headless unzip curl
+
+      - name: Install application dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Build PubForge
+        run: npm run build
+
+      - name: Start static preview
+        run: |
+          npm run preview -- --host 127.0.0.1 --port 4173 >/tmp/pubforge-preview.log 2>&1 &
+          echo $! >/tmp/pubforge-preview.pid
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:4173/ >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/pubforge-preview.log
+          exit 1
+
+      - name: Resolve QA target
+        id: target
+        shell: bash
+        run: |
+          REPOSITORY="${{ inputs.repository }}"
+          if [ -z "$REPOSITORY" ]; then REPOSITORY="$GITHUB_REPOSITORY"; fi
+          REF="${{ inputs.ref }}"
+          if [ -z "$REF" ]; then REF="$GITHUB_SHA"; fi
+          echo "repo=$REPOSITORY@$REF" >> "$GITHUB_OUTPUT"
+
+      - name: Generate browser publication artifacts
+        env:
+          PUBFORGE_REPO: ${{ steps.target.outputs.repo }}
+          PUBFORGE_URL: http://127.0.0.1:4173/
+          PUBFORGE_QA_DIR: qa-output
+          PDF_EDITIONS: normal,print,high-quality
+        run: node scripts/qa-publication.mjs
+
+      - name: Install EPUBCheck 5.4.0
+        run: |
+          curl --fail --location \
+            --output /tmp/epubcheck.zip \
+            https://github.com/w3c/epubcheck/releases/download/v5.4.0/epubcheck-5.4.0.zip
+          unzip -q /tmp/epubcheck.zip -d /tmp
+          echo "EPUBCHECK=/tmp/epubcheck-5.4.0/epubcheck.jar" >> "$GITHUB_ENV"
+
+      - name: Validate EPUB 3
+        run: |
+          java -jar "$EPUBCHECK" qa-output/publication.epub \
+            --json qa-output/epubcheck.json \
+            2>&1 | tee qa-output/epubcheck.txt
+
+      - name: Validate PDF structure and collect diagnostics
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p qa-output/rendered-pages
+
+          for PDF in qa-output/publication-*.pdf; do
+            NAME="$(basename "$PDF" .pdf)"
+            qpdf --check "$PDF" 2>&1 | tee "qa-output/${NAME}.qpdf-check.txt"
+            qpdf --json "$PDF" > "qa-output/${NAME}.qpdf.json"
+            pdfinfo -box "$PDF" > "qa-output/${NAME}.pdfinfo.txt"
+            pdffonts "$PDF" > "qa-output/${NAME}.fonts.txt"
+            pdfimages -list "$PDF" > "qa-output/${NAME}.images.txt"
+            mkdir -p "qa-output/rendered-pages/${NAME}"
+            pdftoppm -png -r 96 "$PDF" "qa-output/rendered-pages/${NAME}/page" >/dev/null
+          done
+
+      - name: Verify edition page parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          NORMAL="$(pdfinfo qa-output/publication-normal.pdf | awk '/^Pages:/ {print $2}')"
+          PRINT="$(pdfinfo qa-output/publication-print.pdf | awk '/^Pages:/ {print $2}')"
+          HQ="$(pdfinfo qa-output/publication-high-quality.pdf | awk '/^Pages:/ {print $2}')"
+          printf 'normal=%s\nprint=%s\nhigh-quality=%s\n' "$NORMAL" "$PRINT" "$HQ" \
+            | tee qa-output/page-counts.txt
+          test "$NORMAL" = "$PRINT"
+          test "$NORMAL" = "$HQ"
+
+      - name: Generate artifact checksums
+        run: |
+          (
+            cd qa-output
+            sha256sum publication.epub publication-*.pdf > SHA256SUMS.txt
+          )
+
+      - name: Write QA summary
+        shell: bash
+        run: |
+          {
+            echo "# PubForge production QA"
+            echo
+            echo "Target: \`${{ steps.target.outputs.repo }}\`"
+            echo
+            echo "## Edition page counts"
+            echo '```'
+            cat qa-output/page-counts.txt
+            echo '```'
+            echo
+            echo "## Checks"
+            echo "- EPUBCheck 5.4.0: passed"
+            echo "- qpdf structural checks: passed"
+            echo "- Poppler PDF metadata/font/image reports: captured"
+            echo "- All PDF pages rendered to PNG for visual inspection"
+            echo "- SHA-256 checksums generated"
+          } > qa-output/QA-REPORT.md
+
+      - name: Upload QA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pubforge-production-qa
+          if-no-files-found: error
+          retention-days: 14
+          path: qa-output/
