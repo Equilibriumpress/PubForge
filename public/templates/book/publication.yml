@@ -1,25 +1,34 @@
 version: 2
 publication:
-  title: Book
-  subtitle: PubForge starter project
+  title: Book Typography Showcase
+  subtitle: Classical A5 pages, chapter openers and running heads
   authors:
-    - Your Name
+    - Equilibrium Press
   language: en
   type: book
-  description: Reflowable EPUB and paginated print book starter.
+  description: Layout fixture for long-form book typography.
 
 contents:
   toc: true
+  tocTitle: Contents
+  sectionDepth: 2
   landmarks: true
 
 readingOrder:
+  - path: content/00-title.md
+    role: title-page
+    title: Title Page
   - path: content/01-start.md
     role: chapter
-    title: Chapter One
+    title: The Quiet Room
     breakBefore: recto
   - path: content/02-main.md
     role: chapter
-    title: Chapter Two
+    title: Margins and Memory
+    breakBefore: recto
+  - path: content/03-notes.md
+    role: appendix
+    title: Notes on the Edition
     breakBefore: recto
 
 theme:
@@ -43,7 +52,7 @@ pdf:
 
 epub:
   enabled: true
-  reflowable: true
+  layout: reflowable
   embeddedFonts: true
 
 webpub:
