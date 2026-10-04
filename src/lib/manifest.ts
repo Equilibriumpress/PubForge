@@ -13,6 +13,7 @@ interface RawManifest {
   cover?: PublicationManifest['cover'];
   contents?: PublicationManifest['contents'];
   readingOrder?: ContentEntry[];
+  layout?: PublicationManifest['layout'];
   theme?: PublicationManifest['theme'];
   assets?: PublicationManifest['assets'];
   vfm?: PublicationManifest['vfm'];
@@ -84,6 +85,7 @@ export function parsePublicationManifest(source: string): PublicationManifest {
       pageList: value.contents?.pageList ?? false,
     },
     readingOrder,
+    layout: value.layout ?? { mode: 'flow' },
     theme: value.theme,
     assets: value.assets ?? {},
     vfm: value.vfm ?? {
