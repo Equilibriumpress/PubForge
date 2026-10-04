@@ -30,9 +30,14 @@ await page.goto(publicationUrl.href, {
   waitUntil: 'domcontentloaded',
   timeout: 120_000,
 });
-await page.getByRole('button', { name: 'Export EPUB' }).waitFor({
+await page.getByRole('button', { name: 'Output' }).waitFor({
   state: 'visible',
   timeout: 180_000,
+});
+await page.getByRole('button', { name: 'Output' }).click();
+await page.getByRole('button', { name: 'Export EPUB' }).waitFor({
+  state: 'visible',
+  timeout: 60_000,
 });
 
 const downloadPromise = page.waitForEvent('download', { timeout: 120_000 });
