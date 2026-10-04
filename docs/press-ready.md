@@ -15,7 +15,7 @@ pdf:
   cropOffset: 13mm
   production:
     enabled: true
-    preflight: press-ready
+    preflight: press-ready-local
     preflightOptions:
       - enforce-outline
     cmyk: false
@@ -29,6 +29,8 @@ Supported fields:
 - `preflightOptions`: passed to Vivliostyle's PDF post-processing. Typical values include `enforce-outline` and `gray-scale`.
 - `cmyk`: enables Vivliostyle's DeviceCMYK post-processing support. This does not automatically make arbitrary RGB artwork suitable for a printing condition.
 - `outputIntent`: project-relative ICC profile path embedded as the PDF output intent.
+
+GitHub-hosted Actions uses `press-ready-local` in the bundled showcase because it avoids Docker-in-Docker path translation while exercising the same official press-ready conversion locally. The `press-ready` Docker mode remains available for environments where its mount layout is controlled.
 
 ## Workflow
 
