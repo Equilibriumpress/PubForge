@@ -45,3 +45,19 @@ Natural-language requests map to Git operations. Examples:
 - "Prepare this for print" → configure the PDF profile and run PubForge preflight; do not claim browser PDF is PDF/X.
 
 Do not invent a second content model or browser editing workflow when the requested change fits the Git project.
+
+
+## Review feedback protocol
+
+PubForge Review, Layout Lab and Compare are disposable browser review state, not publication source.
+
+When the user provides a copied PubForge improvement or comparison brief:
+
+1. Resolve the repository, commit and manifest named in the brief.
+2. Read the listed likely source files plus any related theme or manifest configuration.
+3. Treat heuristic layout findings as prompts to inspect, not automatic truth.
+4. Apply only improvements that make sense for the publication.
+5. Translate useful Layout Lab experiments into normal theme CSS / manifest source.
+6. Commit the smallest coherent source change.
+7. Re-run PubForge on the new commit.
+8. Never persist the brief itself as hidden publication state or recreate a browser CMS.
