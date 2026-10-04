@@ -781,3 +781,119 @@ h1 {
   .reviewState { justify-content: flex-start; }
   .reviewCanvas { min-height: 560px; padding: 8px; }
 }
+
+
+.reviewAuditButton { margin-left: auto; }
+.reviewPageChip { position: relative; }
+.reviewPageChipFlagged {
+  border-color: #c89c33;
+  background: #fff8e6;
+}
+.reviewPageChip i {
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #b97812;
+}
+.reviewWorkspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 330px;
+  align-items: start;
+}
+.reviewWorkspace .reviewCanvas {
+  min-width: 0;
+}
+.layoutAuditPanel {
+  position: sticky;
+  top: 0;
+  max-height: 860px;
+  overflow: auto;
+  border-left: 1px solid #d7dcda;
+  background: #fff;
+}
+.layoutAuditPanel > header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid #e3e6e4;
+}
+.layoutAuditPanel > header .eyebrow { margin-bottom: 3px; }
+.layoutAuditPanel > header strong { font-size: .9rem; }
+.layoutAuditPanel > header button { padding: .45rem .6rem; }
+.pageMetricGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  padding: 12px;
+  border-bottom: 1px solid #e3e6e4;
+  background: #f8f8f5;
+}
+.pageMetricGrid div {
+  display: grid;
+  gap: 2px;
+  padding: 9px;
+  border: 1px solid #e0e4e2;
+  border-radius: 8px;
+  background: #fff;
+}
+.pageMetricGrid span {
+  color: #7b8488;
+  font-size: .62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+.pageMetricGrid strong { font-size: .82rem; }
+.layoutIssueList { display: grid; }
+.layoutIssue {
+  display: grid;
+  gap: 6px;
+  padding: 13px 15px;
+  border: 0;
+  border-bottom: 1px solid #e3e6e4;
+  border-radius: 0;
+  background: #fff;
+  color: #172026;
+  text-align: left;
+}
+.layoutIssue:hover { background: #f8f8f5; }
+.layoutIssue > span {
+  color: #7a8388;
+  font-size: .65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+.layoutIssue strong { font-size: .82rem; line-height: 1.4; }
+.layoutIssue small { color: #8b9296; font-size: .64rem; }
+.layoutIssue-warning { box-shadow: inset 3px 0 #c58a1a; }
+.layoutIssue-info { box-shadow: inset 3px 0 #6483a7; }
+.layoutAuditEmpty {
+  margin: 0;
+  padding: 18px 15px;
+  color: #687279;
+  font-size: .82rem;
+  line-height: 1.5;
+}
+.layoutAuditDisclaimer {
+  margin: 0;
+  padding: 13px 15px 16px;
+  color: #81898d;
+  font-size: .7rem;
+  line-height: 1.45;
+  background: #f8f8f5;
+}
+@media (max-width: 980px) {
+  .reviewWorkspace { grid-template-columns: 1fr; }
+  .layoutAuditPanel {
+    position: static;
+    max-height: none;
+    border-left: 0;
+    border-top: 1px solid #d7dcda;
+  }
+  .reviewAuditButton { margin-left: 0; }
+}
