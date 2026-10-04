@@ -42,6 +42,8 @@ export interface ContentEntry {
   theme?: string;
   breakBefore?: 'auto' | 'page' | 'left' | 'right' | 'recto' | 'verso';
   pageCounterReset?: number;
+  layout?: 'flow' | 'page' | 'spread';
+  pageName?: string;
 }
 
 export interface PublicationMetadata {
@@ -75,6 +77,11 @@ export interface PublicationManifest {
     pageList?: boolean;
   };
   readingOrder: ContentEntry[];
+  layout?: {
+    mode?: 'flow' | 'magazine';
+    columns?: number;
+    gutter?: string;
+  };
   theme: {
     preset?: string;
     css: string;
