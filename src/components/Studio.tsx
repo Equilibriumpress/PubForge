@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
 
+import { parsePublicationManifest } from '../lib/manifest';
 import type { LoadedProject } from '../lib/load-project';
 import { contentPath } from '../types/publication';
+import { CommitPanel } from './CommitPanel';
 import { ExportPanel } from './ExportPanel';
 import { FileExplorer } from './FileExplorer';
 import { MetadataPanel } from './MetadataPanel';
@@ -9,7 +11,7 @@ import { PublicationPreview } from './PublicationPreview';
 import { SourceEditor } from './SourceEditor';
 import { ThemePanel } from './ThemePanel';
 
-type StudioTab = 'preview' | 'source' | 'metadata' | 'theme' | 'export';
+type StudioTab = 'preview' | 'source' | 'metadata' | 'theme' | 'export' | 'commit';
 
 const TEXT_EXTENSIONS = new Set([
   'css', 'csv', 'html', 'htm', 'js', 'json', 'md', 'markdown', 'svg',
@@ -21,7 +23,12 @@ function isTextFile(path: string): boolean {
   return TEXT_EXTENSIONS.has(ext);
 }
 
-export function Studio({ project }: { project: LoadedProject }) {
+interface StudioProps {
+  project: LoadedProject;
+  onReload(): Promise<void> | void;
+}
+
+export function Studio({ project, onReload }: StudioProps) {
   const firstContent = contentPath(project.manifest.content[0]);
   const [tab, setTab] = useState<StudioTab>('preview');
   const [selectedFile, setSelectedFile] = useState(firstContent);
@@ -41,15 +48,36 @@ export function Studio({ project }: { project: LoadedProject }) {
     setRevision((value) => value + 1);
   }
 
+  function refreshManifestIfValid() {
+    try {
+      project.manifest = parsePublicationManifest(
+        project.workspace.text('publication.yml'),
+      );
+    } catch {
+      // Keep the last valid manifest while publication.yml is mid-edit.
+    }
+  }
+
   function editText(path: string, value: string) {
     project.workspace.writeText(path, value);
+    if (path === 'publication.yml') refreshManifestIfValid();
     refreshDirty();
   }
 
   function reset(path: string) {
     project.workspace.reset(path);
+    if (path === 'publication.yml') refreshManifestIfValid();
     refreshDirty();
   }
+
+  const tabs: StudioTab[] = [
+    'preview',
+    'source',
+    'metadata',
+    'theme',
+    'export',
+    'commit',
+  ];
 
   return (
     <section className="studio">
@@ -70,7 +98,7 @@ export function Studio({ project }: { project: LoadedProject }) {
       </header>
 
       <div className="studioTabs" role="tablist" aria-label="Studio views">
-        {(['preview', 'source', 'metadata', 'theme', 'export'] as StudioTab[]).map((value) => (
+        {tabs.map((value) => (
           <button
             key={value}
             type="button"
@@ -118,6 +146,13 @@ export function Studio({ project }: { project: LoadedProject }) {
             />
           ) : null}
           {tab === 'export' ? <ExportPanel project={project} /> : null}
+          {tab === 'commit' ? (
+            <CommitPanel
+              key={revision}
+              project={project}
+              onCommitted={onReload}
+            />
+          ) : null}
         </div>
       </div>
     </section>
