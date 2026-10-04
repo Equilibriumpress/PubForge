@@ -42,6 +42,12 @@ function resolvedProjectPath(sourcePath: string, reference: string): string | nu
   return decodeURIComponent(url.pathname.replace(/^\//, ''));
 }
 
+function asArrayBuffer(data: Uint8Array): ArrayBuffer {
+  const copy = new Uint8Array(data.byteLength);
+  copy.set(data);
+  return copy.buffer;
+}
+
 function imageMime(path: string): string | null {
   const ext = path.split('.').pop()?.toLowerCase();
   if (ext === 'jpg' || ext === 'jpeg') return 'image/jpeg';
@@ -68,7 +74,9 @@ async function rasterize(
   if (!mime || typeof createImageBitmap !== 'function') return null;
 
   const bytes = workspace.read(path);
-  const bitmap = await createImageBitmap(new Blob([bytes], { type: mime }));
+  const bitmap = await createImageBitmap(
+    new Blob([asArrayBuffer(bytes)], { type: mime }),
+  );
   try {
     const largest = Math.max(bitmap.width, bitmap.height);
     if (largest <= maxDimension) return null;
