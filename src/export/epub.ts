@@ -130,7 +130,7 @@ function fixedChapterXhtml(
   viewport: FixedViewport,
 ): string {
   const html = chapterHtml(project, chapter, compiled);
-  const styles = chapterStyles(project, chapter);
+  const styles = chapterStyles(project, chapter, 'fixed');
   const layoutClass = chapter.layout
     ? ` pubforge-entry-layout-${chapter.layout}`
     : '';
