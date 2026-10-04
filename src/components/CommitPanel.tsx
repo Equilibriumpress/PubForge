@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
 import type { LoadedProject } from '../lib/load-project';
 
@@ -12,10 +12,7 @@ export function CommitPanel({ project, onCommitted }: CommitPanelProps) {
   const [message, setMessage] = useState('Update publication');
   const [status, setStatus] = useState('');
   const [busy, setBusy] = useState(false);
-  const changedPaths = useMemo(
-    () => project.workspace.changedPaths(),
-    [project, project.workspace.changedPaths().join('|')],
-  );
+  const changedPaths = project.workspace.changedPaths();
 
   async function commit() {
     if (!token.trim() || changedPaths.length === 0) return;
