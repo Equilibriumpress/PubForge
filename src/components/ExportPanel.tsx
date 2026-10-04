@@ -11,6 +11,9 @@ interface ExportPanelProps {
 
 export function ExportPanel({ project }: ExportPanelProps) {
   const pdfProfile = resolvePdfProfile(project.manifest);
+  const epubLayout =
+    project.manifest.epub?.layout ??
+    (project.manifest.epub?.reflowable === false ? 'fixed' : 'reflowable');
   const editions: PdfEdition[] =
     project.manifest.pdf?.editions?.length
       ? project.manifest.pdf.editions
@@ -46,10 +49,13 @@ export function ExportPanel({ project }: ExportPanelProps) {
     {
       id: 'epub',
       enabled: project.manifest.epub?.enabled !== false,
-      title: 'EPUB 3',
-      detail: 'Reflowable EPUB with navigation, metadata and semantic reading order.',
-      action: () => exportEpub(project),
-      label: 'Export EPUB',
+      title: epubLayout === 'fixed' ? 'EPUB 3 · Fixed layout' : 'EPUB 3 · Reflowable',
+      detail:
+        epubLayout === 'fixed'
+          ? 'Pre-paginated EPUB with one live HTML/CSS page per reading-order entry.'
+          : 'Reflowable EPUB with navigation, metadata and semantic reading order.',
+      action: () => exportEpub(project, epubLayout),
+      label: epubLayout === 'fixed' ? 'Export fixed EPUB' : 'Export EPUB',
     },
     {
       id: 'webpub',
@@ -91,6 +97,7 @@ export function ExportPanel({ project }: ExportPanelProps) {
           <div><dt>Highlighted code</dt><dd>{project.preparedAssets.highlightedBlocks}</dd></div>
           <div><dt>Optimized images</dt><dd>{project.preparedAssets.optimizedImages}</dd></div>
           <div><dt>Editorial images</dt><dd>{project.preparedAssets.editorialImages.length}</dd></div>
+          <div><dt>EPUB layout</dt><dd>{epubLayout}</dd></div>
         </dl>
         {pdfProfile.profile === 'press' ? (
           <p className="pressNote">
