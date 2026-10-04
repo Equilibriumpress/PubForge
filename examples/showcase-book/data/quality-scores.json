@@ -1,0 +1,10 @@
+{
+  "title": "Publication quality scores",
+  "unit": "percent",
+  "values": [
+    {"stage": "source", "score": 72},
+    {"stage": "semantics", "score": 82},
+    {"stage": "render", "score": 91},
+    {"stage": "preflight", "score": 97}
+  ]
+}
