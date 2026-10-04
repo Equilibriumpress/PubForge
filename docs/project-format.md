@@ -139,3 +139,16 @@ The optional `assets` controls can prepare derived resources without changing Gi
 Derived files live under `.pubforge/generated/` only in the renderer workspace. The Project ZIP continues to contain the exact committed Git source.
 
 `pdf.editions` may request `normal`, `print` and/or `high-quality` theme variants. These are CSS/rendering edition hooks; the browser does not claim vendor-specific image recompression or PDF/X behavior.
+
+
+## Press-ready production
+
+`pdf.production` controls the optional external print pipeline:
+
+- `enabled`: opt in to production rendering
+- `preflight`: `press-ready` or `press-ready-local`
+- `preflightOptions`: options such as `enforce-outline` or `gray-scale`
+- `cmyk`: enable Vivliostyle CLI CMYK post-processing
+- `outputIntent`: project-relative ICC profile path
+
+These settings are intentionally not executed by GitHub Pages. See `docs/press-ready.md`.
