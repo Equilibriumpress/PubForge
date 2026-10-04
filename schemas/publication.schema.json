@@ -249,6 +249,88 @@
               "maximum": 1
             }
           }
+        },
+        "editorialImages": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "src"
+            ],
+            "properties": {
+              "src": {
+                "type": "string",
+                "minLength": 1
+              },
+              "alt": {
+                "type": "string"
+              },
+              "caption": {
+                "type": "string"
+              },
+              "credit": {
+                "type": "string"
+              },
+              "decorative": {
+                "type": "boolean"
+              },
+              "fit": {
+                "type": "string",
+                "enum": [
+                  "cover",
+                  "contain"
+                ]
+              },
+              "focalPoint": {
+                "type": "string"
+              },
+              "bleed": {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "full",
+                  "left",
+                  "right"
+                ]
+              },
+              "span": {
+                "type": "string",
+                "enum": [
+                  "column",
+                  "page",
+                  "spread"
+                ]
+              },
+              "position": {
+                "type": "string",
+                "enum": [
+                  "inline",
+                  "float-left",
+                  "float-right",
+                  "full-page"
+                ]
+              },
+              "printWidthMm": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "targetDpi": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            }
+          }
+        },
+        "imagePreflight": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "targetDpi": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          }
         }
       }
     },
