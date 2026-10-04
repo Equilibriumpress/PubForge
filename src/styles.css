@@ -5,19 +5,9 @@
   font-synthesis: none;
 }
 
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  min-width: 320px;
-}
-
-button,
-input {
-  font: inherit;
-}
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; }
+button, input { font: inherit; }
 
 button {
   border: 0;
@@ -27,6 +17,8 @@ button {
   color: #fff;
   cursor: pointer;
 }
+
+button:disabled { cursor: progress; opacity: 0.6; }
 
 input {
   min-width: 0;
@@ -43,10 +35,7 @@ input {
   padding: 72px 0;
 }
 
-.hero {
-  max-width: 760px;
-  margin-bottom: 40px;
-}
+.hero { max-width: 760px; margin-bottom: 40px; }
 
 .eyebrow {
   margin: 0 0 12px;
@@ -78,22 +67,9 @@ h1 {
   box-shadow: 0 16px 50px rgb(30 40 45 / 8%);
 }
 
-.panel label {
-  display: block;
-  margin-bottom: 10px;
-  font-weight: 700;
-}
-
-.repoRow {
-  display: flex;
-  gap: 10px;
-}
-
-.hint {
-  margin: 12px 0 0;
-  font-size: 0.9rem;
-  color: #687279;
-}
+.panel label { display: block; margin-bottom: 10px; font-weight: 700; }
+.repoRow { display: flex; gap: 10px; }
+.hint { margin: 12px 0 0; font-size: 0.9rem; color: #687279; }
 
 .grid {
   display: grid;
@@ -109,30 +85,34 @@ h1 {
   border-radius: 20px;
 }
 
-.card span {
-  font-variant-numeric: tabular-nums;
-  color: #798178;
+.card span { font-variant-numeric: tabular-nums; color: #798178; }
+.card h2 { margin: 48px 0 8px; font-size: 1.15rem; }
+.card p { margin: 0; color: #596269; line-height: 1.5; }
+
+.projectSummary {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(320px, 1fr);
+  gap: 28px;
+  margin-top: 20px;
+  padding: 28px;
+  border: 1px solid #d9dcda;
+  border-radius: 24px;
+  background: #f8f7f3;
 }
 
-.card h2 {
-  margin: 48px 0 8px;
-  font-size: 1.15rem;
-}
-
-.card p {
+.projectSummary h2 {
   margin: 0;
-  color: #596269;
-  line-height: 1.5;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  letter-spacing: -0.04em;
 }
+
+.projectSummary p { color: #596269; }
+.projectSummary dl { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0; }
+.projectSummary dl div { padding: 14px; border-radius: 14px; background: #fff; }
+.projectSummary dt { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #687279; }
+.projectSummary dd { margin: 7px 0 0; font-weight: 700; overflow-wrap: anywhere; }
 
 @media (max-width: 720px) {
-  .shell {
-    padding: 40px 0;
-  }
-
-  .repoRow,
-  .grid {
-    display: grid;
-    grid-template-columns: 1fr;
-  }
+  .shell { padding: 40px 0; }
+  .repoRow, .grid, .projectSummary { display: grid; grid-template-columns: 1fr; }
 }
