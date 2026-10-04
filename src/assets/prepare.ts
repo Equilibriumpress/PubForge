@@ -1,6 +1,3 @@
-import mermaid from 'mermaid';
-import { codeToHtml } from 'shiki';
-
 import type { PublicationManifest } from '../types/publication';
 import type { ProjectWorkspace } from '../workspace/workspace';
 
@@ -130,8 +127,15 @@ export async function prepareRichAssets(
   const shikiTheme = manifest.assets?.shikiTheme ?? 'github-light';
   const imagePolicy = manifest.assets?.imageOptimization;
 
-  if (useMermaid) {
-    mermaid.initialize({
+  const mermaidApi = useMermaid
+    ? (await import('mermaid')).default
+    : null;
+  const shikiApi = useHighlighting
+    ? await import('shiki')
+    : null;
+
+  if (mermaidApi) {
+    mermaidApi.initialize({
       startOnLoad: false,
       securityLevel: 'strict',
       theme: 'default',
@@ -152,18 +156,18 @@ export async function prepareRichAssets(
         const language = match[1].toLowerCase();
         const code = match[2].replace(/\s+$/, '');
 
-        if (language === 'mermaid' && useMermaid) {
+        if (language === 'mermaid' && mermaidApi) {
           const id = `pubforge-mermaid-${++generatedIndex}`;
-          const rendered = await mermaid.render(id, code);
+          const rendered = await mermaidApi.render(id, code);
           const path = `.pubforge/generated/mermaid/${id}.svg`;
           workspace.addVirtual(path, new TextEncoder().encode(rendered.svg));
           prepared.mermaidDiagrams += 1;
           return `<figure class="pubforge-generated-mermaid"><img src="/${path}" alt="Generated Mermaid diagram" /></figure>`;
         }
 
-        if (useHighlighting && language && !['text', 'txt', 'plaintext'].includes(language)) {
+        if (shikiApi && language && !['text', 'txt', 'plaintext'].includes(language)) {
           try {
-            const html = await codeToHtml(code, {
+            const html = await shikiApi.codeToHtml(code, {
               lang: language,
               theme: shikiTheme,
             });
