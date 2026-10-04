@@ -102,6 +102,9 @@ const config = {
         }
       : undefined,
   size,
+  cropMarks: pdf.cropMarks ?? true,
+  bleed: pdf.bleed ?? '3mm',
+  cropOffset: pdf.cropOffset ?? 'auto',
   output: {
     path: path.relative(webpubDir, outputFile).split(path.sep).join('/'),
     format: 'pdf',
