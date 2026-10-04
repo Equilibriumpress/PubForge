@@ -7,6 +7,20 @@ import {
 import type { LoadedProject } from '../lib/load-project';
 import { downloadBytes, mediaType, slugify, zipFiles } from './utils';
 
+function webpubChapterPath(
+  chapter: ReturnType<typeof compilePublication>['chapters'][number],
+): string {
+  return `chapters/${chapter.outputPath
+    .replace(/^text\//, '')
+    .replace(/\.xhtml$/i, '.html')}`;
+}
+
+function webpubTargetHref(
+  chapter: ReturnType<typeof compilePublication>['chapters'][number],
+): string {
+  return webpubChapterPath(chapter).replace(/^chapters\//, '');
+}
+
 function escapeHtml(value: string): string {
   return value
     .replace(/&/g, '&amp;')
@@ -25,7 +39,7 @@ function chapterHtml(
     chapter.sourcePath,
     (resolved) => {
       const target = findChapterByResolvedPath(compiled, resolved);
-      if (target) return target.outputPath.replace(/^text\//, '');
+      if (target) return webpubTargetHref(target);
       if (project.workspace.has(resolved)) return `../${resolved}`;
       return null;
     },
@@ -56,7 +70,7 @@ export function exportWebPublication(project: LoadedProject): void {
 
   const extras: Record<string, string | Uint8Array> = {};
   const readingOrder = compiled.chapters.map((chapter) => {
-    const outputPath = `chapters/${chapter.outputPath.replace(/^text\//, '')}`;
+    const outputPath = webpubChapterPath(chapter);
     extras[outputPath] = chapterHtml(project, chapter, compiled);
     return {
       url: outputPath,
