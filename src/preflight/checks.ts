@@ -122,9 +122,23 @@ function validateEpubPackage(project: LoadedProject, issues: PreflightIssue[]): 
 
     const nav = files['EPUB/nav.xhtml'];
     if (nav) {
-      const navDoc = xmlDocument(strFromU8(nav));
+      const navSource = strFromU8(nav);
+      const navDoc = xmlDocument(navSource);
       if (hasXmlError(navDoc)) {
         add(issues, 'error', 'epub', 'epub-nav-xml', 'EPUB navigation document is not well-formed XHTML.', 'EPUB/nav.xhtml');
+      }
+      if (
+        project.manifest.contents?.pageList &&
+        !navSource.includes('epub:type="page-list"')
+      ) {
+        add(
+          issues,
+          'warning',
+          'epub',
+          'epub-page-list-empty',
+          'A page-list was requested but no semantic pagebreak markers were found.',
+          'EPUB/nav.xhtml',
+        );
       }
     }
 
@@ -299,6 +313,24 @@ export function runPreflight(project: LoadedProject): PreflightReport {
       'pdf',
       'press-pdfx',
       'Press layout is configured, but browser export is not PDF/X and has no ICC output-intent conversion.',
+    );
+  }
+  if (pdf.cropOffset !== 'auto') {
+    add(
+      issues,
+      'info',
+      'pdf',
+      'crop-offset-production',
+      `Crop offset ${pdf.cropOffset} is recorded for the production pipeline; browser print layout cannot guarantee printer-mark offset placement.`,
+    );
+  }
+  if (project.manifest.pdf?.bookmarks) {
+    add(
+      issues,
+      'info',
+      'pdf',
+      'pdf-bookmarks-production',
+      'PDF bookmarks are requested; browser Save as PDF does not guarantee outline creation, so production QA/build should verify them.',
     );
   }
   if (pdf.cropMarks && pdf.bleed === '0mm') {
