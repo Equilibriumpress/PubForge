@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
 import type { LoadedProject } from '../lib/load-project';
-import { buildPortableHtml } from '../export/portable-html';
+import { buildPublicationDocument } from '../render/build-html';
 import { exportEpub } from '../export/epub';
 import { exportProjectZip } from '../export/project-zip';
 import { exportWebPublication } from '../export/webpub';
@@ -14,7 +14,7 @@ export function ExportPanel({ project }: ExportPanelProps) {
   const enabled = useMemo(() => new Set(project.manifest.outputs), [project]);
 
   function printPublication() {
-    const html = buildPortableHtml(project);
+    const publication = buildPublicationDocument(project);
     const frame = document.createElement('iframe');
     frame.style.position = 'fixed';
     frame.style.right = '0';
@@ -27,9 +27,12 @@ export function ExportPanel({ project }: ExportPanelProps) {
     frame.onload = () => {
       frame.contentWindow?.focus();
       frame.contentWindow?.print();
-      window.setTimeout(() => frame.remove(), 1000);
+      window.setTimeout(() => {
+        frame.remove();
+        publication.dispose();
+      }, 1000);
     };
-    frame.srcdoc = html;
+    frame.srcdoc = publication.html;
   }
 
   return (
