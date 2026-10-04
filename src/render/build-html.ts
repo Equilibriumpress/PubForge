@@ -5,6 +5,7 @@ import {
   rewriteHtmlReferences,
 } from '../engine/compile';
 import { mediaType } from '../export/utils';
+import { buildPdfProfileCss } from '../engine/output-profile';
 
 function asArrayBuffer(data: Uint8Array): ArrayBuffer {
   const copy = new Uint8Array(data.byteLength);
@@ -49,6 +50,7 @@ export function buildPublicationDocument(project: LoadedProject): PublicationDoc
     ]),
   );
 
+  const profileCss = buildPdfProfileCss(project.manifest);
   const css = compiled.themePaths
     .map((path) =>
       rewriteCssReferences(
@@ -112,6 +114,7 @@ body { margin: 0; }
 .pubforge-cover img { max-width: 100%; max-height: 90vh; object-fit: contain; }
 .pubforge-toc { break-before: page; break-after: page; }
 .pubforge-chapter:first-of-type { break-before: auto; }
+${profileCss}
 ${css}
 </style>
 </head>
