@@ -1,0 +1,20 @@
+version: 1
+title: Utrecht Example Report
+subtitle: A minimal PubForge project
+author: Equilibrium Press
+language: en
+type: report
+
+content:
+  - content/01-introduction.md
+  - content/02-findings.md
+
+theme:
+  preset: report
+  css: theme/publication.css
+
+outputs:
+  - print
+  - epub
+  - webpub
+  - project-zip
