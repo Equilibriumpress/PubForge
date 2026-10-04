@@ -1,6 +1,10 @@
 import { parsePublicationManifest } from './manifest';
 import { GitHubStorageProvider } from '../storage/github';
 import type { ProjectSnapshot } from '../storage/types';
+import {
+  resolveThemePackages,
+  type ResolvedThemePackages,
+} from '../themes/resolve';
 import type { PublicationManifest } from '../types/publication';
 import { ProjectWorkspace } from '../workspace/workspace';
 import type { RepositoryTarget } from './github-url';
@@ -10,6 +14,7 @@ export interface LoadedProject {
   snapshot: ProjectSnapshot;
   manifest: PublicationManifest;
   workspace: ProjectWorkspace;
+  resolvedThemes: ResolvedThemePackages;
 }
 
 export async function loadGitHubProject(
@@ -46,5 +51,7 @@ export async function loadGitHubProject(
     onProgress,
   );
 
-  return { provider, snapshot, manifest, workspace };
+  const resolvedThemes = await resolveThemePackages(workspace, manifest);
+
+  return { provider, snapshot, manifest, workspace, resolvedThemes };
 }
