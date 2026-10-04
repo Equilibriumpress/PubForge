@@ -101,6 +101,16 @@ AGENTS.md
 
 Only `publication.yml` is mandatory. See `docs/project-format.md`, `docs/project-protocol.md` and `schemas/publication.schema.json`.
 
+## Review and layout improvement loop
+
+Pages is more than an export screen. The **Review** view adds spread/single-page navigation, zoom, a heuristic audit of the rendered Vivliostyle pages and a browser-only **Layout Lab** for trying page size, margins, columns, text scale and image emphasis.
+
+Useful experiments can be copied as a **ChatGPT improvement brief**. PubForge never saves those experiments itself: ChatGPT applies the real changes to Markdown, `publication.yml` or theme CSS in GitHub.
+
+The **Compare** view can load an earlier commit and render old/new pages side by side with page-count, Preflight and source-delta summaries.
+
+See `docs/review-workflow.md`.
+
 ## Production QA
 
 For release candidates, the optional `Publication production QA` GitHub workflow generates real browser artifacts and validates them with EPUBCheck, qpdf, Poppler, page-rendering and edition-parity checks. See `docs/production-qa.md`.

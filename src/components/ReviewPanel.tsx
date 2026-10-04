@@ -20,6 +20,10 @@ import {
   DEFAULT_LAYOUT_LAB,
   type LayoutLabSettings,
 } from '../review/layout-lab';
+import {
+  buildImprovementBrief,
+  copyReviewText,
+} from '../review/brief';
 
 interface ReviewPanelProps {
   project: LoadedProject;
@@ -43,6 +47,9 @@ export function ReviewPanel({ project }: ReviewPanelProps) {
   const [labEnabled, setLabEnabled] = useState(false);
   const [labSettings, setLabSettings] =
     useState<LayoutLabSettings>(DEFAULT_LAYOUT_LAB);
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>(
+    'idle',
+  );
 
   const labCss = useMemo(
     () => buildLayoutLabCss(project.manifest, labSettings),
@@ -55,6 +62,7 @@ export function ReviewPanel({ project }: ReviewPanelProps) {
     setAudit(null);
     setLabEnabled(false);
     setLabSettings(DEFAULT_LAYOUT_LAB);
+    setCopyState('idle');
     return () => publication.dispose();
   }, [publication]);
 
@@ -162,6 +170,34 @@ export function ReviewPanel({ project }: ReviewPanelProps) {
         >
           Run layout audit
         </button>
+
+        <button
+          type="button"
+          className="reviewBriefButton"
+          onClick={async () => {
+            try {
+              await copyReviewText(
+                buildImprovementBrief(
+                  project,
+                  page,
+                  audit,
+                  labEnabled,
+                  labSettings,
+                ),
+              );
+              setCopyState('copied');
+              window.setTimeout(() => setCopyState('idle'), 2200);
+            } catch {
+              setCopyState('error');
+            }
+          }}
+        >
+          {copyState === 'copied'
+            ? 'Brief copied'
+            : copyState === 'error'
+              ? 'Copy failed'
+              : 'Copy improvement brief'}
+        </button>
       </div>
 
       {pageNumbers.length ? (
@@ -213,7 +249,7 @@ export function ReviewPanel({ project }: ReviewPanelProps) {
               auditRenderedPages();
             }}
             onNavigation={(state) => {
-              if (state.epage > 0) setPage(Math.max(1, state.epage));
+              if (state.epage >= 0) setPage(state.epage + 1);
             }}
           />
         </div>

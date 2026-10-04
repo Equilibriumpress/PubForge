@@ -14,6 +14,26 @@ interface CommitResponse {
   };
 }
 
+interface CommitListItem {
+  sha: string;
+  html_url: string;
+  commit: {
+    message: string;
+    author: {
+      name: string;
+      date: string;
+    } | null;
+  };
+}
+
+export interface RepositoryCommit {
+  sha: string;
+  message: string;
+  author: string;
+  date: string;
+  url: string;
+}
+
 interface TreeResponse {
   truncated: boolean;
   tree: Array<{
@@ -144,5 +164,30 @@ export class GitHubStorageProvider implements StorageProvider {
 
   stat(path: string): FileMeta | null {
     return this.fileIndex.get(path) ?? null;
+  }
+
+  async listCommits(
+    limit = 12,
+    path?: string,
+  ): Promise<RepositoryCommit[]> {
+    const snapshot = this.requireSnapshot();
+    const apiRoot = `https://api.github.com/repos/${snapshot.repository}`;
+    const params = new URLSearchParams({
+      sha: snapshot.commitSha,
+      per_page: String(Math.max(1, Math.min(50, limit))),
+    });
+    if (path) params.set('path', path);
+
+    const commits = await githubJson<CommitListItem[]>(
+      `${apiRoot}/commits?${params.toString()}`,
+    );
+
+    return commits.map((item) => ({
+      sha: item.sha,
+      message: item.commit.message.split('\n', 1)[0],
+      author: item.commit.author?.name ?? 'Unknown',
+      date: item.commit.author?.date ?? '',
+      url: item.html_url,
+    }));
   }
 }
