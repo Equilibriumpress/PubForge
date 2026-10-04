@@ -118,6 +118,12 @@ pdf:
     - normal
     - print
     - high-quality
+  production:
+    enabled: true
+    preflight: press-ready
+    preflightOptions:
+      - enforce-outline
+    cmyk: false
 
 epub:
   enabled: true
