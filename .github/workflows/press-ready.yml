@@ -47,8 +47,10 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: Install Vivliostyle CLI
-        run: npm install --no-save @vivliostyle/cli@11.3.3
+      - name: Install isolated Vivliostyle CLI
+        run: |
+          mkdir -p /tmp/pubforge-vivliostyle-cli
+          npm install --prefix /tmp/pubforge-vivliostyle-cli --no-audit --no-fund             @vivliostyle/cli@11.3.3 vite@8.1.0
 
       - name: Resolve publication target
         id: target
@@ -131,7 +133,7 @@ jobs:
       - name: Build press-ready PDF/X with official Vivliostyle CLI
         working-directory: press-work/webpub
         run: |
-          ../../../node_modules/.bin/vivliostyle build             -c vivliostyle.press.config.mjs
+          /tmp/pubforge-vivliostyle-cli/node_modules/.bin/vivliostyle build             -c vivliostyle.press.config.mjs
 
       - name: Validate press-ready PDF
         shell: bash
