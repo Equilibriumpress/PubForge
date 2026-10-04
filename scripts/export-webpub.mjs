@@ -6,6 +6,28 @@ const baseUrl = process.env.PUBFORGE_URL ?? 'http://127.0.0.1:4173/';
 const target = process.env.PUBFORGE_REPO;
 const output = process.env.PUBFORGE_WEBPUB ?? 'press-work/publication.webpub.zip';
 
+
+async function waitForRenderer(page) {
+  const output = page.getByRole('button', { name: 'Output' });
+  const deadline = Date.now() + 180_000;
+
+  while (Date.now() < deadline) {
+    if (await output.isVisible().catch(() => false)) return;
+
+    const status = await page.locator('[role="status"]').last().textContent().catch(() => null);
+    if (
+      status &&
+      !/Reading publication snapshot|Preparing publication assets|Open a public GitHub publication repository/i.test(status)
+    ) {
+      throw new Error(`PubForge failed to load publication: ${status.trim()}`);
+    }
+
+    await page.waitForTimeout(500);
+  }
+
+  throw new Error('Timed out waiting for PubForge Output view.');
+}
+
 if (!target) throw new Error('PUBFORGE_REPO must be owner/repo@ref.');
 
 await mkdir(path.dirname(output), { recursive: true });
@@ -30,10 +52,7 @@ await page.goto(url.href, {
   waitUntil: 'domcontentloaded',
   timeout: 120_000,
 });
-await page.getByRole('button', { name: 'Output' }).waitFor({
-  state: 'visible',
-  timeout: 180_000,
-});
+await waitForRenderer(page);
 await page.getByRole('button', { name: 'Output' }).click();
 
 const button = page.getByRole('button', { name: 'Export WebPub' });
