@@ -71,6 +71,12 @@ Only `publication.yml` is mandatory. See `docs/project-format.md`, `docs/project
 
 For release candidates, the optional `Publication production QA` GitHub workflow generates real browser artifacts and validates them with EPUBCheck, qpdf, Poppler, page-rendering and edition-parity checks. See `docs/production-qa.md`.
 
+## Press-ready production
+
+For commercial print jobs, the optional **Press-ready publication** workflow uses the official Vivliostyle CLI to create a heavyweight production PDF with press-ready/PDF-X post-processing, optional font outlining, CMYK handling and an optional ICC output intent. The browser renderer remains the default.
+
+See `docs/press-ready.md`.
+
 ## Important PDF boundary
 
 The browser PDF path uses Vivliostyle pagination and can render trim size, bleed and crop-mark layouts. A **press** profile does not by itself create PDF/X or an ICC/output-intent conversion. Those remain an optional external press-ready step.
