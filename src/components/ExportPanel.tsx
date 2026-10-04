@@ -2,12 +2,14 @@ import type { LoadedProject } from '../lib/load-project';
 import { exportEpub } from '../export/epub';
 import { exportProjectZip } from '../export/project-zip';
 import { exportWebPublication } from '../export/webpub';
+import { resolvePdfProfile } from '../engine/output-profile';
 
 interface ExportPanelProps {
   project: LoadedProject;
 }
 
 export function ExportPanel({ project }: ExportPanelProps) {
+  const pdfProfile = resolvePdfProfile(project.manifest);
   function printPublication() {
     const url = new URL(window.location.href);
     url.searchParams.set(
@@ -63,6 +65,21 @@ export function ExportPanel({ project }: ExportPanelProps) {
           {project.snapshot.commitSha.slice(0, 7)} using the same reading order,
           VFM settings, metadata and project assets.
         </p>
+        <dl className="profileSummary">
+          <div><dt>PDF profile</dt><dd>{pdfProfile.profile}</dd></div>
+          <div><dt>Page size</dt><dd>{pdfProfile.pageSize}</dd></div>
+          <div><dt>Binding</dt><dd>{pdfProfile.binding}</dd></div>
+          <div><dt>Bleed</dt><dd>{pdfProfile.bleed}</dd></div>
+          <div><dt>Crop marks</dt><dd>{pdfProfile.cropMarks ? 'yes' : 'no'}</dd></div>
+          <div><dt>Bookmarks</dt><dd>{pdfProfile.bookmarks ? 'yes' : 'no'}</dd></div>
+        </dl>
+        {pdfProfile.profile === 'press' ? (
+          <p className="pressNote">
+            Press profile includes trim/bleed/crop layout. PDF/X conversion and
+            output-intent color preflight still require the optional external
+            press-ready pipeline.
+          </p>
+        ) : null}
       </div>
       <div className="outputCards">
         {outputs.map((output) => (
