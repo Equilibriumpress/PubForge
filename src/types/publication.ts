@@ -138,6 +138,8 @@ export interface PublicationManifest {
     enabled?: boolean;
     reflowable?: boolean;
     layout?: 'reflowable' | 'fixed';
+    editions?: Array<'reflowable' | 'fixed'>;
+    vendorProfile?: 'generic' | 'apple-books' | 'kindle' | 'kobo';
     viewport?: {
       width: number;
       height: number;
