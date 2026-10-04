@@ -10,14 +10,15 @@
     "check:publications": "node scripts/check-publications.mjs"
   },
   "dependencies": {
+    "@vivliostyle/core": "^2.45.2",
     "@vivliostyle/react": "^2.45.2",
     "@vivliostyle/vfm": "^2.7.2",
     "fflate": "^0.8.2",
+    "mermaid": "^12.1.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "yaml": "^2.8.1",
-    "mermaid": "^12.1.0",
-    "shiki": "^4.5.0"
+    "shiki": "^4.5.0",
+    "yaml": "^2.8.1"
   },
   "devDependencies": {
     "@types/react": "^19.1.15",
