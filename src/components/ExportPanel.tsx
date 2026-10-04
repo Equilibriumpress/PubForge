@@ -90,6 +90,7 @@ export function ExportPanel({ project }: ExportPanelProps) {
           <div><dt>Mermaid</dt><dd>{project.preparedAssets.mermaidDiagrams}</dd></div>
           <div><dt>Highlighted code</dt><dd>{project.preparedAssets.highlightedBlocks}</dd></div>
           <div><dt>Optimized images</dt><dd>{project.preparedAssets.optimizedImages}</dd></div>
+          <div><dt>Editorial images</dt><dd>{project.preparedAssets.editorialImages.length}</dd></div>
         </dl>
         {pdfProfile.profile === 'press' ? (
           <p className="pressNote">
