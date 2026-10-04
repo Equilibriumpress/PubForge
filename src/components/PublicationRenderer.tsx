@@ -1,12 +1,13 @@
 import { useState } from 'react';
 
 import type { LoadedProject } from '../lib/load-project';
+import { ComparePanel } from './ComparePanel';
 import { ExportPanel } from './ExportPanel';
 import { PreflightPanel } from './PreflightPanel';
 import { PublicationPreview } from './PublicationPreview';
 import { ReviewPanel } from './ReviewPanel';
 
-type RendererTab = 'preview' | 'review' | 'preflight' | 'output';
+type RendererTab = 'preview' | 'review' | 'compare' | 'preflight' | 'output';
 
 export function PublicationRenderer({ project }: { project: LoadedProject }) {
   const [tab, setTab] = useState<RendererTab>('preview');
@@ -35,7 +36,7 @@ export function PublicationRenderer({ project }: { project: LoadedProject }) {
       </header>
 
       <nav className="rendererTabs" aria-label="Publication views">
-        {(['preview', 'review', 'preflight', 'output'] as RendererTab[]).map((value) => (
+        {(['preview', 'review', 'compare', 'preflight', 'output'] as RendererTab[]).map((value) => (
           <button
             key={value}
             type="button"
@@ -50,6 +51,7 @@ export function PublicationRenderer({ project }: { project: LoadedProject }) {
       <div className="rendererSurface">
         {tab === 'preview' ? <PublicationPreview project={project} /> : null}
         {tab === 'review' ? <ReviewPanel project={project} /> : null}
+        {tab === 'compare' ? <ComparePanel project={project} /> : null}
         {tab === 'preflight' ? <PreflightPanel project={project} /> : null}
         {tab === 'output' ? <ExportPanel project={project} /> : null}
       </div>
