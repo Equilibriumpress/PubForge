@@ -575,6 +575,9 @@
             "kindle",
             "kobo"
           ]
+        },
+        "fixedTheme": {
+          "type": "string"
         }
       }
     },
