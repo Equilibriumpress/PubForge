@@ -18,8 +18,21 @@ async function mapConcurrent<T>(
   await Promise.all(runners);
 }
 
+function cloneBytes(data: Uint8Array): Uint8Array {
+  return new Uint8Array(data);
+}
+
+function equalBytes(a: Uint8Array, b: Uint8Array): boolean {
+  if (a.byteLength !== b.byteLength) return false;
+  for (let index = 0; index < a.byteLength; index += 1) {
+    if (a[index] !== b[index]) return false;
+  }
+  return true;
+}
+
 export class ProjectWorkspace {
   private readonly files = new Map<string, Uint8Array>();
+  private readonly originals = new Map<string, Uint8Array>();
 
   private constructor(
     readonly snapshot: ProjectSnapshot,
@@ -48,7 +61,8 @@ export class ProjectWorkspace {
           await cache.write(file.path, data);
         }
       }
-      workspace.files.set(file.path, data);
+      workspace.files.set(file.path, cloneBytes(data));
+      workspace.originals.set(file.path, cloneBytes(data));
       done += 1;
       onProgress?.(done, snapshot.files.length);
     });
@@ -70,6 +84,39 @@ export class ProjectWorkspace {
 
   text(path: string): string {
     return new TextDecoder().decode(this.read(path));
+  }
+
+  write(path: string, data: Uint8Array): void {
+    this.files.set(path, cloneBytes(data));
+  }
+
+  writeText(path: string, value: string): void {
+    this.write(path, new TextEncoder().encode(value));
+  }
+
+  remove(path: string): void {
+    this.files.delete(path);
+  }
+
+  reset(path: string): void {
+    const original = this.originals.get(path);
+    if (original) {
+      this.files.set(path, cloneBytes(original));
+    } else {
+      this.files.delete(path);
+    }
+  }
+
+  changedPaths(): string[] {
+    const paths = new Set([...this.originals.keys(), ...this.files.keys()]);
+    return [...paths]
+      .filter((path) => {
+        const original = this.originals.get(path);
+        const current = this.files.get(path);
+        if (!original || !current) return original !== current;
+        return !equalBytes(original, current);
+      })
+      .sort();
   }
 
   list(prefix = ''): string[] {
