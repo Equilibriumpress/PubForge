@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 1200" role="img" aria-labelledby="t">
+<title id="t">Harbour geometry</title><rect width="1800" height="1200" fill="#d8ded8"/><rect y="620" width="1800" height="580" fill="#54747b"/>
+<path d="M0 610H1800" stroke="#182b31" stroke-width="24"/><path d="M160 620V950M420 620V870M760 620V1020M1150 620V900M1490 620V1040" stroke="#243e45" stroke-width="20"/>
+<g fill="#ecdfc5"><rect x="220" y="440" width="230" height="170"/><rect x="560" y="390" width="310" height="220"/><rect x="1050" y="455" width="260" height="155"/></g>
+<g fill="#b45f4b"><path d="M210 440l125-90 125 90z"/><path d="M545 390l170-110 170 110z"/><path d="M1040 455l140-95 140 95z"/></g>
+</svg>
