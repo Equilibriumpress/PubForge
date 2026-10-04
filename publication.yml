@@ -120,7 +120,7 @@ pdf:
     - high-quality
   production:
     enabled: true
-    preflight: press-ready
+    preflight: press-ready-local
     preflightOptions:
       - enforce-outline
     cmyk: false
