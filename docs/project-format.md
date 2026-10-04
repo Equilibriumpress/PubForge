@@ -104,3 +104,18 @@ The `vfm` block controls Vivliostyle Flavored Markdown conversion. PubForge supp
 ## Design rule
 
 PubForge stores no hidden publication state. A compatible project remains understandable with ordinary Git tools, text editors and standards-based publication tooling.
+
+
+## Vivliostyle parity controls
+
+Manifest v2 also exposes renderer controls that map to current Vivliostyle configuration concepts:
+
+- `publication.readingProgression`: `ltr` or `rtl`
+- `contents.tocTitle` and `contents.sectionDepth`: generated navigation labeling and heading depth
+- `contents.pageList`: emits an EPUB page-list when source contains semantic `role="doc-pagebreak"` or `epub:type="pagebreak"` markers
+- `readingOrder[].pageCounterReset`: resets the paged-media page counter for an entry
+- `vfm.tableCell`: VFM table alignment output mode
+- `assets.includes` / `assets.excludes`: explicit publication resource-copy rules in addition to dependency discovery
+- `pdf.cropOffset`: production crop-offset intent. Browser print cannot guarantee printer-mark offset positioning; the production pipeline consumes this value.
+
+PDF bookmark requests are retained as production intent because browser Save as PDF does not guarantee PDF outline generation.
