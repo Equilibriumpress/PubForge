@@ -1,0 +1,186 @@
+@page magazine {
+  size: 210mm 280mm;
+  margin: 14mm 15mm 16mm;
+  @bottom-left {
+    content: "NORTH ATLANTIC · ISSUE 01";
+    font: 7pt ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: .12em;
+  }
+  @bottom-right {
+    content: counter(page);
+    font: 8pt ui-sans-serif, system-ui, sans-serif;
+  }
+}
+
+@page cover {
+  size: 210mm 280mm;
+  margin: 0;
+  @bottom-left { content: none; }
+  @bottom-right { content: none; }
+}
+
+@page spread {
+  size: 420mm 280mm;
+  margin: 0;
+  @bottom-left { content: none; }
+  @bottom-right { content: none; }
+}
+
+:root {
+  font-family: ui-serif, Georgia, serif;
+  color: #152126;
+  --pubforge-page-bleed-inline: 3mm;
+}
+
+body {
+  font-size: 10pt;
+  line-height: 1.45;
+}
+
+.pubforge-chapter {
+  page: magazine;
+}
+
+.pubforge-entry-layout-page {
+  break-before: page;
+  break-after: page;
+}
+
+.pubforge-entry-layout-spread {
+  page: spread;
+  break-before: page;
+  break-after: page;
+  min-height: 252mm;
+}
+
+.mag-kicker {
+  margin: 0 0 4mm;
+  font: 700 8pt ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0 0 6mm;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 34pt;
+  line-height: .96;
+  letter-spacing: -.045em;
+}
+
+h2 {
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 15pt;
+  line-height: 1.1;
+  margin: 0 0 3mm;
+}
+
+.pubforge-hero {
+  page: cover;
+  margin: -14mm -15mm -16mm;
+  min-height: 280mm;
+  padding: 22mm 17mm;
+  color: #fff;
+  text-shadow: 0 2px 15px rgb(0 0 0 / .35);
+}
+
+.pubforge-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 35%, rgb(9 22 28 / .78));
+  z-index: 0;
+}
+
+.pubforge-hero h1 {
+  max-width: 150mm;
+  font-size: 55pt;
+}
+
+.pubforge-opener {
+  margin: -14mm -15mm -16mm;
+  min-height: 280mm;
+  padding: 20mm 18mm;
+  color: #fff;
+  text-shadow: 0 2px 13px rgb(0 0 0 / .4);
+}
+
+.pubforge-opener::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 25%, rgb(10 28 31 / .72));
+  z-index: 0;
+}
+
+.pubforge-opener h1,
+.pubforge-opener h2,
+.pubforge-opener p {
+  max-width: 92mm;
+}
+
+.pubforge-pullquote {
+  color: #a14e3d;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+.pubforge-sidebar {
+  margin: 5mm 0;
+  background: #e8ede8;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 8.5pt;
+}
+
+.mag-spread-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 252mm;
+}
+
+.mag-spread-grid > div:first-child {
+  position: relative;
+  padding: 18mm;
+  color: #fff;
+  overflow: hidden;
+}
+
+.mag-spread-grid > div:first-child .pubforge-editorial-image {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  z-index: 0;
+}
+
+.mag-spread-grid > div:first-child .pubforge-editorial-image img {
+  width: 100%;
+  height: 100%;
+}
+
+.mag-spread-grid > div:first-child > :not(.pubforge-editorial-image) {
+  position: relative;
+  z-index: 1;
+}
+
+.mag-spread-copy {
+  padding: 22mm 24mm;
+  background: #f3f0e8;
+}
+
+.pubforge-gallery {
+  margin-bottom: 8mm;
+}
+
+.pubforge-gallery figcaption {
+  font-size: 7pt;
+}
+
+.pubforge-role-colophon {
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  max-width: 120mm;
+}
+
+@media screen and (max-width: 900px) {
+  .mag-spread-grid {
+    grid-template-columns: 1fr;
+  }
+}

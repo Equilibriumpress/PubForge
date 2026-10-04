@@ -2,6 +2,7 @@ import { stringify } from '@vivliostyle/vfm';
 
 import type { LoadedProject } from '../lib/load-project';
 import type { ContentEntry, ContentRole, PublicationManifest } from '../types/publication';
+import { decodeMagazineDirectives } from '../layout/magazine';
 
 export interface CompiledChapter {
   index: number;
@@ -11,6 +12,8 @@ export interface CompiledChapter {
   role: ContentRole;
   breakBefore?: ContentEntry['breakBefore'];
   pageCounterReset?: number;
+  layout?: ContentEntry['layout'];
+  pageName?: string;
   themePaths: string[];
   html: string;
 }
@@ -242,27 +245,33 @@ function collectReferencedResources(
 }
 
 export function compilePublication(project: LoadedProject): CompiledPublication {
-  const themePaths = new Set<string>([
-    ...project.resolvedThemes.base,
-    project.manifest.theme.css,
+  const generatedStyles = [
     ...(project.workspace.has('.pubforge/generated/editorial-images.css')
       ? ['.pubforge/generated/editorial-images.css']
       : []),
+    ...(project.workspace.has('.pubforge/generated/magazine-layout.css')
+      ? ['.pubforge/generated/magazine-layout.css']
+      : []),
+  ];
+  const themePaths = new Set<string>([
+    ...project.resolvedThemes.base,
+    project.manifest.theme.css,
+    ...generatedStyles,
   ]);
 
   const chapters = project.manifest.readingOrder.map((entry, index) => {
     const markdown =
       project.preparedAssets.content.get(entry.path) ??
       project.workspace.text(entry.path);
-    const html = ensureHeadingIds(stringify(markdown, vfmOptions(project.manifest)));
+    const html = ensureHeadingIds(
+      decodeMagazineDirectives(stringify(markdown, vfmOptions(project.manifest))),
+    );
     const role = entry.role ?? 'chapter';
     const title = entry.title ?? chapterTitle(html, `Chapter ${index + 1}`);
     const entryThemes = [
       ...project.resolvedThemes.base,
       project.manifest.theme.css,
-      ...(project.workspace.has('.pubforge/generated/editorial-images.css')
-        ? ['.pubforge/generated/editorial-images.css']
-        : []),
+      ...generatedStyles,
       ...(entry.theme ? [entry.theme] : []),
     ];
     for (const path of entryThemes) themePaths.add(path);
@@ -275,6 +284,8 @@ export function compilePublication(project: LoadedProject): CompiledPublication 
       role,
       breakBefore: entry.breakBefore,
       pageCounterReset: entry.pageCounterReset,
+      layout: entry.layout,
+      pageName: entry.pageName,
       themePaths: entryThemes,
       html,
     } satisfies CompiledChapter;

@@ -181,6 +181,28 @@ export function runPreflight(project: LoadedProject): PreflightReport {
     add(issues, 'info', 'metadata', 'metadata-rights', 'No rights statement is defined.');
   }
 
+  if (project.manifest.layout?.mode === 'magazine') {
+    for (const entry of project.manifest.readingOrder) {
+      if (!entry.layout || entry.layout === 'flow') {
+        add(
+          issues,
+          'warning',
+          'content',
+          'magazine-flow-entry',
+          'Magazine layout entry is still using flow layout; use page or spread when art direction must remain fixed.',
+          entry.path,
+        );
+      }
+    }
+    add(
+      issues,
+      'info',
+      'content',
+      'magazine-layout',
+      `Magazine component layout is active with ${project.manifest.layout.columns ?? 2} default columns.`,
+    );
+  }
+
   const seenSources = new Set<string>();
   for (const chapter of compiled.chapters) {
     if (seenSources.has(chapter.sourcePath)) {

@@ -163,11 +163,15 @@ export function buildPublicationDocument(
         chapter.pageCounterReset !== undefined
           ? `counter-reset:page ${chapter.pageCounterReset - 1}`
           : '',
+        chapter.pageName ? `page:${chapter.pageName}` : '',
       ]
         .filter(Boolean)
         .join(';');
       const styleAttribute = style ? ` style="${style}"` : '';
-      return `<section id="${prefix}" class="pubforge-chapter pubforge-role-${chapter.role}" data-source="${escapeHtml(chapter.sourcePath)}" data-role="${chapter.role}"${styleAttribute}>${body}</section>`;
+      const layoutClass = chapter.layout
+        ? ` pubforge-entry-layout-${chapter.layout}`
+        : '';
+      return `<section id="${prefix}" class="pubforge-chapter pubforge-role-${chapter.role}${layoutClass}" data-source="${escapeHtml(chapter.sourcePath)}" data-role="${chapter.role}" data-entry-layout="${chapter.layout ?? 'flow'}"${styleAttribute}>${body}</section>`;
     })
     .join('\n');
 
