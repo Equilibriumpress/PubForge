@@ -1,5 +1,11 @@
 import { strToU8, zipSync, type Zippable } from 'fflate';
 
+function asArrayBuffer(data: Uint8Array): ArrayBuffer {
+  const copy = new Uint8Array(data.byteLength);
+  copy.set(data);
+  return copy.buffer;
+}
+
 export function slugify(value: string): string {
   const slug = value
     .normalize('NFKD')
@@ -15,7 +21,7 @@ export function downloadBytes(
   filename: string,
   type = 'application/octet-stream',
 ): void {
-  const url = URL.createObjectURL(new Blob([bytes], { type }));
+  const url = URL.createObjectURL(new Blob([asArrayBuffer(bytes)], { type }));
   const anchor = document.createElement('a');
   anchor.href = url;
   anchor.download = filename;
