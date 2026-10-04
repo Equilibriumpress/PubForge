@@ -169,3 +169,260 @@ h1 {
   .previewToolbar { align-items: flex-start; flex-direction: column; }
   .previewCanvas { min-height: 560px; padding: 10px; }
 }
+
+
+.studio {
+  margin-top: 20px;
+  overflow: hidden;
+  border: 1px solid #d9dcda;
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 16px 50px rgb(30 40 45 / 6%);
+}
+
+.studioTopbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px;
+  border-bottom: 1px solid #e2e5e3;
+}
+
+.studioTopbar h2 {
+  margin: 0;
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  letter-spacing: -0.04em;
+}
+
+.studioTopbar p:last-child {
+  margin: 8px 0 0;
+  color: #687279;
+}
+
+.studioStatus {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.studioStatus span,
+.dirtyBadge {
+  border-radius: 999px;
+  padding: 0.45rem 0.7rem;
+  background: #eef0ef;
+  color: #465158;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.dirtyBadge {
+  background: #fff4c7;
+  color: #6c5310;
+}
+
+.studioTabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 10px 14px;
+  border-bottom: 1px solid #e2e5e3;
+  background: #f8f7f3;
+}
+
+.studioTab {
+  border-radius: 10px;
+  padding: 0.65rem 0.9rem;
+  background: transparent;
+  color: #596269;
+}
+
+.studioTabActive {
+  background: #172026;
+  color: #fff;
+}
+
+.studioBody {
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  min-height: 680px;
+}
+
+.fileExplorer {
+  min-width: 0;
+  border-right: 1px solid #e2e5e3;
+  background: #f8f7f3;
+}
+
+.fileExplorerHeader {
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid #e2e5e3;
+  font-weight: 700;
+}
+
+.fileExplorerHeader small {
+  color: #798178;
+}
+
+.fileList {
+  max-height: 820px;
+  overflow: auto;
+  padding: 8px;
+}
+
+.fileItem {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-radius: 8px;
+  padding: 0.58rem 0.65rem;
+  background: transparent;
+  color: #465158;
+  text-align: left;
+  font-size: 0.82rem;
+}
+
+.fileItem span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fileItem strong {
+  color: #a87b00;
+}
+
+.fileItem:hover,
+.fileItemActive {
+  background: #e7e9e7;
+  color: #172026;
+}
+
+.studioMain {
+  min-width: 0;
+  background: #fff;
+}
+
+.studioMain .previewPanel,
+.studioMain .exportPanel {
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+}
+
+.sourceEditor,
+.studioCard {
+  min-height: 680px;
+}
+
+.studioPanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 22px;
+  border-bottom: 1px solid #e2e5e3;
+}
+
+.studioPanelHeader .eyebrow {
+  margin-bottom: 4px;
+}
+
+.sourceActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sourceTextarea {
+  display: block;
+  width: 100%;
+  min-height: 620px;
+  resize: vertical;
+  border: 0;
+  outline: 0;
+  padding: 22px;
+  background: #111719;
+  color: #f1f4f2;
+  font: 0.9rem/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  tab-size: 2;
+}
+
+.themeTextarea {
+  color: #edf5ef;
+}
+
+.binaryNotice {
+  margin: 28px;
+  padding: 24px;
+  border-radius: 16px;
+  background: #f2f1ed;
+}
+
+.metadataGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 22px;
+}
+
+.metadataGrid div {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid #e2e5e3;
+  border-radius: 14px;
+}
+
+.metadataGrid dt {
+  color: #687279;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.metadataGrid dd {
+  margin: 8px 0 0;
+  overflow-wrap: anywhere;
+  font-weight: 700;
+}
+
+.panelFootnote {
+  margin: 0 22px 22px;
+  color: #687279;
+  font-size: 0.88rem;
+}
+
+@media (max-width: 860px) {
+  .studioTopbar {
+    flex-direction: column;
+  }
+
+  .studioBody {
+    grid-template-columns: 1fr;
+  }
+
+  .fileExplorer {
+    border-right: 0;
+    border-bottom: 1px solid #e2e5e3;
+  }
+
+  .fileList {
+    display: flex;
+    max-height: none;
+    overflow-x: auto;
+  }
+
+  .fileItem {
+    width: auto;
+    min-width: 180px;
+  }
+
+  .metadataGrid {
+    grid-template-columns: 1fr;
+  }
+}
