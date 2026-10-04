@@ -424,6 +424,9 @@ export function runPreflight(project: LoadedProject): PreflightReport {
   const themePaths = new Set(compiled.themePaths);
   for (const path of project.resolvedThemes.epub) themePaths.add(path);
   if (project.manifest.epub?.theme) themePaths.add(project.manifest.epub.theme);
+  if (project.manifest.epub?.fixedTheme) {
+    themePaths.add(project.manifest.epub.fixedTheme);
+  }
   for (const path of themePaths) {
     if (!project.workspace.has(path)) {
       add(issues, 'error', 'assets', 'missing-theme', 'Theme stylesheet is missing.', path);
