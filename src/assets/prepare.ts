@@ -6,6 +6,10 @@ import {
   type EditorialImageMetric,
 } from './editorial-images';
 import type { ProjectWorkspace } from '../workspace/workspace';
+import {
+  encodeMagazineDirectives,
+  MAGAZINE_BASE_CSS,
+} from '../layout/magazine';
 
 export interface PreparedAssets {
   content: Map<string, string>;
@@ -164,6 +168,9 @@ export async function prepareRichAssets(
   for (const entry of manifest.readingOrder) {
     const original = workspace.text(entry.path);
     let markdown = replaceEditorialImageTokens(original, manifest);
+    if (manifest.layout?.mode === 'magazine') {
+      markdown = encodeMagazineDirectives(markdown);
+    }
 
     markdown = await replaceAsync(
       markdown,
@@ -235,6 +242,13 @@ export async function prepareRichAssets(
     workspace.addVirtual(
       '.pubforge/generated/editorial-images.css',
       new TextEncoder().encode(EDITORIAL_IMAGE_CSS),
+    );
+  }
+
+  if (manifest.layout?.mode === 'magazine') {
+    workspace.addVirtual(
+      '.pubforge/generated/magazine-layout.css',
+      new TextEncoder().encode(MAGAZINE_BASE_CSS),
     );
   }
 
