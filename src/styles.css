@@ -412,3 +412,42 @@ h1 {
     flex-direction: column;
   }
 }
+
+
+.profileSummary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 20px 0 0;
+}
+
+.profileSummary div {
+  padding: 10px 12px;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 10px;
+}
+
+.profileSummary dt {
+  color: #94a0a5;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.profileSummary dd {
+  margin: 5px 0 0;
+  font-weight: 750;
+}
+
+.pressNote {
+  padding: 12px 14px;
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: 10px;
+  background: rgb(255 255 255 / 5%);
+}
+
+@media (max-width: 560px) {
+  .profileSummary {
+    grid-template-columns: 1fr;
+  }
+}
