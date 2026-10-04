@@ -1,4 +1,8 @@
 import { parsePublicationManifest } from './manifest';
+import {
+  prepareRichAssets,
+  type PreparedAssets,
+} from '../assets/prepare';
 import { GitHubStorageProvider } from '../storage/github';
 import type { ProjectSnapshot } from '../storage/types';
 import {
@@ -15,6 +19,7 @@ export interface LoadedProject {
   manifest: PublicationManifest;
   workspace: ProjectWorkspace;
   resolvedThemes: ResolvedThemePackages;
+  preparedAssets: PreparedAssets;
 }
 
 export async function loadGitHubProject(
@@ -52,6 +57,14 @@ export async function loadGitHubProject(
   );
 
   const resolvedThemes = await resolveThemePackages(workspace, manifest);
+  const preparedAssets = await prepareRichAssets(workspace, manifest);
 
-  return { provider, snapshot, manifest, workspace, resolvedThemes };
+  return {
+    provider,
+    snapshot,
+    manifest,
+    workspace,
+    resolvedThemes,
+    preparedAssets,
+  };
 }

@@ -6,7 +6,10 @@ import {
   rewriteHtmlReferences,
 } from '../engine/compile';
 import { mediaType } from '../export/utils';
-import { buildPdfProfileCss } from '../engine/output-profile';
+import {
+  buildPdfProfileCss,
+  type PdfEdition,
+} from '../engine/output-profile';
 
 function asArrayBuffer(data: Uint8Array): ArrayBuffer {
   const copy = new Uint8Array(data.byteLength);
@@ -104,10 +107,14 @@ export interface PublicationDocument {
   dispose(): void;
 }
 
-export function buildPublicationDocument(project: LoadedProject): PublicationDocument {
+export function buildPublicationDocument(
+  project: LoadedProject,
+  options: { edition?: PdfEdition } = {},
+): PublicationDocument {
+  const edition = options.edition ?? 'normal';
   const compiled = compilePublication(project);
   const objectUrls = createObjectUrls(project, compiled.assetPaths);
-  const profileCss = buildPdfProfileCss(project.manifest);
+  const profileCss = buildPdfProfileCss(project.manifest, edition);
   const css = compiled.themePaths
     .map((path) =>
       rewriteCssReferences(
@@ -168,7 +175,7 @@ export function buildPublicationDocument(project: LoadedProject): PublicationDoc
   const meta = project.manifest.publication;
 
   const html = `<!doctype html>
-<html lang="${escapeHtml(meta.language)}" dir="${meta.readingProgression ?? 'ltr'}">
+<html lang="${escapeHtml(meta.language)}" dir="${meta.readingProgression ?? 'ltr'}" data-pubforge-edition="${edition}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">

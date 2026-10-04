@@ -212,3 +212,23 @@ aside[role="doc-footnote"] {
 math {
   font-size: 1.05em;
 }
+
+
+.pubforge-generated-mermaid,
+.pubforge-highlighted-code {
+  break-inside: avoid;
+  margin-block: 1.4em;
+}
+
+.pubforge-generated-mermaid img {
+  width: 100%;
+  height: auto;
+}
+
+html[data-pubforge-edition='print'] {
+  --pubforge-edition-background: #fff;
+}
+
+html[data-pubforge-edition='high-quality'] figure img {
+  image-rendering: auto;
+}

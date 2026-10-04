@@ -32,3 +32,18 @@ The raw fixture is also available as [CSV](../data/quality-scores.csv) and [JSON
 <div class="callout">
 <strong>Portable source.</strong> The SVG is useful in PDF, EPUB and the web without a raster-only dependency.
 </div>
+
+
+## Generated diagram
+
+The following diagram is source Markdown rather than a committed SVG. PubForge renders the Mermaid fence in the browser and feeds the resulting virtual SVG to every publication output.
+
+```mermaid
+flowchart LR
+  A[ChatGPT] --> B[GitHub]
+  B --> C[PubForge]
+  C --> D[Preview]
+  C --> E[EPUB 3]
+  C --> F[PDF]
+  C --> G[Web Publication]
+```

@@ -24,6 +24,7 @@ function cloneBytes(data: Uint8Array): Uint8Array {
 
 export class ProjectWorkspace {
   private readonly files = new Map<string, Uint8Array>();
+  private readonly sourcePaths = new Set<string>();
 
   private constructor(
     readonly snapshot: ProjectSnapshot,
@@ -51,6 +52,7 @@ export class ProjectWorkspace {
         if (cache) await cache.write(file.path, data);
       }
       workspace.files.set(file.path, cloneBytes(data));
+      workspace.sourcePaths.add(file.path);
       done += 1;
       onProgress?.(done, snapshot.files.length);
     });
@@ -89,5 +91,11 @@ export class ProjectWorkspace {
 
   entries(): Array<[string, Uint8Array]> {
     return [...this.files.entries()].sort(([a], [b]) => a.localeCompare(b));
+  }
+
+  sourceEntries(): Array<[string, Uint8Array]> {
+    return [...this.sourcePaths]
+      .sort()
+      .map((path) => [path, this.read(path)]);
   }
 }

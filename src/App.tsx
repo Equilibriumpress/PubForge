@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { PublicationRenderer } from './components/PublicationRenderer';
 import { PublicationPrintView } from './components/PublicationPrintView';
 import { parseRepositoryTarget } from './lib/github-url';
+import type { PdfEdition } from './engine/output-profile';
 import { loadGitHubProject, type LoadedProject } from './lib/load-project';
 
 const SAMPLE_REPO = 'Equilibriumpress/PubForge';
@@ -10,6 +11,11 @@ const SAMPLE_REPO = 'Equilibriumpress/PubForge';
 export function App() {
   const params = new URLSearchParams(window.location.search);
   const printMode = params.get('print') === '1';
+  const requestedEdition = params.get('edition');
+  const edition: PdfEdition =
+    requestedEdition === 'print' || requestedEdition === 'high-quality'
+      ? requestedEdition
+      : 'normal';
   const [repository, setRepository] = useState(params.get('repo') ?? SAMPLE_REPO);
   const [project, setProject] = useState<LoadedProject | null>(null);
   const [status, setStatus] = useState('Open a public GitHub publication repository.');
@@ -47,7 +53,7 @@ export function App() {
   }, []);
 
   if (printMode && project) {
-    return <PublicationPrintView project={project} />;
+    return <PublicationPrintView project={project} edition={edition} />;
   }
 
   return (

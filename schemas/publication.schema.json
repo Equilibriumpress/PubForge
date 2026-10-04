@@ -4,46 +4,127 @@
   "title": "PubForge Publication v2",
   "type": "object",
   "additionalProperties": false,
-  "required": ["version", "publication", "readingOrder", "theme"],
+  "required": [
+    "version",
+    "publication",
+    "readingOrder",
+    "theme"
+  ],
   "properties": {
-    "version": { "const": 2 },
+    "version": {
+      "const": 2
+    },
     "publication": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["title", "language"],
+      "required": [
+        "title",
+        "language"
+      ],
       "properties": {
-        "title": { "type": "string", "minLength": 1 },
-        "subtitle": { "type": "string" },
-        "authors": { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1 },
-        "language": { "type": "string", "minLength": 2 },
-        "type": { "type": "string", "enum": ["report", "book", "magazine", "manual", "travel-guide", "custom"] },
-        "identifier": { "type": "string" },
-        "publisher": { "type": "string" },
-        "description": { "type": "string" },
-        "subjects": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
-        "rights": { "type": "string" },
-        "date": { "type": "string" },
-        "readingProgression": { "type": "string", "enum": ["ltr", "rtl"], "default": "ltr" }
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subtitle": {
+          "type": "string"
+        },
+        "authors": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        },
+        "language": {
+          "type": "string",
+          "minLength": 2
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "report",
+            "book",
+            "magazine",
+            "manual",
+            "travel-guide",
+            "custom"
+          ]
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "publisher": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "subjects": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "rights": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string"
+        },
+        "readingProgression": {
+          "type": "string",
+          "enum": [
+            "ltr",
+            "rtl"
+          ],
+          "default": "ltr"
+        }
       }
     },
     "cover": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "image": { "type": "string" },
-        "page": { "type": "string" },
-        "alt": { "type": "string" }
+        "image": {
+          "type": "string"
+        },
+        "page": {
+          "type": "string"
+        },
+        "alt": {
+          "type": "string"
+        }
       }
     },
     "contents": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "toc": { "type": "boolean", "default": true },
-        "tocTitle": { "type": "string", "default": "Contents" },
-        "sectionDepth": { "type": "integer", "minimum": 1, "maximum": 6, "default": 1 },
-        "landmarks": { "type": "boolean", "default": true },
-        "pageList": { "type": "boolean", "default": false }
+        "toc": {
+          "type": "boolean",
+          "default": true
+        },
+        "tocTitle": {
+          "type": "string",
+          "default": "Contents"
+        },
+        "sectionDepth": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 6,
+          "default": 1
+        },
+        "landmarks": {
+          "type": "boolean",
+          "default": true
+        },
+        "pageList": {
+          "type": "boolean",
+          "default": false
+        }
       }
     },
     "readingOrder": {
@@ -52,79 +133,283 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["path"],
+        "required": [
+          "path"
+        ],
         "properties": {
-          "path": { "type": "string", "minLength": 1 },
-          "title": { "type": "string" },
-          "role": { "type": "string", "enum": ["cover", "title-page", "copyright", "toc", "preface", "chapter", "appendix", "bibliography", "colophon", "other"] },
-          "theme": { "type": "string" },
-          "breakBefore": { "type": "string", "enum": ["auto", "page", "left", "right", "recto", "verso"] },
-          "pageCounterReset": { "type": "integer" }
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "title": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "cover",
+              "title-page",
+              "copyright",
+              "toc",
+              "preface",
+              "chapter",
+              "appendix",
+              "bibliography",
+              "colophon",
+              "other"
+            ]
+          },
+          "theme": {
+            "type": "string"
+          },
+          "breakBefore": {
+            "type": "string",
+            "enum": [
+              "auto",
+              "page",
+              "left",
+              "right",
+              "recto",
+              "verso"
+            ]
+          },
+          "pageCounterReset": {
+            "type": "integer"
+          }
         }
       }
     },
     "theme": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["css"],
+      "required": [
+        "css"
+      ],
       "properties": {
-        "preset": { "type": "string" },
-        "css": { "type": "string", "minLength": 1 },
-        "packages": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true }
+        "preset": {
+          "type": "string"
+        },
+        "css": {
+          "type": "string",
+          "minLength": 1
+        },
+        "packages": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
       }
     },
     "assets": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "includes": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
-        "excludes": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true }
+        "includes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "excludes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "mermaid": {
+          "type": "boolean",
+          "default": true
+        },
+        "syntaxHighlighting": {
+          "type": "boolean",
+          "default": true
+        },
+        "shikiTheme": {
+          "type": "string",
+          "default": "github-light"
+        },
+        "imageOptimization": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "maxDimension": {
+              "type": "integer",
+              "minimum": 256
+            },
+            "jpegQuality": {
+              "type": "number",
+              "minimum": 0.1,
+              "maximum": 1
+            }
+          }
+        }
       }
     },
     "vfm": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "math": { "type": "boolean" },
-        "mathRenderer": { "type": "string", "enum": ["mathjax", "mathml"] },
-        "footnote": { "type": "string", "enum": ["pandoc", "dpub", "gcpm"] },
-        "hardLineBreaks": { "type": "boolean" },
-        "imgFigcaptionOrder": { "type": "string", "enum": ["img-figcaption", "figcaption-img"] },
-        "assignIdToFigcaption": { "type": "boolean" },
-        "captionlessImagePolicy": { "type": "string", "enum": ["paragraph", "figure"] },
-        "parseFigcaptionAsInline": { "type": "boolean" },
-        "rewriteRelativeHrefExtensions": { "type": "boolean" },
-        "tableCell": { "type": "string", "enum": ["align-attribute", "align-class", "align-style"] }
+        "math": {
+          "type": "boolean"
+        },
+        "mathRenderer": {
+          "type": "string",
+          "enum": [
+            "mathjax",
+            "mathml"
+          ]
+        },
+        "footnote": {
+          "type": "string",
+          "enum": [
+            "pandoc",
+            "dpub",
+            "gcpm"
+          ]
+        },
+        "hardLineBreaks": {
+          "type": "boolean"
+        },
+        "imgFigcaptionOrder": {
+          "type": "string",
+          "enum": [
+            "img-figcaption",
+            "figcaption-img"
+          ]
+        },
+        "assignIdToFigcaption": {
+          "type": "boolean"
+        },
+        "captionlessImagePolicy": {
+          "type": "string",
+          "enum": [
+            "paragraph",
+            "figure"
+          ]
+        },
+        "parseFigcaptionAsInline": {
+          "type": "boolean"
+        },
+        "rewriteRelativeHrefExtensions": {
+          "type": "boolean"
+        },
+        "tableCell": {
+          "type": "string",
+          "enum": [
+            "align-attribute",
+            "align-class",
+            "align-style"
+          ]
+        }
       }
     },
     "pdf": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "enabled": { "type": "boolean" },
-        "profile": { "type": "string", "enum": ["screen", "book", "press"] },
-        "size": { "type": "string" },
-        "width": { "type": "string" },
-        "height": { "type": "string" },
-        "binding": { "type": "string", "enum": ["left", "right"] },
-        "bleed": { "type": "string" },
-        "cropMarks": { "type": "boolean" },
-        "cropOffset": { "type": "string" },
-        "bookmarks": { "type": "boolean" }
+        "enabled": {
+          "type": "boolean"
+        },
+        "profile": {
+          "type": "string",
+          "enum": [
+            "screen",
+            "book",
+            "press"
+          ]
+        },
+        "size": {
+          "type": "string"
+        },
+        "width": {
+          "type": "string"
+        },
+        "height": {
+          "type": "string"
+        },
+        "binding": {
+          "type": "string",
+          "enum": [
+            "left",
+            "right"
+          ]
+        },
+        "bleed": {
+          "type": "string"
+        },
+        "cropMarks": {
+          "type": "boolean"
+        },
+        "cropOffset": {
+          "type": "string"
+        },
+        "bookmarks": {
+          "type": "boolean"
+        },
+        "editions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "normal",
+              "print",
+              "high-quality"
+            ]
+          },
+          "uniqueItems": true
+        }
       }
     },
     "epub": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "enabled": { "type": "boolean" },
-        "reflowable": { "type": "boolean" },
-        "theme": { "type": "string" },
-        "themePackages": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
-        "embeddedFonts": { "type": "boolean" }
+        "enabled": {
+          "type": "boolean"
+        },
+        "reflowable": {
+          "type": "boolean"
+        },
+        "theme": {
+          "type": "string"
+        },
+        "themePackages": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "embeddedFonts": {
+          "type": "boolean"
+        }
       }
     },
-    "webpub": { "type": "object", "additionalProperties": false, "properties": { "enabled": { "type": "boolean" } } },
-    "projectZip": { "type": "object", "additionalProperties": false, "properties": { "enabled": { "type": "boolean" } } }
+    "webpub": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        }
+      }
+    },
+    "projectZip": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        }
+      }
+    }
   }
 }

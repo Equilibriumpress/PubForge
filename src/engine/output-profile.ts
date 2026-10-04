@@ -8,6 +8,8 @@ const PAGE_SIZES: Record<string, string> = {
   Legal: '8.5in 14in',
 };
 
+export type PdfEdition = 'normal' | 'print' | 'high-quality';
+
 export interface PdfProfileSummary {
   profile: 'screen' | 'book' | 'press';
   pageSize: string;
@@ -44,7 +46,10 @@ export function resolvePdfProfile(
   };
 }
 
-export function buildPdfProfileCss(manifest: PublicationManifest): string {
+export function buildPdfProfileCss(
+  manifest: PublicationManifest,
+  edition: PdfEdition = 'normal',
+): string {
   const profile = resolvePdfProfile(manifest);
   const marks = profile.cropMarks ? 'crop' : 'none';
   const progression = manifest.publication.readingProgression ?? 'ltr';
@@ -60,6 +65,7 @@ export function buildPdfProfileCss(manifest: PublicationManifest): string {
   --pubforge-pdf-profile: "${profile.profile}";
   --pubforge-binding: "${profile.binding}";
   --pubforge-crop-offset: "${profile.cropOffset}";
+  --pubforge-pdf-edition: "${edition}";
   direction: ${progression};
 }
 
