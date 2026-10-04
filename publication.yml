@@ -78,6 +78,8 @@ readingOrder:
 theme:
   preset: showcase-book
   css: examples/showcase-book/theme/publication.css
+  packages:
+    - "@vivliostyle/theme-base@3.0.0"
 
 assets:
   includes:
@@ -111,6 +113,8 @@ epub:
   enabled: true
   reflowable: true
   theme: examples/showcase-book/theme/epub.css
+  themePackages:
+    - "@vivliostyle/theme-base@3.0.0"
   embeddedFonts: true
 
 webpub:
