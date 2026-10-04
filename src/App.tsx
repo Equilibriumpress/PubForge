@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 
+import { ExportPanel } from './components/ExportPanel';
 import { PublicationPreview } from './components/PublicationPreview';
 import { parseRepositoryTarget } from './lib/github-url';
 import { loadGitHubProject, type LoadedProject } from './lib/load-project';
@@ -102,6 +103,7 @@ export function App() {
             </dl>
           </section>
           <PublicationPreview project={project} />
+          <ExportPanel project={project} />
         </>
       ) : (
         <section className="grid">
