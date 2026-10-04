@@ -1,0 +1,20 @@
+version: 1
+title: Manual
+subtitle: PubForge starter project
+author: Your Name
+language: en
+type: manual
+
+content:
+  - content/01-start.md
+  - content/02-main.md
+
+theme:
+  preset: manual
+  css: theme/publication.css
+
+outputs:
+  - print
+  - epub
+  - webpub
+  - project-zip
