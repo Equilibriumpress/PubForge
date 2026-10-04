@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 2133" role="img" aria-labelledby="t d">
+<title id="t">Dawn over the North Atlantic</title><desc id="d">Abstract coastal dawn with dark water, cliffs and a pale horizon.</desc>
+<defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#cfd9da"/><stop offset=".55" stop-color="#f1d2ae"/><stop offset="1" stop-color="#7f9ca3"/></linearGradient><linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#526f78"/><stop offset="1" stop-color="#152b33"/></linearGradient></defs>
+<rect width="1600" height="2133" fill="url(#sky)"/><rect y="1160" width="1600" height="973" fill="url(#sea)"/>
+<path d="M0 1100L330 910 560 1010 760 820 980 1010 1260 900 1600 1040V1440H0Z" fill="#23383b"/>
+<circle cx="1160" cy="840" r="105" fill="#f7dec1" opacity=".9"/>
+<path d="M0 1450C300 1390 520 1530 830 1450s520-50 770 20" fill="none" stroke="#d7e0dc" stroke-width="14" opacity=".35"/>
+</svg>
