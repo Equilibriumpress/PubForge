@@ -1,4 +1,10 @@
 import type { PublicationManifest } from '../types/publication';
+import {
+  EDITORIAL_IMAGE_CSS,
+  inspectEditorialImages,
+  replaceEditorialImageTokens,
+  type EditorialImageMetric,
+} from './editorial-images';
 import type { ProjectWorkspace } from '../workspace/workspace';
 
 export interface PreparedAssets {
@@ -6,6 +12,7 @@ export interface PreparedAssets {
   mermaidDiagrams: number;
   highlightedBlocks: number;
   optimizedImages: number;
+  editorialImages: EditorialImageMetric[];
 }
 
 async function replaceAsync(
@@ -128,6 +135,7 @@ export async function prepareRichAssets(
     mermaidDiagrams: 0,
     highlightedBlocks: 0,
     optimizedImages: 0,
+    editorialImages: [],
   };
 
   const useMermaid = manifest.assets?.mermaid !== false;
@@ -155,7 +163,7 @@ export async function prepareRichAssets(
 
   for (const entry of manifest.readingOrder) {
     const original = workspace.text(entry.path);
-    let markdown = original;
+    let markdown = replaceEditorialImageTokens(original, manifest);
 
     markdown = await replaceAsync(
       markdown,
@@ -219,6 +227,15 @@ export async function prepareRichAssets(
     if (markdown !== original) {
       prepared.content.set(entry.path, markdown);
     }
+  }
+
+  prepared.editorialImages = await inspectEditorialImages(workspace, manifest);
+
+  if (prepared.editorialImages.length > 0) {
+    workspace.addVirtual(
+      '.pubforge/generated/editorial-images.css',
+      new TextEncoder().encode(EDITORIAL_IMAGE_CSS),
+    );
   }
 
   return prepared;
