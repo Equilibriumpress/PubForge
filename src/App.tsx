@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { ExportPanel } from './components/ExportPanel';
-import { PublicationPreview } from './components/PublicationPreview';
+import { Studio } from './components/Studio';
 import { parseRepositoryTarget } from './lib/github-url';
 import { loadGitHubProject, type LoadedProject } from './lib/load-project';
 
@@ -26,7 +25,7 @@ export function App() {
       });
       setProject(loaded);
       setStatus(
-        `Loaded ${loaded.snapshot.repository}@${loaded.snapshot.ref} · ${loaded.snapshot.commitSha.slice(0, 7)} · browser workspace ready`,
+        `Loaded ${loaded.snapshot.repository}@${loaded.snapshot.ref} · ${loaded.snapshot.commitSha.slice(0, 7)}`,
       );
 
       const next = new URLSearchParams(window.location.search);
@@ -41,9 +40,7 @@ export function App() {
 
   useEffect(() => {
     const initial = new URLSearchParams(window.location.search).get('repo');
-    if (initial) {
-      void openProject(initial);
-    }
+    if (initial) void openProject(initial);
   }, []);
 
   return (
@@ -52,12 +49,12 @@ export function App() {
         <p className="eyebrow">Git-native publishing</p>
         <h1>PubForge</h1>
         <p className="lede">
-          Open a publication repository, render it in the browser, and export it
-          without moving the project into a separate CMS.
+          GitHub stores the project. PubForge edits, previews and exports the
+          publication in your browser.
         </p>
       </header>
 
-      <section className="panel">
+      <section className="panel projectOpener">
         <label htmlFor="repo">GitHub repository</label>
         <div className="repoRow">
           <input
@@ -70,57 +67,27 @@ export function App() {
             {loading ? 'Opening…' : 'Open project'}
           </button>
         </div>
-        <p className="hint" role="status">
-          {status}
-        </p>
+        <p className="hint" role="status">{status}</p>
       </section>
 
       {project ? (
-        <>
-          <section className="projectSummary">
-            <div>
-              <p className="eyebrow">Publication</p>
-              <h2>{project.manifest.title}</h2>
-              {project.manifest.subtitle ? <p>{project.manifest.subtitle}</p> : null}
-            </div>
-            <dl>
-              <div>
-                <dt>Type</dt>
-                <dd>{project.manifest.type ?? 'custom'}</dd>
-              </div>
-              <div>
-                <dt>Language</dt>
-                <dd>{project.manifest.language}</dd>
-              </div>
-              <div>
-                <dt>Files</dt>
-                <dd>{project.workspace.list().length}</dd>
-              </div>
-              <div>
-                <dt>Commit</dt>
-                <dd>{project.snapshot.commitSha.slice(0, 7)}</dd>
-              </div>
-            </dl>
-          </section>
-          <PublicationPreview project={project} />
-          <ExportPanel project={project} />
-        </>
+        <Studio key={project.snapshot.commitSha} project={project} />
       ) : (
         <section className="grid">
           <article className="card">
             <span>01</span>
-            <h2>GitHub project</h2>
-            <p>Content, assets, themes and configuration stay in one repository.</p>
+            <h2>Repository first</h2>
+            <p>Content, assets, configuration and history remain ordinary Git files.</p>
           </article>
           <article className="card">
             <span>02</span>
-            <h2>Browser rendering</h2>
-            <p>Publication rendering runs in the browser instead of a render server.</p>
+            <h2>Local workspace</h2>
+            <p>Edits and rendering run in the browser before anything is written back.</p>
           </article>
           <article className="card">
             <span>03</span>
-            <h2>Portable output</h2>
-            <p>The same project becomes print, EPUB and Web Publication output.</p>
+            <h2>Publication output</h2>
+            <p>One project feeds Vivliostyle preview, PDF, EPUB and Web Publication.</p>
           </article>
         </section>
       )}
