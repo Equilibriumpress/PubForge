@@ -54,7 +54,7 @@ function chapterXhtml(
     .join('\n');
 
   return `<?xml version="1.0" encoding="UTF-8"?>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" lang="${xmlEscape(project.manifest.publication.language)}" xml:lang="${xmlEscape(project.manifest.publication.language)}">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" lang="${xmlEscape(project.manifest.publication.language)}" xml:lang="${xmlEscape(project.manifest.publication.language)}" dir="${project.manifest.publication.readingProgression ?? 'ltr'}">
 <head>
 <title>${xmlEscape(chapter.title)}</title>
 ${styles}
@@ -70,7 +70,7 @@ ${xhtmlBody(html)}
 function coverXhtml(project: LoadedProject, imagePath: string): string {
   const alt = project.manifest.cover?.alt ?? project.manifest.publication.title;
   return `<?xml version="1.0" encoding="UTF-8"?>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" lang="${xmlEscape(project.manifest.publication.language)}">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" lang="${xmlEscape(project.manifest.publication.language)}" dir="${project.manifest.publication.readingProgression ?? 'ltr'}">
 <head><title>Cover</title></head>
 <body epub:type="cover">
 <section epub:type="cover">
@@ -78,6 +78,61 @@ function coverXhtml(project: LoadedProject, imagePath: string): string {
 </section>
 </body>
 </html>`;
+}
+
+function chapterTocItem(
+  chapter: ReturnType<typeof compilePublication>['chapters'][number],
+  depth: number,
+): string {
+  if (depth <= 1) {
+    return `<li><a href="${chapter.outputPath}">${xmlEscape(chapter.title)}</a></li>`;
+  }
+
+  const document = new DOMParser().parseFromString(chapter.html, 'text/html');
+  const selectors = Array.from(
+    { length: Math.max(0, depth - 1) },
+    (_, index) => `h${index + 2}[id]`,
+  ).join(', ');
+  const children = selectors
+    ? Array.from(document.querySelectorAll<HTMLElement>(selectors))
+        .map((heading) => {
+          const label = heading.textContent?.trim();
+          return label
+            ? `<li><a href="${chapter.outputPath}#${xmlEscape(heading.id)}">${xmlEscape(label)}</a></li>`
+            : '';
+        })
+        .filter(Boolean)
+        .join('')
+    : '';
+
+  return `<li><a href="${chapter.outputPath}">${xmlEscape(chapter.title)}</a>${children ? `<ol>${children}</ol>` : ''}</li>`;
+}
+
+function collectPageList(
+  compiled: ReturnType<typeof compilePublication>,
+): string[] {
+  const items: string[] = [];
+  for (const chapter of compiled.chapters) {
+    const document = new DOMParser().parseFromString(chapter.html, 'text/html');
+    for (const element of Array.from(document.querySelectorAll<HTMLElement>('[id]'))) {
+      const role = element.getAttribute('role');
+      const epubType = element.getAttribute('epub:type') ?? '';
+      const isPageBreak =
+        role === 'doc-pagebreak' ||
+        epubType.split(/\s+/).includes('pagebreak');
+      if (!isPageBreak) continue;
+
+      const label =
+        element.getAttribute('aria-label') ??
+        element.getAttribute('title') ??
+        element.textContent?.trim() ??
+        element.id;
+      items.push(
+        `<li><a href="${chapter.outputPath}#${xmlEscape(element.id)}">${xmlEscape(label || element.id)}</a></li>`,
+      );
+    }
+  }
+  return items;
 }
 
 export function buildEpubArchive(project: LoadedProject): Uint8Array {
@@ -122,7 +177,7 @@ export function buildEpubArchive(project: LoadedProject): Uint8Array {
     );
     spineItems.push(`<itemref idref="${id}"/>`);
     tocItems.push(
-      `<li><a href="${chapter.outputPath}">${xmlEscape(chapter.title)}</a></li>`,
+      chapterTocItem(chapter, project.manifest.contents?.sectionDepth ?? 1),
     );
   }
 
@@ -154,10 +209,16 @@ export function buildEpubArchive(project: LoadedProject): Uint8Array {
     );
   }
 
+  const tocTitle = project.manifest.contents?.tocTitle ?? 'Contents';
   const tocNav =
     project.manifest.contents?.toc === false
       ? ''
-      : `<nav epub:type="toc" id="toc"><h1>Contents</h1><ol>${tocItems.join('')}</ol></nav>`;
+      : `<nav epub:type="toc" id="toc"><h1>${xmlEscape(tocTitle)}</h1><ol>${tocItems.join('')}</ol></nav>`;
+  const pageListItems = collectPageList(compiled);
+  const pageListNav =
+    project.manifest.contents?.pageList && pageListItems.length
+      ? `<nav epub:type="page-list" id="page-list"><h2>Pages</h2><ol>${pageListItems.join('')}</ol></nav>`
+      : '';
   const landmarksNav =
     project.manifest.contents?.landmarks === false || landmarks.length === 0
       ? ''
@@ -168,6 +229,7 @@ export function buildEpubArchive(project: LoadedProject): Uint8Array {
 <head><title>Navigation</title></head>
 <body>
 ${tocNav}
+${pageListNav}
 ${landmarksNav}
 </body>
 </html>`);
@@ -201,7 +263,7 @@ ${metadata.date ? `<dc:date>${xmlEscape(metadata.date)}</dc:date>` : ''}
 <manifest>
 ${manifestItems.join('\n')}
 </manifest>
-<spine page-progression-direction="${project.manifest.pdf?.binding === 'right' ? 'rtl' : 'ltr'}">
+<spine page-progression-direction="${project.manifest.publication.readingProgression ?? 'ltr'}">
 ${spineItems.join('\n')}
 </spine>
 </package>`);
