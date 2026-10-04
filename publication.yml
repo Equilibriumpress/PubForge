@@ -1,128 +1,152 @@
 version: 2
 
 publication:
-  title: The Browser Book
-  subtitle: A PubForge showcase of rich PDF, EPUB 3 and Web Publication features
+  title: North Atlantic
+  subtitle: Field Notes · Issue 01
   authors:
     - Equilibrium Press
     - PubForge
   language: en
-  type: book
-  identifier: urn:pubforge:showcase-book:2026
+  type: magazine
+  identifier: urn:pubforge:north-atlantic:issue-01:2026
   publisher: Equilibrium Press
-  description: A deliberately feature-rich demonstration publication used to exercise PubForge preview, preflight, PDF, EPUB 3 and Web Publication output.
+  description: An art-directed magazine fixture for testing image-led print, EPUB and Web Publication output.
   subjects:
-    - digital publishing
-    - EPUB 3
-    - paged media
-    - Vivliostyle
-    - Git-native publishing
+    - magazine design
+    - editorial photography
+    - Atlantic
+    - travel
   rights: © 2026 Equilibrium Press. Demonstration publication.
   date: 2026-10-04
   readingProgression: ltr
 
 cover:
-  image: examples/showcase-book/assets/cover.svg
-  alt: Cover of The Browser Book, showing layered pages and a browser window
+  image: examples/magazine-showcase/assets/dawn.svg
+  alt: Abstract dawn over a dark Atlantic coastline
 
 contents:
   toc: true
-  tocTitle: Contents
-  sectionDepth: 3
+  tocTitle: In this issue
+  sectionDepth: 2
   landmarks: true
   pageList: true
 
+layout:
+  mode: magazine
+  columns: 3
+  gutter: 5mm
+
 readingOrder:
-  - path: examples/showcase-book/content/00-title-page.md
+  - path: examples/magazine-showcase/content/01-cover.md
     role: title-page
-    title: Title Page
-  - path: examples/showcase-book/content/01-copyright.md
-    role: copyright
-    title: Copyright
-  - path: examples/showcase-book/content/02-preface.md
-    role: preface
-    title: Preface
-    breakBefore: recto
-  - path: examples/showcase-book/content/03-typography.md
+    title: Cover
+    layout: page
+    pageName: cover
+  - path: examples/magazine-showcase/content/02-opening.md
     role: chapter
-    title: Typography and Semantics
-    breakBefore: recto
-    pageCounterReset: 1
-  - path: examples/showcase-book/content/04-figures-data.md
+    title: At the edge of weather
+    layout: page
+    pageName: cover
+  - path: examples/magazine-showcase/content/03-feature.md
     role: chapter
-    title: Figures, Tables and Data
-    breakBefore: recto
-  - path: examples/showcase-book/content/05-math-links.md
+    title: The long way west
+    layout: page
+    pageName: magazine
+  - path: examples/magazine-showcase/content/04-people.md
     role: chapter
-    title: Math, Notes and Cross-References
-    breakBefore: recto
-  - path: examples/showcase-book/content/06-paged-media.md
+    title: Lives facing the sea
+    layout: spread
+    pageName: spread
+  - path: examples/magazine-showcase/content/05-gallery.md
     role: chapter
-    title: Paged Media
-    breakBefore: recto
-    theme: examples/showcase-book/theme/paged-media-extra.css
-  - path: examples/showcase-book/content/90-appendix.md
-    role: appendix
-    title: Appendix
-    breakBefore: recto
-    theme: examples/showcase-book/theme/appendix.css
-  - path: examples/showcase-book/content/91-bibliography.md
-    role: bibliography
-    title: Bibliography
-    breakBefore: page
-  - path: examples/showcase-book/content/99-colophon.md
+    title: Three ways to read a coast
+    layout: page
+    pageName: magazine
+  - path: examples/magazine-showcase/content/06-colophon.md
     role: colophon
     title: Colophon
-    breakBefore: recto
+    layout: page
+    pageName: magazine
 
 theme:
-  preset: showcase-book
-  css: examples/showcase-book/theme/publication.css
+  preset: magazine
+  css: examples/magazine-showcase/theme/publication.css
   packages:
     - "@vivliostyle/theme-base@3.0.0"
 
 assets:
-  includes:
-    - examples/showcase-book/data/*
-  excludes:
-    - examples/showcase-book/**/*.tmp
   mermaid: true
   syntaxHighlighting: true
   shikiTheme: github-light
-  imageOptimization:
-    maxDimension: 1800
-    jpegQuality: 0.9
   imagePreflight:
     targetDpi: 300
   editorialImages:
-    page-anatomy:
-      src: examples/showcase-book/assets/page-anatomy.svg
-      alt: Diagram of an A5 page showing bleed, trim, margins, running header and folio
-      caption: Page anatomy used by the print theme
-      credit: PubForge
-      fit: contain
-      focalPoint: 50% 50%
-      bleed: none
+    dawn:
+      src: examples/magazine-showcase/assets/dawn.svg
+      alt: Dawn above the North Atlantic with a dark coastal silhouette
+      fit: cover
+      focalPoint: 68% 38%
+      bleed: full
       span: page
       position: full-page
-      printWidthMm: 120
+    cliffs:
+      src: examples/magazine-showcase/assets/cliffs.svg
+      alt: Steep Atlantic cliffs under changing weather
+      fit: cover
+      focalPoint: 58% 48%
+      bleed: full
+      span: page
+      position: full-page
+    harbor:
+      src: examples/magazine-showcase/assets/harbor.svg
+      alt: Harbour buildings and piers arranged as strong geometric forms
+      caption: Harbour geometry after the morning ferry
+      credit: PubForge illustration
+      fit: cover
+      focalPoint: 50% 54%
+      span: page
+      printWidthMm: 175
+    portrait:
+      src: examples/magazine-showcase/assets/portrait.svg
+      alt: Editorial portrait of a harbour master
+      credit: PubForge illustration
+      fit: cover
+      focalPoint: 52% 36%
+      span: page
+    dawn-small:
+      src: examples/magazine-showcase/assets/dawn.svg
+      alt: Atlantic dawn
+      caption: First light
+      fit: cover
+      focalPoint: 68% 38%
+      span: column
+    cliffs-small:
+      src: examples/magazine-showcase/assets/cliffs.svg
+      alt: Atlantic cliffs
+      caption: Weather front
+      fit: cover
+      focalPoint: 55% 45%
+      span: column
+    harbor-small:
+      src: examples/magazine-showcase/assets/harbor.svg
+      alt: Harbour geometry
+      caption: Shelter
+      fit: cover
+      focalPoint: 50% 54%
+      span: column
 
 vfm:
   math: true
   mathRenderer: mathml
   footnote: dpub
-  hardLineBreaks: false
-  imgFigcaptionOrder: img-figcaption
-  assignIdToFigcaption: true
-  captionlessImagePolicy: figure
-  parseFigcaptionAsInline: true
   rewriteRelativeHrefExtensions: true
   tableCell: align-class
 
 pdf:
   enabled: true
   profile: press
-  size: A5
+  width: 210mm
+  height: 280mm
   binding: left
   bleed: 3mm
   cropMarks: true
@@ -142,7 +166,7 @@ pdf:
 epub:
   enabled: true
   reflowable: true
-  theme: examples/showcase-book/theme/epub.css
+  theme: examples/magazine-showcase/theme/epub.css
   themePackages:
     - "@vivliostyle/theme-base@3.0.0"
   embeddedFonts: true
