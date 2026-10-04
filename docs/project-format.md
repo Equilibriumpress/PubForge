@@ -119,3 +119,10 @@ Manifest v2 also exposes renderer controls that map to current Vivliostyle confi
 - `pdf.cropOffset`: production crop-offset intent. Browser print cannot guarantee printer-mark offset positioning; the production pipeline consumes this value.
 
 PDF bookmark requests are retained as production intent because browser Save as PDF does not guarantee PDF outline generation.
+
+
+## Theme packages
+
+`theme.packages` and `epub.themePackages` may contain npm package references such as `@vivliostyle/theme-base@3.0.0`.
+
+PubForge resolves these packages directly in the browser through jsDelivr, reads the package's Vivliostyle/style/main entry, recursively inlines CSS imports, downloads relative theme assets into a read-only virtual workspace and then bundles those resources into EPUB/WebPub output. Local project CSS is layered after base package themes so a publication can override package defaults.

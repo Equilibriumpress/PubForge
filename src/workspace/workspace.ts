@@ -58,6 +58,13 @@ export class ProjectWorkspace {
     return workspace;
   }
 
+  addVirtual(path: string, data: Uint8Array): void {
+    if (this.files.has(path)) {
+      throw new Error(`Virtual publication resource already exists: ${path}`);
+    }
+    this.files.set(path, cloneBytes(data));
+  }
+
   has(path: string): boolean {
     return this.files.has(path);
   }

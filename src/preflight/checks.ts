@@ -271,6 +271,7 @@ export function runPreflight(project: LoadedProject): PreflightReport {
   }
 
   const themePaths = new Set(compiled.themePaths);
+  for (const path of project.resolvedThemes.epub) themePaths.add(path);
   if (project.manifest.epub?.theme) themePaths.add(project.manifest.epub.theme);
   for (const path of themePaths) {
     if (!project.workspace.has(path)) {
