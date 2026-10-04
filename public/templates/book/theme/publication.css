@@ -1,0 +1,5 @@
+@page { size: 148mm 210mm; margin: 20mm 17mm 22mm; @bottom-outer { content: counter(page); font-size: 8.5pt; } }
+:root { font-family: ui-serif, Georgia, serif; color: #1f1c19; }
+body { font-size: 10.5pt; line-height: 1.62; }
+h1 { break-before: recto; break-after: avoid; margin-top: 18mm; font-size: 24pt; }
+p { orphans: 2; widows: 2; }
