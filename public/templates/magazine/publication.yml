@@ -1,0 +1,20 @@
+version: 1
+title: Magazine
+subtitle: PubForge starter project
+author: Your Name
+language: en
+type: magazine
+
+content:
+  - content/01-start.md
+  - content/02-main.md
+
+theme:
+  preset: magazine
+  css: theme/publication.css
+
+outputs:
+  - print
+  - epub
+  - webpub
+  - project-zip
