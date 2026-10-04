@@ -63,6 +63,11 @@ await button.click();
 const download = await downloadPromise;
 await download.saveAs(output);
 
+const failure = await page.locator('[role="status"]').last().textContent().catch(() => null);
+if (failure && /Unable|failed|error/i.test(failure)) {
+  throw new Error(`WebPub download did not produce a healthy publication: ${failure.trim()}`);
+}
+
 await page.close();
 await context.close();
 await browser.close();
