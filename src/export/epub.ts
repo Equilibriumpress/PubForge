@@ -2,6 +2,7 @@ import { strToU8, zipSync, type Zippable } from 'fflate';
 
 import {
   compilePublication,
+  findChapterByResolvedPath,
   publicationIdentifier,
   rewriteHtmlReferences,
   roleToEpubType,
@@ -27,14 +28,14 @@ function safeId(path: string, index: number): string {
 function chapterXhtml(
   project: LoadedProject,
   chapter: ReturnType<typeof compilePublication>['chapters'][number],
-  chapterMap: Map<string, string>,
+  compiled: ReturnType<typeof compilePublication>,
 ): string {
   const html = rewriteHtmlReferences(
     chapter.html,
     chapter.sourcePath,
     (resolved) => {
-      const chapterTarget = chapterMap.get(resolved);
-      if (chapterTarget) return chapterTarget.replace(/^text\//, '');
+      const target = findChapterByResolvedPath(compiled, resolved);
+      if (target) return target.outputPath.replace(/^text\//, '');
       if (project.workspace.has(resolved)) return `../${resolved}`;
       return null;
     },
@@ -92,9 +93,6 @@ export function buildEpubArchive(project: LoadedProject): Uint8Array {
   </rootfiles>
 </container>`);
 
-  const chapterMap = new Map(
-    compiled.chapters.map((chapter) => [chapter.sourcePath, chapter.outputPath]),
-  );
   const manifestItems: string[] = [];
   const spineItems: string[] = [];
   const tocItems: string[] = [];
@@ -115,7 +113,7 @@ export function buildEpubArchive(project: LoadedProject): Uint8Array {
 
   for (const chapter of compiled.chapters) {
     const id = `chapter-${chapter.index + 1}`;
-    const xhtml = chapterXhtml(project, chapter, chapterMap);
+    const xhtml = chapterXhtml(project, chapter, compiled);
     files[`EPUB/${chapter.outputPath}`] = strToU8(xhtml);
 
     const properties = xhtml.includes('<math') ? ' properties="mathml"' : '';
@@ -128,14 +126,10 @@ export function buildEpubArchive(project: LoadedProject): Uint8Array {
     );
   }
 
-  const excluded = new Set([
-    'publication.yml',
-    ...compiled.chapters.map((chapter) => chapter.sourcePath),
-  ]);
   let resourceIndex = 0;
 
-  for (const [path, bytes] of project.workspace.entries()) {
-    if (excluded.has(path)) continue;
+  for (const path of compiled.assetPaths) {
+    const bytes = project.workspace.read(path);
     files[`EPUB/${path}`] = bytes;
 
     const properties =
