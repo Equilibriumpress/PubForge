@@ -2,6 +2,12 @@ function safeSegment(value: string): string {
   return value.replace(/[^a-zA-Z0-9._-]+/g, '_');
 }
 
+function asArrayBuffer(data: Uint8Array): ArrayBuffer {
+  const copy = new Uint8Array(data.byteLength);
+  copy.set(data);
+  return copy.buffer;
+}
+
 async function childDirectory(
   root: FileSystemDirectoryHandle,
   parts: string[],
@@ -56,7 +62,7 @@ export class OpfsProjectCache {
     const directory = await childDirectory(this.root, parts, true);
     const handle = await directory.getFileHandle(fileName, { create: true });
     const writable = await handle.createWritable();
-    await writable.write(data);
+    await writable.write(asArrayBuffer(data));
     await writable.close();
   }
 }

@@ -145,13 +145,27 @@ h1 {
   background: #dfe2e0;
 }
 
-.previewCanvas > div {
-  margin: 0 auto;
+.previewCanvas > div { margin: 0 auto; }
+
+.exportPanel {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 1fr);
+  gap: 28px;
+  margin-top: 20px;
+  padding: 28px;
+  border-radius: 24px;
+  background: #172026;
+  color: #fff;
 }
+
+.exportPanel h2 { margin: 0; font-size: clamp(1.6rem, 3vw, 2.5rem); }
+.exportPanel p { color: #bcc4c7; line-height: 1.5; }
+.exportActions { display: grid; align-content: start; gap: 10px; }
+.exportActions button { background: #fff; color: #172026; text-align: left; }
 
 @media (max-width: 720px) {
   .shell { padding: 40px 0; }
-  .repoRow, .grid, .projectSummary { display: grid; grid-template-columns: 1fr; }
+  .repoRow, .grid, .projectSummary, .exportPanel { display: grid; grid-template-columns: 1fr; }
   .previewToolbar { align-items: flex-start; flex-direction: column; }
   .previewCanvas { min-height: 560px; padding: 10px; }
 }

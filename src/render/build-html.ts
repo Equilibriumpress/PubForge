@@ -24,6 +24,12 @@ function mimeType(path: string): string {
   return MIME_TYPES[ext] ?? 'application/octet-stream';
 }
 
+function asArrayBuffer(data: Uint8Array): ArrayBuffer {
+  const copy = new Uint8Array(data.byteLength);
+  copy.set(data);
+  return copy.buffer;
+}
+
 function resolveProjectPath(fromFile: string, reference: string): string | null {
   if (
     !reference ||
@@ -42,7 +48,10 @@ function resolveProjectPath(fromFile: string, reference: string): string | null 
 function createAssetUrls(project: LoadedProject): Map<string, string> {
   const urls = new Map<string, string>();
   for (const [path, data] of project.workspace.entries()) {
-    urls.set(path, URL.createObjectURL(new Blob([data], { type: mimeType(path) })));
+    urls.set(
+      path,
+      URL.createObjectURL(new Blob([asArrayBuffer(data)], { type: mimeType(path) })),
+    );
   }
   return urls;
 }
@@ -78,7 +87,7 @@ function rewriteCssUrls(
   sourcePath: string,
   assetUrls: Map<string, string>,
 ): string {
-  return css.replace(/url\((['"]?)([^)'"]+)\1\)/g, (full, quote: string, value: string) => {
+  return css.replace(/url\((['"]?)([^)'"]+)\1\)/g, (full, _quote: string, value: string) => {
     const resolved = resolveProjectPath(sourcePath, value.trim());
     if (!resolved || !assetUrls.has(resolved)) return full;
     return `url("${assetUrls.get(resolved)}")`;

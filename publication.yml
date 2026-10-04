@@ -1,0 +1,20 @@
+version: 1
+title: PubForge Example Publication
+subtitle: Git-native publishing in the browser
+author: Equilibrium Press
+language: en
+type: report
+
+content:
+  - examples/report/content/01-introduction.md
+  - examples/report/content/02-findings.md
+
+theme:
+  preset: report
+  css: examples/report/theme/publication.css
+
+outputs:
+  - print
+  - epub
+  - webpub
+  - project-zip
